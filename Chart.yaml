@@ -1,0 +1,9 @@
+apiVersion: v2
+name: spacelift-worker
+description: A Helm chart for deploying a Spacelift worker pool.
+type: application
+version: 0.1.0
+
+# The appVersion is the version of the launcher binary. Since the chart is currently configured
+# to always use the latest version, this is set to "latest".
+appVersion: "latest"
