@@ -70,7 +70,9 @@ spec:
           imagePullPolicy: {{ .Values.dind.image.pullPolicy }}
           resources:
             {{- toYaml .Values.dind.resources | nindent 12 }}
-          command: ["dockerd", "--host", "tcp://0.0.0.0:2375"] # Used to disable TLS for docker server - can we enable?
+          # By default the Docker container starts the daemon with TLS enabled, which causes
+          # the launcher to fail to connect to it. Specifying the command manually disables this.
+          command: ["dockerd", "--host", "tcp://0.0.0.0:2375"]
           securityContext:
             privileged: true
           volumeMounts:
