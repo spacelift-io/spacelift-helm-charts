@@ -1,0 +1,76 @@
+name: Preprod registry
+
+on: [push]
+
+concurrency:
+  group: ${{ github.ref }}-registry-preprod
+
+jobs:
+  registry:
+    name: Publish the Helm chart to the registry
+    runs-on: ubuntu-latest
+    env:
+      HELM_VERSION: "3.7.1"
+      REGISTRY_URL: "https://downloads.spacelift.dev/helm"
+      CHART_VERSION_PREFIX: "0.0.1-preprod"
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@master
+
+      - name: Install Helm
+        run: |
+          curl -s https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          sudo mv linux-amd64/helm /usr/local/bin
+          rm helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          rm -rf linux-amd64
+
+      - name: Create output directory
+        run: mkdir -p build/chart
+
+      - name: Download existing index.yaml
+        run: curl -fs ${REGISTRY_URL}/index.yaml -o build/index-current.yaml
+        # The first time this step runs the index file won't exist, so allow the step to fail
+        continue-on-error: true
+
+      - name: Set chart version number
+        run: |
+          timestamp=$(date +'%s')
+          echo "CHART_VERSION=${CHART_VERSION_PREFIX}.${timestamp}" >> $GITHUB_ENV
+
+      - name: Lint chart
+        run: helm lint .
+
+      - name: Package chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart .
+          helm repo index build/chart --url "$REGISTRY_URL" --merge "build/index-current.yaml"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ secrets.PREPROD_AWS_REGION }}
+          aws-access-key-id: ${{ secrets.PREPROD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.PREPROD_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Test uploading the provider data to S3
+        run: >-
+          aws s3 sync
+          build/chart s3://${{ secrets.PREPROD_AWS_S3_BUCKET }}/helm
+          --no-progress
+          --dryrun
+
+      - name: Upload the provider data to S3
+        if: github.ref == 'refs/heads/main'
+        run: >-
+          aws s3 sync
+          build/chart s3://${{ secrets.PREPROD_AWS_S3_BUCKET }}/helm
+          --no-progress
+
+      - name: Invalidate cache
+        if: github.ref == 'refs/heads/main'
+        run: >-
+          aws cloudfront create-invalidation
+          --distribution-id ${{ secrets.PREPROD_DISTRIBUTION }}
+          --paths "/helm/*"
