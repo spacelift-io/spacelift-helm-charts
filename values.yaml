@@ -1,0 +1,65 @@
+# replicaCount defines the number of Spacelift workers that will be created.
+replicaCount: 1
+# terminationGracePeriodSeconds specifies how long Kubernetes gives a worker pod to gracefully
+# terminate before forcibly killing it.
+terminationGracePeriodSeconds: 30
+
+credentials:
+  # create defines whether a secret should be created for the worker pool credentials. If you want to pass
+  # the credentials in via a different method, set this to false and use the `launcher.extraEnv`
+  # value to set the `SPACELIFT_TOKEN` and `SPACELIFT_POOL_PRIVATE_KEY` environment variables.
+  create: true
+  # token contains the token downloaded from Spacelift when creating your worker pool.
+  token: ""
+  # privateKey contains the base64-encoded private key for the worker pool.
+  privateKey: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # create specifies whether a service account should be created
+  create: true
+  # annotations contains custom annotations to add to the service account
+  annotations: {}
+  # name overrides the name of the service account.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+
+# launcher contains settings for the launcher container.
+launcher:
+  image:
+    # repository contains the docker repository containing the launcher image.
+    repository: public.ecr.aws/spacelift-dev/launcher
+    # pullPolicy defines the pull policy for the image.
+    pullPolicy: Always
+    # tag specifies the image tag to use.
+    tag: "latest"
+  resources: {}
+  securityContext: {}
+  # extraEnv allows you to inject additional environment variables to the launcher container.
+  extraEnv: []
+
+# dind contains settings for the dind container.
+dind:
+  image:
+    # repository specifies the docker repository containing the dind image.
+    repository: docker
+    # pullPolicy defines the pull policy for the image.
+    pullPolicy: IfNotPresent
+    # tag specifies the image tag to use.
+    tag: "20.10.10-dind"
+  resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# storageVolume specifies the template to use for the storage volume attached to the launcher (default `emptyDir`).
+storageVolume: {}

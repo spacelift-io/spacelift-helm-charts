@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "spacelift-worker.fullname" . }}
+  labels:
+    {{- include "spacelift-worker.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "spacelift-worker.selectorLabels" . | nindent 6 }}
+  serviceName: "{{ include "spacelift-worker.fullname" . }}"
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "spacelift-worker.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "spacelift-worker.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      containers:
+        - name: launcher
+          securityContext:
+            {{- toYaml .Values.launcher.securityContext | nindent 12 }}
+          image: "{{ .Values.launcher.image.repository }}:{{ .Values.launcher.image.tag }}"
+          imagePullPolicy: {{ .Values.launcher.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.launcher.resources | nindent 12 }}
+          env:
+            - name: DOCKER_HOST
+              value: tcp://localhost:2375
+            {{- if .Values.credentials.create }}
+            - name: SPACELIFT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "spacelift-worker.fullname" . }}
+                  key: token
+            - name: SPACELIFT_POOL_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "spacelift-worker.fullname" . }}
+                  key: privateKey
+            {{- end }}
+            - name: SPACELIFT_METADATA_instance_id
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SPACELIFT_METADATA_k8s_namespace
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- with .Values.launcher.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: launcher-storage
+              mountPath: /opt/spacelift
+              subPath: spacelift
+        - name: dind
+          image: "{{ .Values.dind.image.repository }}:{{ .Values.dind.image.tag }}"
+          imagePullPolicy: {{ .Values.dind.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.dind.resources | nindent 12 }}
+          # By default the Docker container starts the daemon with TLS enabled, which causes
+          # the launcher to fail to connect to it. Specifying the command manually disables this.
+          command: ["dockerd", "--host", "tcp://0.0.0.0:2375"]
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: launcher-storage
+              mountPath: /var/lib/docker
+              subPath: docker
+            - name: launcher-storage
+              mountPath: /opt/spacelift
+              subPath: spacelift
+      {{- if not (or .Values.storageVolume .Values.storageVolumeClaimTemplateSpec) }}
+      volumes:
+        - name: launcher-storage
+          emptyDir: {}
+      {{- end }}
+      {{- with .Values.storageVolume }}
+      volumes:
+        - name: launcher-storage
+          {{- toYaml . | nindent 10 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- with .Values.storageVolumeClaimTemplateSpec }}
+  volumeClaimTemplates:
+    - metadata:
+        name: launcher-storage
+      spec:
+        {{- toYaml . | nindent 8 }}
+  {{- end }}
