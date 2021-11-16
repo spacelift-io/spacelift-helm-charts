@@ -1,0 +1,82 @@
+name: Production chart publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: ${{ github.ref }}-chart-publish-prod
+
+jobs:
+  registry:
+    name: Publish the Helm chart to the Helm repository
+    runs-on: ubuntu-latest
+    env:
+      HELM_VERSION: "3.7.1"
+      REGISTRY_URL: "https://downloads.spacelift.io/helm"
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@master
+
+      - name: Install Helm
+        run: |
+          curl -s https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          sudo mv linux-amd64/helm /usr/local/bin
+          rm helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          rm -rf linux-amd64
+
+      - name: Create output directory
+        run: mkdir -p build/chart
+
+      - name: Download existing index.yaml
+        run: curl -fs ${REGISTRY_URL}/index.yaml -o build/index-current.yaml
+        # The first time this step runs the index file won't exist, so allow the step to fail
+        continue-on-error: true
+
+      - name: Set chart version number
+        run: |
+          if [[ $GITHUB_REF_NAME != v* ]]; then
+            echo "Tag does not look like a valid version: $GITHUB_REF_NAME"
+            exit 1
+          fi
+
+          echo "CHART_VERSION=${GITHUB_REF_NAME:1}" >> $GITHUB_ENV
+
+      - name: Lint chart
+        run: helm lint .
+
+      - name: Package chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart .
+          helm repo index build/chart --url "$REGISTRY_URL" --merge "build/index-current.yaml"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Test uploading the provider data to S3
+        run: >-
+          aws s3 sync
+          build/chart s3://${{ secrets.AWS_S3_BUCKET }}/helm
+          --no-progress
+          --dryrun
+
+      - name: Upload the provider data to S3
+        if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
+        run: >-
+          aws s3 sync
+          build/chart s3://${{ secrets.AWS_S3_BUCKET }}/helm
+          --no-progress
+
+      - name: Invalidate cache
+        if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
+        run: >-
+          aws cloudfront create-invalidation
+          --distribution-id ${{ secrets.DISTRIBUTION }}
+          --paths "/helm/*"
