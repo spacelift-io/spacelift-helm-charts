@@ -67,17 +67,16 @@ jobs:
           --no-progress
           --dryrun
 
-      # Uncomment after testing
-      # - name: Upload the chart to S3
-      #   if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
-      #   run: >-
-      #     aws s3 sync
-      #     build/chart s3://${{ secrets.AWS_S3_BUCKET }}/helm
-      #     --no-progress
+      - name: Upload the chart to S3
+        if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
+        run: >-
+          aws s3 sync
+          build/chart s3://${{ secrets.AWS_S3_BUCKET }}/helm
+          --no-progress
 
-      # - name: Invalidate cache
-      #   if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
-      #   run: >-
-      #     aws cloudfront create-invalidation
-      #     --distribution-id ${{ secrets.DISTRIBUTION }}
-      #     --paths "/helm/*"
+      - name: Invalidate cache
+        if: github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
+        run: >-
+          aws cloudfront create-invalidation
+          --distribution-id ${{ secrets.DISTRIBUTION }}
+          --paths "/helm/*"
