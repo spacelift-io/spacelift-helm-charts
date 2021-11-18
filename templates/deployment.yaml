@@ -1,6 +1,6 @@
-{{- if .Values.useStatefulSet }}
+{{- if not .Values.useStatefulSet }}
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ include "spacelift-worker.fullname" . }}
   labels:
@@ -10,7 +10,6 @@ spec:
   selector:
     matchLabels:
       {{- include "spacelift-worker.selectorLabels" . | nindent 6 }}
-  serviceName: "{{ include "spacelift-worker.fullname" . }}"
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -83,7 +82,7 @@ spec:
             - name: launcher-storage
               mountPath: /opt/spacelift
               subPath: spacelift
-      {{- if not (or .Values.storageVolume .Values.storageVolumeClaimTemplateSpec) }}
+      {{- if not .Values.storageVolume }}
       volumes:
         - name: launcher-storage
           emptyDir: {}
@@ -105,11 +104,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-  {{- with .Values.storageVolumeClaimTemplateSpec }}
-  volumeClaimTemplates:
-    - metadata:
-        name: launcher-storage
-      spec:
-        {{- toYaml . | nindent 8 }}
-  {{- end }}
 {{- end }}

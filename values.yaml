@@ -34,9 +34,9 @@ podSecurityContext: {}
 launcher:
   image:
     # repository contains the docker repository containing the launcher image.
-    repository: public.ecr.aws/spacelift/launcher
+    repository: "public.ecr.aws/spacelift/launcher"
     # pullPolicy defines the pull policy for the image.
-    pullPolicy: Always
+    pullPolicy: "Always"
     # tag specifies the image tag to use.
     tag: "latest"
   resources: {}
@@ -48,11 +48,11 @@ launcher:
 dind:
   image:
     # repository specifies the docker repository containing the dind image.
-    repository: docker
+    repository: "docker"
     # pullPolicy defines the pull policy for the image.
-    pullPolicy: IfNotPresent
+    pullPolicy: "Always"
     # tag specifies the image tag to use.
-    tag: "20.10.10-dind"
+    tag: "dind"
   resources: {}
 
 nodeSelector: {}
@@ -63,3 +63,9 @@ affinity: {}
 
 # storageVolume specifies the template to use for the storage volume attached to the launcher (default `emptyDir`).
 storageVolume: {}
+
+# storageVolumeClaimTemplateSpec specifies the volumeClaimTemplate spec to use for the launcher storage when using a StatefulSet.
+storageVolumeClaimTemplateSpec: {}
+
+# useStatefulSet causes a StatefulSet to be created instead of a Deployment.
+useStatefulSet: false
