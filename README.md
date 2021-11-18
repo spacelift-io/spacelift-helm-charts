@@ -67,11 +67,12 @@ launcher:
 
 ## Storage
 
-By default this chart configures the launcher pods to use `emptyDir` for storage. This is
-just for convenience while testing. Using `emptyDir` in production is not recommended, and
-may result in the launcher pods being evicted due to disk pressure.
+By default this chart configures the launcher pods to use `emptyDir` for storage. If you decide
+to use `emptyDir`, please be aware that there needs to be enough space available on your
+Kubernetes nodes for the worker to use. If your nodes run low on disk space the worker pods
+may be evicted.
 
-This chart provides two ways to configure storage for the launcher:
+Because of this, the chart provides other ways to configure storage for the launcher:
 
 - Using a [volume template](#volume-template) (recommended).
 - Using a [volume claim template](#volume-claim-template).
@@ -103,9 +104,14 @@ launcher StatefulSet, allowing a volume to automatically be provisioned. The dow
 approach is that your volume will not automatically be deleted when pods are deleted (for example,
 when scaling down), and you will have to manually delete any volumes yourself.
 
+Please note that volume claim templates are only supported when using a StatefulSet rather
+than a Deployment.
+
 The following example shows how to configure a 100Gi GP2 volume for storage:
 
 ```yaml
+useStatefulSet: true
+
 storageVolumeClaimTemplateSpec:
   accessModes: ["ReadWriteOnce"]
   storageClassName: "gp2"
