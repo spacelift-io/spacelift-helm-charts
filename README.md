@@ -12,11 +12,18 @@ on Kubernetes. The chart deploys the worker pool as a StatefulSet containing two
 Follow the instructions [here](https://docs.spacelift.io/concepts/worker-pools) to create a
 new worker pool, generating a private key and token.
 
+Next, add our Helm chart repo and update your local chart cache:
+
+```shell
+helm repo add spacelift https://downloads.spacelift.io/helm
+helm repo update
+```
+
 Assuming your key and token are stored in the `SPACELIFT_PK` and `SPACELIFT_TOKEN` environment
 variables, you can install the chart using the following command:
 
 ```shell
-helm upgrade spacelift-worker . --install --set "credentials.token=$SPACELIFT_TOKEN,credentials.privateKey=$SPACELIFT_PK"
+helm upgrade spacelift-worker spacelift/spacelift-worker --install --set "credentials.token=$SPACELIFT_TOKEN,credentials.privateKey=$SPACELIFT_PK"
 ```
 
 Read the rest of this page to find out how to configure various other options.
@@ -26,6 +33,12 @@ Read the rest of this page to find out how to configure various other options.
 This chart uses [Docker in Docker](https://hub.docker.com/_/docker) to provide a Docker daemon
 for the launcher. The `dind` container needs a privileged [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 to work. Please make sure this is acceptable to you before deploying it to your own clusters.
+
+## Image Version
+
+The `launcher.image.tag` is set to `latest` by default in this chart. We rely on this behavior
+to automatically roll out new versions of the launcher. Pinning this to a specific version
+may eventually cause your private launchers to stop working.
 
 ## Authentication
 
