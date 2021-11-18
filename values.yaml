@@ -34,7 +34,7 @@ podSecurityContext: {}
 launcher:
   image:
     # repository contains the docker repository containing the launcher image.
-    repository: public.ecr.aws/spacelift-dev/launcher
+    repository: public.ecr.aws/spacelift/launcher
     # pullPolicy defines the pull policy for the image.
     pullPolicy: Always
     # tag specifies the image tag to use.
