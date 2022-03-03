@@ -1,24 +1,23 @@
-name: Preprod chart publish
+name: Build chart
 
 on:
   push:
-    branches:
+    branches-ignore:
       - main
+    tags-ignore:
+      - "v*"
 
 concurrency:
-  group: ${{ github.ref }}-chart-publish-preprod
+  group: ${{ github.ref }}-chart-build
 
 jobs:
   registry:
-    name: Publish the chart to the preprod Helm repository
+    name: Lint and package the Helm chart
     runs-on: ubuntu-latest
     env:
       HELM_VERSION: "3.7.1"
       REGISTRY_URL: "https://downloads.spacelift.dev/helm"
       CHART_VERSION_PREFIX: "0.0.1-preprod"
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       - name: Check out repository code
@@ -52,22 +51,3 @@ jobs:
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart .
           helm repo index build/chart --url "$REGISTRY_URL" --merge "build/index-current.yaml"
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: ${{ secrets.PREPROD_AWS_REGION }}
-          role-to-assume: ${{ secrets.PREPROD_AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 900
-
-      - name: Upload the chart to S3
-        run: >-
-          aws s3 sync
-          build/chart s3://${{ secrets.PREPROD_AWS_S3_BUCKET }}/helm
-          --no-progress
-
-      - name: Invalidate cache
-        run: >-
-          aws cloudfront create-invalidation
-          --distribution-id ${{ secrets.PREPROD_DISTRIBUTION }}
-          --paths "/helm/*"
