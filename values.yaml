@@ -43,6 +43,7 @@ launcher:
   securityContext: {}
   # extraEnv allows you to inject additional environment variables to the launcher container.
   extraEnv: []
+  extraVolumeMounts: []
 
 # dind contains settings for the dind container.
 dind:
@@ -60,6 +61,8 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+volumes: []
 
 # storageVolume specifies the template to use for the storage volume attached to the launcher (default `emptyDir`).
 storageVolume: {}

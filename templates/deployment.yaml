@@ -72,6 +72,9 @@ spec:
             - name: launcher-storage
               mountPath: /opt/spacelift
               subPath: spacelift
+            {{- with .Values.launcher.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
         - name: dind
           image: "{{ .Values.dind.image.repository }}:{{ .Values.dind.image.tag }}"
           imagePullPolicy: {{ .Values.dind.image.pullPolicy }}
@@ -104,10 +107,16 @@ spec:
         - name: launcher-storage
           emptyDir: {}
       {{- end }}
+        {{- with .Values.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.storageVolume }}
       volumes:
         - name: launcher-storage
           {{- toYaml . | nindent 10 }}
+        {{- with .Values.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
