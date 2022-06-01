@@ -43,6 +43,7 @@ launcher:
   securityContext: {}
   # extraEnv allows you to inject additional environment variables to the launcher container.
   extraEnv: []
+  # extraVolumeMounts adds extra volume mounts to the launcher container.
   extraVolumeMounts: []
 
 # dind contains settings for the dind container.
@@ -62,6 +63,7 @@ tolerations: []
 
 affinity: {}
 
+# volumes specified extra volumes to attach to Deployment / StatefulSet.
 volumes: []
 
 # storageVolume specifies the template to use for the storage volume attached to the launcher (default `emptyDir`).
