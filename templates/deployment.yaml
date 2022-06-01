@@ -92,7 +92,7 @@ spec:
                 command:
                 - /bin/sh
                 - -c
-                - while [ ! -z $(docker ps -q) ]; do echo test; done;
+                - while [ ! -z $(docker ps -q) ]; do sleep 1; done;
           securityContext:
             privileged: true
           volumeMounts:
