@@ -35,6 +35,13 @@ spec:
           imagePullPolicy: {{ .Values.launcher.image.pullPolicy }}
           resources:
             {{- toYaml .Values.launcher.resources | nindent 12 }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - sleep 20
           env:
             - name: DOCKER_HOST
               value: tcp://localhost:2375
@@ -65,6 +72,9 @@ spec:
             - name: launcher-storage
               mountPath: /opt/spacelift
               subPath: spacelift
+            {{- with .Values.launcher.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
         - name: dind
           image: "{{ .Values.dind.image.repository }}:{{ .Values.dind.image.tag }}"
           imagePullPolicy: {{ .Values.dind.image.pullPolicy }}
@@ -73,6 +83,16 @@ spec:
           # By default the Docker container starts the daemon with TLS enabled, which causes
           # the launcher to fail to connect to it. Specifying the command manually disables this.
           command: ["dockerd", "--host", "tcp://127.0.0.1:2375"]
+          env:
+            - name: DOCKER_HOST
+              value: tcp://localhost:2375
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - while [ ! -z $(docker ps -q) ]; do sleep 1; done;
           securityContext:
             privileged: true
           volumeMounts:
@@ -82,16 +102,17 @@ spec:
             - name: launcher-storage
               mountPath: /opt/spacelift
               subPath: spacelift
-      {{- if not .Values.storageVolume }}
       volumes:
         - name: launcher-storage
+      {{- if not .Values.storageVolume }}
           emptyDir: {}
       {{- end }}
       {{- with .Values.storageVolume }}
-      volumes:
-        - name: launcher-storage
           {{- toYaml . | nindent 10 }}
       {{- end }}
+        {{- with .Values.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

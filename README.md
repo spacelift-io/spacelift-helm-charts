@@ -120,6 +120,27 @@ storageVolumeClaimTemplateSpec:
       storage: 100Gi
 ```
 
+### Extra volumes
+
+It is possible to add additional volumes to the Deployment or Stateful set by defining the `volumes`
+value and attach it to launcher container with `launcher.extraVolumeMounts`. This can for instance be
+useful to mount credentials for docker login if necessary.
+
+Example mounting a secret `config.json` to `/opt/docker`:
+
+```yaml
+launcher:
+  extraVolumeMounts:
+  - name: secret-volume
+    mountPath: /opt/docker/config.json
+    subPath: config.json
+
+volumes:
+- name: secret-volume
+  secret:
+    secretName: very-secret
+```
+
 ## Development
 
 ### Publishing the Chart
