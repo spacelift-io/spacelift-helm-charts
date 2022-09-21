@@ -22,7 +22,7 @@ spec:
       labels:
         {{- include "spacelift-worker.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
-          {{- toYaml . | nindent 10 }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
