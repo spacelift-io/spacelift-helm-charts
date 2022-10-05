@@ -18,6 +18,20 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+# VPA for the `dind` container, scaling for the `launcher` container is disabled.
+vpa:
+  # Should VPA be enabled?
+  enabled: false
+  # "Auto", "Recreate", "Initial", "Off"
+  mode: "Off"
+  bounds:
+    min:
+      cpu: "1"
+      memory: "512MiB"
+    max:
+      cpu: "2"
+      memory: "1GiB"
+
 serviceAccount:
   # create specifies whether a service account should be created
   create: true
