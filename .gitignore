@@ -1,5 +1,2 @@
 # Ignore any build artifacts
 build/
-/.idea/modules.xml
-/.idea/spacelift-workerpool-k8s.iml
-/.idea/vcs.xml
