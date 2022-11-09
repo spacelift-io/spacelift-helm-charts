@@ -1,3 +1,6 @@
+# replicas.enabled is for, if you are using HPA, replicas can't be used. That line needs to be removed in order for the HPA to work.
+replicas:
+  enabled: true
 # replicaCount defines the number of Spacelift workers that will be created.
 replicaCount: 1
 # terminationGracePeriodSeconds specifies how long Kubernetes gives a worker pod to gracefully
