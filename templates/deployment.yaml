@@ -9,7 +9,9 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if .Values.replicasEnabled  }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "spacelift-worker.selectorLabels" . | nindent 6 }}
