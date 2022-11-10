@@ -1,4 +1,4 @@
-# replicas.enabled is for, if you are using HPA, replicas can't be used. That line needs to be removed in order for the HPA to work.
+# replicas.enabled defines whether the `replicas` field is set against the Deployment or StatefulSet. This allows you to prevent the field from being set when using a HPA, as recommended in the Kubernetes documentation: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#migrating-deployments-and-statefulsets-to-horizontal-autoscaling.
 replicas:
   enabled: true
 # replicaCount defines the number of Spacelift workers that will be created.
