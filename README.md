@@ -34,6 +34,10 @@ This chart uses [Docker in Docker](https://hub.docker.com/_/docker) to provide a
 for the launcher. The `dind` container needs a privileged [security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 to work. Please make sure this is acceptable to you before deploying it to your own clusters.
 
+### Does this work with containerd
+
+Yes - the Docker in Docker approach used by this chart should still work even if your cluster nodes are not using dockershim. The reason this works is because we run a Docker daemon in a side-car container rather than relying on the Kubernetes node's runtime.
+
 ## Image Version
 
 The `launcher.image.tag` is set to `latest` by default in this chart. We rely on this behavior
