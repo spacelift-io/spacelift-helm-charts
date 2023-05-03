@@ -90,7 +90,12 @@ spec:
             {{- toYaml .Values.dind.resources | nindent 12 }}
           # By default the Docker container starts the daemon with TLS enabled, which causes
           # the launcher to fail to connect to it. Specifying the command manually disables this.
-          command: ["dockerd", "--host", "tcp://127.0.0.1:2375"]
+          command:
+            - docker-init
+            - "--"
+            - dockerd
+            - "--host"
+            - tcp://127.0.0.1:2375
           env:
             - name: DOCKER_HOST
               value: tcp://localhost:2375
