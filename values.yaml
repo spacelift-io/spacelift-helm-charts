@@ -43,6 +43,8 @@ launcher:
     pullPolicy: "Always"
     # tag specifies the image tag to use.
     tag: "latest"
+    # (optional) digest specifies the image digest to use.
+    # digest: "sha256:84a6bcc230a55058ba27c72a29903557c5bcf1c805f9360391e8fafaf4edaca4"
   resources: {}
   securityContext: {}
   # extraEnv allows you to inject additional environment variables to the launcher container.
@@ -59,6 +61,8 @@ dind:
     pullPolicy: "Always"
     # tag specifies the image tag to use.
     tag: "dind"
+    # (optional) digest specifies the image digest to use.
+    # digest: "sha256:84a6bcc230a55058ba27c72a29903557c5bcf1c805f9360391e8fafaf4edaca4"
   resources: {}
 
 nodeSelector: {}

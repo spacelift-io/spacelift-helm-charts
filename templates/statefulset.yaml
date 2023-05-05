@@ -40,7 +40,11 @@ spec:
         - name: launcher
           securityContext:
             {{- toYaml .Values.launcher.securityContext | nindent 12 }}
+          {{- if .Values.launcher.image.digest }}
+          image: "{{ .Values.launcher.image.repository }}@{{ .Values.launcher.image.digest }}"
+          {{- else }}
           image: "{{ .Values.launcher.image.repository }}:{{ .Values.launcher.image.tag }}"
+          {{- end }}
           imagePullPolicy: {{ .Values.launcher.image.pullPolicy }}
           resources:
             {{- toYaml .Values.launcher.resources | nindent 12 }}
@@ -85,7 +89,11 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
         - name: dind
+          {{- if .Values.dind.image.digest }}
+          image: "{{ .Values.dind.image.repository }}@{{ .Values.dind.image.digest }}"
+          {{- else }}
           image: "{{ .Values.dind.image.repository }}:{{ .Values.dind.image.tag }}"
+          {{- end }}
           imagePullPolicy: {{ .Values.dind.image.pullPolicy }}
           resources:
             {{- toYaml .Values.dind.resources | nindent 12 }}
