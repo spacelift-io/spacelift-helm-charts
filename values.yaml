@@ -1,5 +1,5 @@
 # replicas.enabled defines whether the `replicas` field is set against the Deployment or StatefulSet. This allows you to prevent the field from being set when using a HPA, as recommended in the Kubernetes documentation: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#migrating-deployments-and-statefulsets-to-horizontal-autoscaling.
-replicasEnabled : true
+replicasEnabled: true
 # replicaCount defines the number of Spacelift workers that will be created.
 replicaCount: 1
 # terminationGracePeriodSeconds specifies how long Kubernetes gives a worker pod to gracefully
@@ -64,6 +64,8 @@ dind:
     # (optional) digest specifies the image digest to use.
     # digest: "sha256:84a6bcc230a55058ba27c72a29903557c5bcf1c805f9360391e8fafaf4edaca4"
   resources: {}
+  # extraEnv allows you to inject additional environment variables to the dind container.
+  extraEnv: []
 
 nodeSelector: {}
 
