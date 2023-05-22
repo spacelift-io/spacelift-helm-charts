@@ -126,6 +126,9 @@ spec:
             - name: launcher-storage
               mountPath: /opt/spacelift
               subPath: spacelift
+            {{- with .Values.dind.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
       volumes:
         - name: launcher-storage
       {{- if not .Values.storageVolume }}
