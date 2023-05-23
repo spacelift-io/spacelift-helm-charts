@@ -66,6 +66,8 @@ dind:
   resources: {}
   # extraEnv allows you to inject additional environment variables to the dind container.
   extraEnv: []
+  # extraVolumeMounts adds extra volume mounts to the dind container.
+  extraVolumeMounts: []
 
 nodeSelector: {}
 
