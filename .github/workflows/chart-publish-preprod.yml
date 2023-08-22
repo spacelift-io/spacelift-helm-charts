@@ -32,26 +32,14 @@ jobs:
           rm helm-v${HELM_VERSION}-linux-amd64.tar.gz
           rm -rf linux-amd64
 
-      - name: Create output directory
-        run: mkdir -p build/chart
+      - name: Install Helm S3 Plugin
+        run: helm plugin install https://github.com/hypnoglow/helm-s3.git
 
-      - name: Download existing index.yaml
-        run: curl -fs ${REGISTRY_URL}/index.yaml -o build/index-current.yaml
-        # The first time this step runs the index file won't exist, so allow the step to fail
-        continue-on-error: true
+      - name: Create output directory for Spacelift Worker Pool Chart
+        run: mkdir -p build/chart/worker-pool
 
-      - name: Set chart version number
-        run: |
-          timestamp=$(date +'%s')
-          echo "CHART_VERSION=${CHART_VERSION_PREFIX}.${timestamp}" >> $GITHUB_ENV
-
-      - name: Lint chart
-        run: helm lint .
-
-      - name: Package chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart .
-          helm repo index build/chart --url "$REGISTRY_URL" --merge "build/index-current.yaml"
+      - name: Create output directory for Spacelift VCS Agent Chart
+        run: mkdir -p build/chart/vcs-agent
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -60,11 +48,31 @@ jobs:
           role-to-assume: ${{ secrets.PREPROD_AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 900
 
-      - name: Upload the chart to S3
-        run: >-
-          aws s3 sync
-          build/chart s3://${{ secrets.PREPROD_AWS_S3_BUCKET }}/helm
-          --no-progress
+      - name: Download existing index.yaml
+        run: helm repo add spacelift ${REGISTRY_URL}
+        # The first time this step runs the index file won't exist, so allow the step to fail
+        continue-on-error: true
+
+      - name: Set chart version number
+        run: |
+          timestamp=$(date +'%s')
+          echo "CHART_VERSION=${CHART_VERSION_PREFIX}.${timestamp}" >> $GITHUB_ENV
+
+      - name: Lint Spacelift Worker Pool chart
+        run: helm lint spacelift-worker-pool/
+
+      - name: Lint Spacelift VCS Agent chart
+        run: helm lint vcs-agent/
+
+      - name: Package Spacelift Worker Pool chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/worker-pool spacelift-worker-pool/
+          helm s3 push build/chart/worker-pool/worker-pool-${CHART_VERSION}.tgz spacelift
+
+      - name: Package Spacelift VCS Agent chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/vcs-agent vcs-agent/
+          helm s3 push build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
 
       - name: Invalidate cache
         run: >-
