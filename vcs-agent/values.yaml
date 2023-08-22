@@ -18,6 +18,8 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
+containerName: vcsagent
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
@@ -31,7 +33,7 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-vcs-agent:
+vcsagent:
   extraEnv: []
   # extraVolumeMounts adds extra volume mounts to the launcher container.
 

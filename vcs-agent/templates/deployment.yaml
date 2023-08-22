@@ -28,7 +28,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.containerName }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -55,7 +55,7 @@ spec:
                   name: {{ include "vcs-agent.fullname" . }}
                   key: vendor
             {{- end }}
-            {{- with index .Values "vsc-agent" "extraEnv" }}
+            {{- with .Values.vcsagent.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           resources:
