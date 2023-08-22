@@ -40,13 +40,6 @@ jobs:
       - name: Create output directory for Spacelift VCS Agent Chart
         run: mkdir -p build/chart/vcs-agent
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-region: ${{ secrets.PREPROD_AWS_REGION }}
-          role-to-assume: ${{ secrets.PREPROD_AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 900
-
       - name: Download existing index.yaml
         run: helm repo add spacelift ${REGISTRY_URL}
         # The first time this step runs the index file won't exist, so allow the step to fail
@@ -66,9 +59,7 @@ jobs:
       - name: Package Spacelift Worker Pool chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/worker-pool spacelift-worker-pool/
-          helm s3 push build/chart/worker-pool/worker-pool-${CHART_VERSION}.tgz spacelift
 
       - name: Package Spacelift VCS Agent chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/vcs-agent vcs-agent/
-          helm s3 push build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
