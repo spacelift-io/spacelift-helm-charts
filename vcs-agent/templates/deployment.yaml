@@ -55,7 +55,7 @@ spec:
                   name: {{ include "vcs-agent.fullname" . }}
                   key: vendor
             {{- end }}
-            {{- with .Values.vsc-agent.extraEnv }}
+            {{- with index .Values "vsc-agent" "extraEnv" }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           resources:
