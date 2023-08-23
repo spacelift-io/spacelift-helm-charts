@@ -47,7 +47,7 @@ vcsagent:
             name: spacelift-secret
             key:  token
     - name: "SPACELIFT_VCS_AGENT_TARGET_BASE_ENDPOINT"
-      valueFrom: "endpoint"
+      value: "https://gitlab.myorg.com"
     - name: "SPACELIFT_VCS_AGENT_VENDOR"
       value: "vcs-vendor"
 ```
