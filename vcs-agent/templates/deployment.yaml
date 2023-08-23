@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "vcs-agent.fullname" . }}
+  labels:
+    {{- include "vcs-agent.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "vcs-agent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "vcs-agent.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "vcs-agent.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Values.containerName }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- if .Values.credentials.create }}
+            - name: SPACELIFT_VCS_AGENT_POOL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "vcs-agent.fullname" . }}
+                  key: token
+            - name: SPACELIFT_VCS_AGENT_TARGET_BASE_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "vcs-agent.fullname" . }}
+                  key: endpoint
+            - name: SPACELIFT_VCS_AGENT_VENDOR
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "vcs-agent.fullname" . }}
+                  key: vendor
+            {{- end }}
+            {{- with .Values.vcsagent.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
