@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HELM_VERSION: "3.7.1"
-      REGISTRY_URL: "https://downloads.spacelift.io/helm"
     permissions:
       id-token: write
       contents: read
@@ -48,7 +47,7 @@ jobs:
           role-duration-seconds: 900
 
       - name: Add the Spacelift Helm registry
-        run: helm repo add spacelift ${REGISTRY_URL}
+        run: helm repo add spacelift s3://${{ secrets.PROD_AWS_S3_BUCKET }}/helm
         # The first time this step runs the index file won't exist, so allow the step to fail
         continue-on-error: true
 
