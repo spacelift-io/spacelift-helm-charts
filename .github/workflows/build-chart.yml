@@ -40,7 +40,7 @@ jobs:
       - name: Create output directory for Spacelift VCS Agent Chart
         run: mkdir -p build/chart/vcs-agent
 
-      - name: Download existing index.yaml
+      - name: Add the Spacelift Helm registry
         run: helm repo add spacelift ${REGISTRY_URL}
         # The first time this step runs the index file won't exist, so allow the step to fail
         continue-on-error: true

@@ -39,22 +39,15 @@ use the `vcs-agent.extraEnv` value to provide the variables yourself. For exampl
 credentials:
   create: false
 
-launcher:
+vcsagent:
   extraEnv:
     - name: "SPACELIFT_VCS_AGENT_POOL_TOKEN"
-      value: "my-token"
-    - name: "SPACELIFT_VCS_AGENT_TARGET_BASE_ENDPOINT"
       valueFrom:
         secretKeyRef:
-          name: spacelift-secret
-          key: endpoint
+            name: spacelift-secret
+            key:  token
+    - name: "SPACELIFT_VCS_AGENT_TARGET_BASE_ENDPOINT"
+      valueFrom: "endpoint"
     - name: "SPACELIFT_VCS_AGENT_VENDOR"
       value: "vcs-vendor"
 ```
-
-## Development
-
-### Publishing the Chart
-
-To publish a new version of the chart, create a new release with a tag in the format `v<version>`,
-for example `v0.0.1`. This will automatically trigger the workflow to publish the chart.

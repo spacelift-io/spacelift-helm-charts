@@ -143,10 +143,3 @@ volumes:
   secret:
     secretName: very-secret
 ```
-
-## Development
-
-### Publishing the Chart
-
-To publish a new version of the chart, create a new release with a tag in the format `v<version>`,
-for example `v0.0.1`. This will automatically trigger the workflow to publish the chart.

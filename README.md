@@ -14,5 +14,5 @@ For installation of the VCS Agent Helm Chart, you can refer to the relative [doc
 
 ### Publishing the Chart
 
-To publish a new version of the chart, create a new release with a tag in the format `v<version>`,
-for example `v0.0.1`. This will automatically trigger the workflow to publish the chart.
+To publish a new version of the chart, create a new release with a tag in the format `v<version>`, for example `v0.0.1`. This will automatically trigger the workflow to publish the chart.
+Both charts in this repository will published at the same time and they will have the same version number.

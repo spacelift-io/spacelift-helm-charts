@@ -48,7 +48,7 @@ jobs:
           role-to-assume: ${{ secrets.PREPROD_AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 900
 
-      - name: Download existing index.yaml
+      - name: Add the Spacelift Helm registry
         run: helm repo add spacelift ${REGISTRY_URL}
         # The first time this step runs the index file won't exist, so allow the step to fail
         continue-on-error: true
