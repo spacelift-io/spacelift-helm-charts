@@ -85,14 +85,8 @@ jobs:
     needs: [registry]
     env:
       HELM_VERSION: "3.7.1"
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@master
-
       - name: Install Helm
         run: |
           curl -s https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm-v${HELM_VERSION}-linux-amd64.tar.gz
