@@ -105,5 +105,5 @@ jobs:
         run: |
           helm repo add spacelift https://downloads.spacelift.dev/helm
           helm repo update
-          helm pull spacelift/spacelift-worker
-          helm pull spacelift/vcs-agent          
+          helm pull --devel spacelift/spacelift-worker
+          helm pull --devel spacelift/vcs-agent
