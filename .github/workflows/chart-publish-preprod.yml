@@ -66,12 +66,12 @@ jobs:
       - name: Package Spacelift Worker Pool chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/worker-pool spacelift-worker-pool/
-          helm s3 push build/chart/worker-pool/spacelift-worker-${CHART_VERSION}.tgz spacelift
+          helm s3 push --relative build/chart/worker-pool/spacelift-worker-${CHART_VERSION}.tgz spacelift
 
       - name: Package Spacelift VCS Agent chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/vcs-agent vcs-agent/
-          helm s3 push build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
+          helm s3 push --relative build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
 
       - name: Invalidate cache
         run: >-
