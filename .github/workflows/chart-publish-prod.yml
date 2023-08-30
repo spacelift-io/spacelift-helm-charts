@@ -69,15 +69,37 @@ jobs:
       - name: Package Spacelift Worker Pool chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/worker-pool spacelift-worker-pool/
-          helm s3 push build/chart/worker-pool/spacelift-worker-${CHART_VERSION}.tgz spacelift
+          helm s3 push --relative build/chart/worker-pool/spacelift-worker-${CHART_VERSION}.tgz spacelift
 
       - name: Package Spacelift VCS Agent chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/vcs-agent vcs-agent/
-          helm s3 push build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
+          helm s3 push --relative build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
 
       - name: Invalidate cache
         run: >-
           aws cloudfront create-invalidation
           --distribution-id ${{ secrets.DISTRIBUTION }}
           --paths "/helm/*"
+          
+  test-new-version:
+    name: Test that the new chart version can be pulled
+    runs-on: ubuntu-latest
+    needs: [registry]
+    env:
+      HELM_VERSION: "3.7.1"
+    steps:
+      - name: Install Helm
+        run: |
+          curl -s https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          sudo mv linux-amd64/helm /usr/local/bin
+          rm helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          rm -rf linux-amd64
+
+      - name: Pull chart
+        run: |
+          helm repo add spacelift https://downloads.spacelift.io/helm
+          helm repo update
+          helm pull spacelift/spacelift-worker
+          helm pull spacelift/vcs-agent
