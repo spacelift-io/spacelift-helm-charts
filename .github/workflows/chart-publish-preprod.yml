@@ -85,7 +85,6 @@ jobs:
     needs: [registry]
     env:
       HELM_VERSION: "3.7.1"
-      CHART_VERSION_PREFIX: "0.0.1-preprod"
     permissions:
       id-token: write
       contents: read
@@ -104,7 +103,7 @@ jobs:
 
       - name: Pull chart
         run: |
-          helm repo add spacelift https://downloads.spacelift.io/helm
+          helm repo add spacelift https://downloads.spacelift.dev/helm
           helm repo update
           helm pull spacelift/spacelift-worker
           helm pull spacelift/vcs-agent          
