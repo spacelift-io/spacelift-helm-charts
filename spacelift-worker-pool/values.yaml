@@ -69,6 +69,8 @@ dind:
   # extraVolumeMounts adds extra volume mounts to the dind container.
   extraVolumeMounts: []
 
+additionalContainers: []
+
 nodeSelector: {}
 
 tolerations: []
