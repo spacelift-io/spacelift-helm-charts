@@ -8,9 +8,16 @@ metadata:
     {{- with .Values.extraLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if .Values.replicasEnabled  }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  {{- with .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ . }}
   {{- end }}
   selector:
     matchLabels:
@@ -81,6 +88,10 @@ spec:
             {{- with .Values.launcher.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- with .Values.launcher.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12}}
+          {{- end }}
           volumeMounts:
             - name: launcher-storage
               mountPath: /opt/spacelift
@@ -106,6 +117,10 @@ spec:
             {{- with .Values.dind.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- with .Values.dind.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12}}
+          {{- end }}
           lifecycle:
             preStop:
               exec:
@@ -139,6 +154,10 @@ spec:
         {{- with .Values.volumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8}}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

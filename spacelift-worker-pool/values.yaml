@@ -5,6 +5,8 @@ replicaCount: 1
 # terminationGracePeriodSeconds specifies how long Kubernetes gives a worker pod to gracefully
 # terminate before forcibly killing it.
 terminationGracePeriodSeconds: 30
+# revisionHistoryLimit controls the amount of past replica sets that are kept
+# revisionHistoryLimit: 3
 
 credentials:
   # create defines whether a secret should be created for the worker pool credentials. If you want to pass
@@ -29,6 +31,7 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+annotations: {}
 extraLabels: {}
 podAnnotations: {}
 extraPodLabels: {}
@@ -49,6 +52,8 @@ launcher:
   securityContext: {}
   # extraEnv allows you to inject additional environment variables to the launcher container.
   extraEnv: []
+  # envFrom allows you to inject all values from secrets and config maps as environment variables to the launcher container
+  envFrom: []
   # extraVolumeMounts adds extra volume mounts to the launcher container.
   extraVolumeMounts: []
 
@@ -66,6 +71,8 @@ dind:
   resources: {}
   # extraEnv allows you to inject additional environment variables to the dind container.
   extraEnv: []
+  # envFrom allows you to inject all values from secrets and config maps as environment variables to the dind container
+  envFrom: []
   # extraVolumeMounts adds extra volume mounts to the dind container.
   extraVolumeMounts: []
 
@@ -76,6 +83,8 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+topologySpreadConstraints: []
 
 # volumes specified extra volumes to attach to Deployment / StatefulSet.
 volumes: []
