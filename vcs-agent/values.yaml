@@ -1,4 +1,6 @@
 replicaCount: 1
+# revisionHistoryLimit controls the amount of past replica sets that are kept
+# revisionHistoryLimit: 3
 
 credentials:
   # create defines whether a secret should be created for the VCS Agent credentials. If you want to pass
@@ -36,7 +38,10 @@ serviceAccount:
 vcsagent:
   extraEnv: []
   # extraVolumeMounts adds extra volume mounts to the launcher container.
+  # envFrom allows you to inject all values from secrets and config maps as environment variables to the vcsagent container
+  envFrom: []
 
+annotations: {}
 podAnnotations: {}
 
 podSecurityContext: {}
@@ -67,3 +72,5 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+topologySpreadConstraints: []
