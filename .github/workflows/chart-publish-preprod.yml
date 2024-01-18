@@ -40,6 +40,9 @@ jobs:
       - name: Create output directory for Spacelift VCS Agent Chart
         run: mkdir -p build/chart/vcs-agent
 
+      - name: Create output directory for spacelift-workerpool-controller Chart
+        run: mkdir -p build/chart/spacelift-workerpool-controller
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -63,6 +66,9 @@ jobs:
       - name: Lint Spacelift VCS Agent chart
         run: helm lint vcs-agent/
 
+      - name: Lint spacelift-workerpool-controller chart
+        run: helm lint spacelift-workerpool-controller/
+
       - name: Package Spacelift Worker Pool chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/worker-pool spacelift-worker-pool/
@@ -72,6 +78,11 @@ jobs:
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/vcs-agent vcs-agent/
           helm s3 push --relative build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
+
+      - name: Package spacelift-workerpool-controller chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-workerpool-controller spacelift-workerpool-controller/
+          helm s3 push --relative build/chart/spacelift-workerpool-controller/spacelift-workerpool-controller-${CHART_VERSION}.tgz spacelift
 
       - name: Invalidate cache
         run: >-
@@ -101,3 +112,4 @@ jobs:
           helm repo update
           helm pull --devel spacelift/spacelift-worker
           helm pull --devel spacelift/vcs-agent
+          helm pull --devel spacelift/spacelift-workerpool-controller

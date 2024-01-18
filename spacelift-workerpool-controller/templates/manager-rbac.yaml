@@ -1,0 +1,104 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "spacelift-workerpool-controller.fullname" . }}-manager-role
+  labels:
+  {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - workers.spacelift.io
+  resources:
+  - workerpools
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - workers.spacelift.io
+  resources:
+  - workerpools/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - workers.spacelift.io
+  resources:
+  - workerpools/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - workers.spacelift.io
+  resources:
+  - workers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - workers.spacelift.io
+  resources:
+  - workers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - workers.spacelift.io
+  resources:
+  - workers/status
+  verbs:
+  - get
+  - patch
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "spacelift-workerpool-controller.fullname" . }}-manager-rolebinding
+  labels:
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: spacelift-workerpool-controller
+    app.kubernetes.io/part-of: spacelift-workerpool-controller
+  {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: '{{ include "spacelift-workerpool-controller.fullname" . }}-manager-role'
+subjects:
+- kind: ServiceAccount
+  name: '{{ include "spacelift-workerpool-controller.fullname" . }}-controller-manager'
+  namespace: '{{ .Release.Namespace }}'
