@@ -56,6 +56,9 @@ spec:
       {{- end }}
       - args: {{- toYaml .Values.controllerManager.manager.args | nindent 8 }}
         - --metrics-bind-address={{ if .Values.metricsService.enabled }}127.0.0.1:8080{{ else }}0{{ end }}
+        {{- range .Values.controllerManager.namespaces }}
+        - --namespaces={{ . }}
+        {{- end }}
         command:
         - /spacelift-workerpool-controller
         env:

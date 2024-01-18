@@ -1,4 +1,9 @@
 controllerManager:
+  # If you do not specify a list of namespaces here, the controller will be assigned a ClusterRole,
+  # and will be able to manage WorkerPools across all namespaces in your cluster.
+  # If you do not want to grant cluster wide permissions to the controller, you can specify a list
+  # of namespaces. That will create a Role per namespace and bind it to the service account used by the controller.
+  namespaces: []
   kubeRbacProxy:
     args:
     - --secure-listen-address=0.0.0.0:8443
@@ -31,7 +36,7 @@ controllerManager:
         - ALL
     image:
       repository: public.ecr.aws/spacelift/kube-workerpool-controller
-      tag: v0.0.1-alpha2
+      tag: v0.0.1-alpha3
     resources:
       limits:
         memory: 128Mi
