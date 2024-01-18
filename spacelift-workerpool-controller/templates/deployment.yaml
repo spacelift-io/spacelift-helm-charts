@@ -37,6 +37,7 @@ spec:
                 values:
                 - linux
       containers:
+      {{- if .Values.metricsService.enabled }}
       - args: {{- toYaml .Values.controllerManager.kubeRbacProxy.args | nindent 8 }}
         env:
         - name: KUBERNETES_CLUSTER_DOMAIN
@@ -52,7 +53,9 @@ spec:
           10 }}
         securityContext: {{- toYaml .Values.controllerManager.kubeRbacProxy.containerSecurityContext
           | nindent 10 }}
+      {{- end }}
       - args: {{- toYaml .Values.controllerManager.manager.args | nindent 8 }}
+        - --metrics-bind-address={{ if .Values.metricsService.enabled }}127.0.0.1:8080{{ else }}0{{ end }}
         command:
         - /spacelift-workerpool-controller
         env:
