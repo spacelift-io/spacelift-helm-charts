@@ -36,6 +36,8 @@ spec:
                 items:
                   type: string
                 type: array
+              keepSuccessfulPods:
+                type: boolean
               pod:
                 properties:
                   activeDeadlineSeconds:
@@ -2066,6 +2068,8 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  launcherImage:
+                    type: string
                   nodeName:
                     type: string
                   nodeSelector:
