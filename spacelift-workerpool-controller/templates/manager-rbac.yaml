@@ -78,7 +78,7 @@
     - get
     - patch
     - update
-{{- end -}}
+{{ end -}}
 {{ if default .Values.controllerManager.namespaces | empty }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
