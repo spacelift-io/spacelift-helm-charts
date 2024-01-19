@@ -23,7 +23,6 @@ controllerManager:
   manager:
     args:
     - --health-probe-bind-address=:8081
-    - --metrics-bind-address=127.0.0.1:8080
     - --leader-elect
     containerSecurityContext:
       allowPrivilegeEscalation: false
@@ -43,7 +42,10 @@ controllerManager:
   serviceAccount:
     annotations: {}
 kubernetesClusterDomain: cluster.local
+# The metric service will expose a metrics endpoint that can be scraped by a prometheus instance.
+# This is disabled by default, enable this if you want to enable controller observability.
 metricsService:
+  enabled: false
   ports:
   - name: https
     port: 8443
