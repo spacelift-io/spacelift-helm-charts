@@ -84,7 +84,7 @@ jobs:
 
       - name: Package spacelift-workerpool-controller chart
         run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-workerpool-controller/
+          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-workerpool-controller/ spacelift-workerpool-controller
           helm s3 push --relative build/chart/spacelift-workerpool-controller/spacelift-workerpool-controller-${CHART_VERSION}.tgz spacelift
 
       - name: Invalidate cache
