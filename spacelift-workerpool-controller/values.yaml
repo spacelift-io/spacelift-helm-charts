@@ -11,6 +11,7 @@ controllerManager:
     - --logtostderr=true
     - --v=0
     containerSecurityContext:
+      readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
       capabilities:
         drop:
@@ -30,6 +31,7 @@ controllerManager:
     - --health-probe-bind-address=:8081
     - --leader-elect
     containerSecurityContext:
+      readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
       capabilities:
         drop:

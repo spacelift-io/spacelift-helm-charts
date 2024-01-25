@@ -66,6 +66,13 @@ spec:
           value: {{ quote .Values.kubernetesClusterDomain }}
         image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
           | default .Chart.AppVersion }}
+        ports:
+          - containerPort: 8081
+            name: health
+          {{- if .Values.metricsService.enabled }}
+          - containerPort: 8080
+            name: metrics
+          {{- end }}
         livenessProbe:
           httpGet:
             path: /healthz
