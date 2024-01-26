@@ -1,3 +1,5 @@
+⚠️ **[NOTICE] This chart is being deprecated, please migrate to our Kubernetes operator with [spacelift-workerpool-controller](../spacelift-workerpool-controller)** ⚠️
+
 # Spacelift Workerpool Helm Chart
 
 This folder contains a Helm chart for deploying a [Spacelift Worker Pool](https://docs.spacelift.io/concepts/worker-pools) on Kubernetes. The chart deploys the worker pool as a StatefulSet containing two containers:
