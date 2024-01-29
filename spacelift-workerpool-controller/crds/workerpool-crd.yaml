@@ -20,7 +20,7 @@ spec:
     - jsonPath: .status.actualPoolSize
       name: Actual pool size
       type: integer
-    name: v1alpha1
+    name: v1beta1
     schema:
       openAPIV3Schema:
         properties:
@@ -3859,6 +3859,8 @@ spec:
                     - key
                     type: object
                     x-kubernetes-map-type: atomic
+                required:
+                  - secretKeyRef
                 type: object
               token:
                 properties:
@@ -3874,7 +3876,13 @@ spec:
                     - key
                     type: object
                     x-kubernetes-map-type: atomic
+                required:
+                  - secretKeyRef
                 type: object
+            required:
+              - poolSize
+              - privateKey
+              - token
             type: object
           status:
             properties:
