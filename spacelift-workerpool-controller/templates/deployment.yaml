@@ -21,6 +21,9 @@ spec:
       {{- include "spacelift-workerpool-controller.selectorLabels" . | nindent 8 }}
       annotations:
         kubectl.kubernetes.io/default-container: manager
+        {{- with .Values.controllerManager.podAnnotations }}
+        {{- toYaml . | nindent 8}}
+        {{- end }}
     spec:
       affinity:
         nodeAffinity:
@@ -96,3 +99,15 @@ spec:
           type: RuntimeDefault
       serviceAccountName: {{ include "spacelift-workerpool-controller.fullname" . }}-controller-manager
       terminationGracePeriodSeconds: 10
+      {{- with .Values.controllerManager.topologySpreadConstraints }}
+      topologySpreadConstraints:
+      {{- toYaml . | nindent 8}}
+      {{- end }}
+      {{- with .Values.controllerManager.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controllerManager.tolerations }}
+      tolerations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
