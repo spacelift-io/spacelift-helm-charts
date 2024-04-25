@@ -3964,6 +3964,7 @@ spec:
                       type: object
                   type: object
                 poolSize:
+                  default: 1
                   format: int32
                   minimum: 0
                   type: integer
@@ -4002,7 +4003,6 @@ spec:
                     - secretKeyRef
                   type: object
               required:
-                - poolSize
                 - privateKey
                 - token
               type: object
