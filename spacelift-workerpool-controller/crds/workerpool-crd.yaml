@@ -14,7 +14,7 @@ spec:
   scope: Namespaced
   versions:
     - additionalPrinterColumns:
-        - jsonPath: .spec.poolSize
+        - jsonPath: .status.desiredPoolSize
           name: Desired pool size
           type: integer
         - jsonPath: .status.actualPoolSize
@@ -3964,7 +3964,6 @@ spec:
                       type: object
                   type: object
                 poolSize:
-                  default: 1
                   format: int32
                   minimum: 0
                   type: integer
@@ -4009,6 +4008,9 @@ spec:
             status:
               properties:
                 actualPoolSize:
+                  format: int32
+                  type: integer
+                desiredPoolSize:
                   format: int32
                   type: integer
               required:
