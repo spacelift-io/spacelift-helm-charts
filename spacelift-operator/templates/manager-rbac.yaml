@@ -1,0 +1,167 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "chart.fullname" . }}-manager-role
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - contexts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - contexts/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - contexts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - policies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - policies/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - policies/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - runs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - runs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - runs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - spaces
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - spaces/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - spaces/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - stacks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - stacks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - app.spacelift.io
+  resources:
+  - stacks/status
+  verbs:
+  - get
+  - patch
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "chart.fullname" . }}-manager-rolebinding
+  labels:
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: spacelift-operator
+    app.kubernetes.io/part-of: spacelift-operator
+  {{- include "chart.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: '{{ include "chart.fullname" . }}-manager-role'
+subjects:
+- kind: ServiceAccount
+  name: '{{ include "chart.fullname" . }}-controller-manager'
+  namespace: '{{ .Release.Namespace }}'
