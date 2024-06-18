@@ -23,7 +23,6 @@ controllerManager:
   manager:
     args:
     - --health-probe-bind-address=:8081
-    - --metrics-bind-address=127.0.0.1:8080
     - --leader-elect
     containerSecurityContext:
       allowPrivilegeEscalation: false
@@ -44,6 +43,7 @@ controllerManager:
     annotations: {}
 kubernetesClusterDomain: cluster.local
 metricsService:
+  enabled: false
   ports:
   - name: https
     port: 8443
