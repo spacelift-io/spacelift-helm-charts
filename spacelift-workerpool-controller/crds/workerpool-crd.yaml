@@ -2472,6 +2472,8 @@ spec:
                                 x-kubernetes-map-type: atomic
                             type: object
                           type: array
+                        imagePullPolicy:
+                          type: string
                         resources:
                           properties:
                             claims:
@@ -2693,6 +2695,8 @@ spec:
                                 x-kubernetes-map-type: atomic
                             type: object
                           type: array
+                        imagePullPolicy:
+                          type: string
                         resources:
                           properties:
                             claims:
@@ -3760,6 +3764,8 @@ spec:
                                 x-kubernetes-map-type: atomic
                             type: object
                           type: array
+                        imagePullPolicy:
+                          type: string
                         resources:
                           properties:
                             claims:
