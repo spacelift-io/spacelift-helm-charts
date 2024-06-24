@@ -3,4 +3,4 @@ name: spacelift-workerpool-controller
 description: A Helm chart for deploying spacelift workerpool controller
 type: application
 version: 0.1.0
-appVersion: "v0.0.9"
+appVersion: "v0.0.10"
