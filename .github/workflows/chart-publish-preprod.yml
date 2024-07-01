@@ -86,9 +86,15 @@ jobs:
           helm s3 push --relative build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
 
       - name: Package spacelift-workerpool-controller chart
+        env:
+          PUBLIC_HELM_CHART_ECR_REPOSITORY_URL: ${{ secrets.PUBLIC_HELM_CHART_ECR_REPOSITORY_URL }}
+          AWS_REGION: ${{ secrets.PREPROD_AWS_REGION }}
+          HELM_EXPERIMENTAL_OCI: 1
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-workerpool-controller spacelift-workerpool-controller/
           helm s3 push --relative build/chart/spacelift-workerpool-controller/spacelift-workerpool-controller-${CHART_VERSION}.tgz spacelift
+          aws ecr-public get-login-password | helm registry login --username AWS --password-stdin public.ecr.aws
+          helm push build/chart/spacelift-workerpool-controller/spacelift-workerpool-controller-${CHART_VERSION}.tgz oci://${PUBLIC_HELM_CHART_ECR_REPOSITORY_URL}
 
       - name: Package spacelift-operator chart
         run: |
