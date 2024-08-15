@@ -1,0 +1,3 @@
+- [ ] A chart version is updated
+  - [ ] No changes on CRDs
+  - [ ] CRDs are updated

@@ -1,0 +1,12 @@
+{{- if .Values.useStatefulSet }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "spacelift-worker.fullname" . }}
+  labels:
+    {{- include "spacelift-worker.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    {{- include "spacelift-worker.selectorLabels" . | nindent 4 }}
+{{- end }}

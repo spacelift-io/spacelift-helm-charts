@@ -1,0 +1,72 @@
+controllerManager:
+  # If you do not specify a list of namespaces here, the controller will be assigned a ClusterRole,
+  # and will be able to manage WorkerPools across all namespaces in your cluster.
+  # If you do not want to grant cluster wide permissions to the controller, you can specify a list
+  # of namespaces. That will create a Role per namespace and bind it to the service account used by the controller.
+  #
+  # PLEASE NOTE: currently the metrics service requires a ClusterRole in order to function, so
+  # if `metricsService.enabled` is set to true, a ClusterRole will be created even if you
+  # specify namespaces.
+  namespaces: []
+  kubeRbacProxy:
+    args:
+    - --secure-listen-address=0.0.0.0:8443
+    - --upstream=http://127.0.0.1:8080/
+    - --logtostderr=true
+    - --v=0
+    containerSecurityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+    image:
+      repository: gcr.io/kubebuilder/kube-rbac-proxy
+      tag: v0.14.1
+    resources:
+      limits:
+        cpu: 500m
+        memory: 128Mi
+      requests:
+        cpu: 5m
+        memory: 64Mi
+  manager:
+    args:
+    - --health-probe-bind-address=:8081
+    - --leader-elect
+    containerSecurityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+    image:
+      repository: public.ecr.aws/spacelift/kube-workerpool-controller
+      tag: v0.0.12
+    resources:
+      limits:
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+  replicas: 1
+  podAnnotations: {}
+  serviceAccount:
+    annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  topologySpreadConstraints: []
+kubernetesClusterDomain: cluster.local
+# The metric service will expose a metrics endpoint that can be scraped by a prometheus instance.
+# This is disabled by default, enable this if you want to enable controller observability.
+metricsService:
+  enabled: false
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: https
+  type: ClusterIP
+
+spacelift-promex:
+  enabled: true

@@ -1,0 +1,139 @@
+name: Preprod chart publish
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.ref }}-chart-publish-preprod
+
+jobs:
+  registry:
+    name: Publish the chart to the preprod Helm repository
+    runs-on: ubuntu-latest
+    env:
+      HELM_VERSION: "3.7.1"
+      CHART_VERSION_PREFIX: "0.0.1-preprod"
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@main
+
+      - name: Install Helm
+        run: |
+          curl -s https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          sudo mv linux-amd64/helm /usr/local/bin
+          rm helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          rm -rf linux-amd64
+
+      - name: Install Helm S3 Plugin
+        run: helm plugin install https://github.com/hypnoglow/helm-s3.git
+
+      - name: Create output directory for Spacelift PromEx Chart
+        run: mkdir -p build/chart/spacelift-promex
+
+      - name: Create output directory for Spacelift Worker Pool Chart
+        run: mkdir -p build/chart/worker-pool
+
+      - name: Create output directory for Spacelift VCS Agent Chart
+        run: mkdir -p build/chart/vcs-agent
+
+      - name: Create output directory for spacelift-workerpool-controller Chart
+        run: mkdir -p build/chart/spacelift-workerpool-controller
+
+      - name: Create output directory for spacelift-operator Chart
+        run: mkdir -p build/chart/spacelift-operator
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.PREPROD_AWS_REGION }}
+          role-to-assume: ${{ secrets.PREPROD_AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 900
+
+      - name: Add the Spacelift Helm registry
+        run: helm repo add spacelift s3://${{ secrets.PREPROD_AWS_S3_BUCKET }}/helm
+        # The first time this step runs the index file won't exist, so allow the step to fail
+        continue-on-error: true
+
+      - name: Set chart version number
+        run: |
+          timestamp=$(date +'%s')
+          echo "CHART_VERSION=${CHART_VERSION_PREFIX}.${timestamp}" >> $GITHUB_ENV
+
+      - name: Lint spacelift-promex chart
+        run: helm lint spacelift-promex/
+
+      - name: Lint Spacelift Worker Pool chart
+        run: helm lint spacelift-worker-pool/
+
+      - name: Lint Spacelift VCS Agent chart
+        run: helm lint vcs-agent/
+
+      - name: Lint spacelift-workerpool-controller chart
+        run: helm lint spacelift-workerpool-controller/
+
+      - name: Lint spacelift-operator chart
+        run: helm lint spacelift-operator/
+
+      - name: Package spacelift-promex chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-promex spacelift-promex/
+          helm s3 push --relative build/chart/spacelift-promex/spacelift-promex-${CHART_VERSION}.tgz spacelift
+
+      - name: Package Spacelift Worker Pool chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/worker-pool spacelift-worker-pool/
+          helm s3 push --relative build/chart/worker-pool/spacelift-worker-${CHART_VERSION}.tgz spacelift
+
+      - name: Package Spacelift VCS Agent chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/vcs-agent vcs-agent/
+          helm s3 push --relative build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
+
+      - name: Package spacelift-workerpool-controller chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-workerpool-controller spacelift-workerpool-controller/
+          helm s3 push --relative build/chart/spacelift-workerpool-controller/spacelift-workerpool-controller-${CHART_VERSION}.tgz spacelift
+
+      - name: Package spacelift-operator chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-operator spacelift-operator/
+          helm s3 push --relative build/chart/spacelift-operator/spacelift-operator-${CHART_VERSION}.tgz spacelift
+
+      - name: Invalidate cache
+        run: >-
+          aws cloudfront create-invalidation
+          --distribution-id ${{ secrets.PREPROD_DISTRIBUTION }}
+          --paths "/helm/*"
+          
+  test-new-version:
+    name: Test that the new chart version can be pulled
+    runs-on: ubuntu-latest
+    needs: [registry]
+    env:
+      HELM_VERSION: "3.7.1"
+
+    steps:
+      - name: Install Helm
+        run: |
+          curl -s https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          sudo mv linux-amd64/helm /usr/local/bin
+          rm helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          rm -rf linux-amd64
+
+      - name: Pull chart
+        run: |
+          helm repo add spacelift https://downloads.spacelift.dev/helm
+          helm repo update
+          helm pull --devel spacelift/spacelift-promex
+          helm pull --devel spacelift/spacelift-worker
+          helm pull --devel spacelift/vcs-agent
+          helm pull --devel spacelift/spacelift-workerpool-controller
+          helm pull --devel spacelift/spacelift-operator

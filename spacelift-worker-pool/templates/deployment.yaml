@@ -1,0 +1,177 @@
+{{- if not .Values.useStatefulSet }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spacelift-worker.fullname" . }}
+  labels:
+    {{- include "spacelift-worker.labels" . | nindent 4 }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.replicasEnabled  }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  {{- with .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ . }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "spacelift-worker.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "spacelift-worker.selectorLabels" . | nindent 8 }}
+        {{- with .Values.extraPodLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "spacelift-worker.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      containers:
+        - name: launcher
+          securityContext:
+            {{- toYaml .Values.launcher.securityContext | nindent 12 }}
+          {{- if .Values.launcher.image.digest }}
+          image: "{{ .Values.launcher.image.repository }}@{{ .Values.launcher.image.digest }}"
+          {{- else }}
+          image: "{{ .Values.launcher.image.repository }}:{{ .Values.launcher.image.tag }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.launcher.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.launcher.resources | nindent 12 }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - sleep 20
+          env:
+            - name: DOCKER_HOST
+              value: tcp://localhost:2375
+            {{- if .Values.credentials.create }}
+            - name: SPACELIFT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "spacelift-worker.fullname" . }}
+                  key: token
+            - name: SPACELIFT_POOL_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "spacelift-worker.fullname" . }}
+                  key: privateKey
+            {{- end }}
+            - name: SPACELIFT_METADATA_instance_id
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SPACELIFT_METADATA_k8s_namespace
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- with .Values.launcher.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.launcher.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12}}
+          {{- end }}
+          volumeMounts:
+            - name: launcher-storage
+              mountPath: /opt/spacelift
+              subPath: spacelift
+            {{- with .Values.launcher.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+        - name: dind
+          {{- if .Values.dind.image.digest }}
+          image: "{{ .Values.dind.image.repository }}@{{ .Values.dind.image.digest }}"
+          {{- else }}
+          image: "{{ .Values.dind.image.repository }}:{{ .Values.dind.image.tag }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.dind.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.dind.resources | nindent 12 }}
+          # By default the Docker container starts the daemon with TLS enabled, which causes
+          # the launcher to fail to connect to it. Specifying the command manually disables this.
+          command:
+            - docker-init
+            - "--"
+            - dockerd
+            - "--host"
+            - tcp://127.0.0.1:2375
+          env:
+            - name: DOCKER_HOST
+              value: tcp://localhost:2375
+            {{- with .Values.dind.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.dind.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12}}
+          {{- end }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - while [ ! -z $(docker ps -q) ]; do sleep 1; done;
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: launcher-storage
+              mountPath: /var/lib/docker
+              subPath: docker
+            - name: launcher-storage
+              mountPath: /opt/spacelift
+              subPath: spacelift
+            {{- with .Values.dind.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+        {{- if .Values.additionalContainers }}
+        {{- toYaml .Values.additionalContainers | nindent 8 }}
+        {{- end }}
+      volumes:
+        - name: launcher-storage
+      {{- if not .Values.storageVolume }}
+          emptyDir: {}
+      {{- end }}
+      {{- with .Values.storageVolume }}
+          {{- toYaml . | nindent 10 }}
+      {{- end }}
+        {{- with .Values.volumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8}}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

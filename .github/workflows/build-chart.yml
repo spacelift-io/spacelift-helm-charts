@@ -1,0 +1,94 @@
+name: Build chart
+
+on:
+  push:
+    branches-ignore:
+      - main
+    tags-ignore:
+      - "v*"
+
+concurrency:
+  group: ${{ github.ref }}-chart-build
+
+jobs:
+  registry:
+    name: Lint and package the Helm chart
+    runs-on: ubuntu-latest
+    env:
+      HELM_VERSION: "3.7.1"
+      CHART_VERSION_PREFIX: "0.0.1-preprod"
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@main
+
+      - name: Install Helm
+        run: |
+          curl -s https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          sudo mv linux-amd64/helm /usr/local/bin
+          rm helm-v${HELM_VERSION}-linux-amd64.tar.gz
+          rm -rf linux-amd64
+
+      - name: Install Helm S3 Plugin
+        run: helm plugin install https://github.com/hypnoglow/helm-s3.git
+
+      - name: Create output directory for spacelift-promex Chart
+        run: mkdir -p build/chart/spacelift-promex
+
+      - name: Create output directory for Spacelift Worker Pool Chart
+        run: mkdir -p build/chart/worker-pool
+
+      - name: Create output directory for spacelift-workerpool-controller Chart
+        run: mkdir -p build/chart/spacelift-workerpool-controller
+
+      - name: Create output directory for spacelift-operator Chart
+        run: mkdir -p build/chart/spacelift-operator
+
+      - name: Create output directory for Spacelift VCS Agent Chart
+        run: mkdir -p build/chart/vcs-agent
+
+      - name: Add the Spacelift Helm registry
+        run: helm repo add spacelift s3://${{ secrets.PREPROD_AWS_S3_BUCKET }}/helm
+        # The first time this step runs the index file won't exist, so allow the step to fail
+        continue-on-error: true
+
+      - name: Set chart version number
+        run: |
+          timestamp=$(date +'%s')
+          echo "CHART_VERSION=${CHART_VERSION_PREFIX}.${timestamp}" >> $GITHUB_ENV
+
+      - name: Lint spacelift-promex chart
+        run: helm lint --strict spacelift-promex/
+
+      - name: Lint Spacelift Worker Pool chart
+        run: helm lint spacelift-worker-pool/
+
+      - name: Lint Spacelift VCS Agent chart
+        run: helm lint vcs-agent/
+
+      - name: Lint spacelift-workerpool-controller chart
+        run: helm lint --strict spacelift-workerpool-controller/
+
+      - name: Lint spacelift-operator chart
+        run: helm lint --strict spacelift-operator/
+
+      - name: Package Spacelift PromEx chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-promex spacelift-promex/
+
+      - name: Package Spacelift Worker Pool chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/worker-pool spacelift-worker-pool/
+
+      - name: Package Spacelift VCS Agent chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/vcs-agent vcs-agent/
+
+      - name: Package spacelift-workerpool-controller chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-workerpool-controller spacelift-workerpool-controller/
+
+      - name: Package spacelift-operator chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-operator spacelift-operator/
