@@ -34,6 +34,9 @@ jobs:
       - name: Install Helm S3 Plugin
         run: helm plugin install https://github.com/hypnoglow/helm-s3.git
 
+      - name: Create output directory for Spacelift PromEx Chart
+        run: mkdir -p build/chart/spacelift-promex
+
       - name: Create output directory for Spacelift Worker Pool Chart
         run: mkdir -p build/chart/worker-pool
 
@@ -63,6 +66,9 @@ jobs:
           timestamp=$(date +'%s')
           echo "CHART_VERSION=${CHART_VERSION_PREFIX}.${timestamp}" >> $GITHUB_ENV
 
+      - name: Lint spacelift-promex chart
+        run: helm lint spacelift-promex/
+
       - name: Lint Spacelift Worker Pool chart
         run: helm lint spacelift-worker-pool/
 
@@ -74,6 +80,11 @@ jobs:
 
       - name: Lint spacelift-operator chart
         run: helm lint spacelift-operator/
+
+      - name: Package spacelift-promex chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-promex spacelift-promex/
+          helm s3 push --relative build/chart/spacelift-promex/spacelift-promex-${CHART_VERSION}.tgz spacelift
 
       - name: Package Spacelift Worker Pool chart
         run: |
@@ -121,6 +132,7 @@ jobs:
         run: |
           helm repo add spacelift https://downloads.spacelift.dev/helm
           helm repo update
+          helm pull --devel spacelift/spacelift-promex
           helm pull --devel spacelift/spacelift-worker
           helm pull --devel spacelift/vcs-agent
           helm pull --devel spacelift/spacelift-workerpool-controller

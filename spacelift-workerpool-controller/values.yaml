@@ -67,3 +67,6 @@ metricsService:
     protocol: TCP
     targetPort: https
   type: ClusterIP
+
+spacelift-promex:
+  enabled: true

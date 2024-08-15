@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spacelift-promex.fullname" . }}
+  labels:
+    {{- include "spacelift-promex.labels" . | nindent 4 }}
+    {{- with .Values.spaceliftPromex.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.spaceliftPromex.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.spaceliftPromex.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "spacelift-promex.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "spacelift-promex.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.spaceliftPromex.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: spacelift-promex
+          {{- if .Values.spaceliftPromex.image.digest }}
+          image: "{{ .Values.spaceliftPromex.image.repository }}@{{ .Values.spaceliftPromex.image.digest }}"
+          {{- else }}
+          image: "{{ .Values.spaceliftPromex.image.repository }}:{{ .Values.spaceliftPromex.image.tag }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.spaceliftPromex.image.pullPolicy }}
+          ports:
+            - name: metrics
+              containerPort: 9953
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: metrics
+            periodSeconds: 5
+          env:
+            - name: "SPACELIFT_PROMEX_API_ENDPOINT"
+              value: "{{ .Values.spacelift.apiEndpoint }}"
+            - name: "SPACELIFT_PROMEX_API_KEY_ID"
+              value: "{{ .Values.spacelift.apiKeyId }}"
+            - name: "SPACELIFT_PROMEX_API_KEY_SECRET"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.spacelift.apiKeySecretName }}
+                  key: "SPACELIFT_PROMEX_API_KEY_SECRET"
+            - name: "SPACELIFT_PROMEX_LISTEN_ADDRESS"
+              value: "{{ .Values.spaceliftPromex.listenAddress}}"
