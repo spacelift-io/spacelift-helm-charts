@@ -43,13 +43,13 @@ spec:
             periodSeconds: 5
           env:
             - name: "SPACELIFT_PROMEX_API_ENDPOINT"
-              value: "{{ .Values.spacelift.apiEndpoint }}"
+              value: "{{ required "must include spacelift.apiEndpoint in values" .Values.spacelift.apiEndpoint }}"
             - name: "SPACELIFT_PROMEX_API_KEY_ID"
-              value: "{{ .Values.spacelift.apiKeyId }}"
+              value: "{{ required "must include spacelift.apiKeyId in values" .Values.spacelift.apiKeyId }}"
             - name: "SPACELIFT_PROMEX_API_KEY_SECRET"
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.spacelift.apiKeySecretName }}
+                  name: {{ required "must include spacelift.apiKeySecretName in values" .Values.spacelift.apiKeySecretName }}
                   key: "SPACELIFT_PROMEX_API_KEY_SECRET"
             - name: "SPACELIFT_PROMEX_LISTEN_ADDRESS"
               value: "{{ .Values.spaceliftPromex.listenAddress}}"

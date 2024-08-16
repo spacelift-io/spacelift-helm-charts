@@ -18,11 +18,11 @@ spaceliftPromex:
 #    app.spacelift.io/example: spacelift-promx
 
 spacelift:
-  # Your api endpoint, must be provided
-  apiEndpoint: https://{myaccount}.app.spacelift.io
-
-  # Your api key id, must be provided
-  apiKeyId: ""
-
-  # your api key secret, the secret should contain the key "SPACELIFT_PROMEX_API_KEY_SECRET"
-  apiKeySecretName: ""
+#  # Your api endpoint, must be provided
+#  apiEndpoint: https://{myaccount}.app.spacelift.io
+#
+#  # Your api key id, must be provided
+#  apiKeyId: ""
+#
+#  # your api key secret, the secret should contain the key "SPACELIFT_PROMEX_API_KEY_SECRET"
+#  apiKeySecretName: ""

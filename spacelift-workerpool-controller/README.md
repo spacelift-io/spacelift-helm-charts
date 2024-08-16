@@ -14,7 +14,7 @@ helm repo update
 You can then install the controller using this chart 
 
 ```shell
-helm upgrade spacelift-workerpool-controller spacelift/spacelift-workerpool-controller --install --set spacelift-promex.enabled=false
+helm upgrade spacelift-workerpool-controller spacelift/spacelift-workerpool-controller --install
 ```
 
 You are now ready to create a worker pool and start scheduling some runs.

@@ -69,4 +69,4 @@ metricsService:
   type: ClusterIP
 
 spacelift-promex:
-  enabled: true
+  enabled: false
