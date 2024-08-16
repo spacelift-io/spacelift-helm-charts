@@ -4,15 +4,15 @@ metadata:
   name: {{ include "spacelift-promex.fullname" . }}
   labels:
     {{- include "spacelift-promex.labels" . | nindent 4 }}
-    {{- with .Values.spaceliftPromex.labels }}
+    {{- with .Values.labels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
-  {{- with .Values.spaceliftPromex.annotations }}
+  {{- with .Values.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.spaceliftPromex.replicaCount }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "spacelift-promex.selectorLabels" . | nindent 6 }}
@@ -21,18 +21,18 @@ spec:
       labels:
         {{- include "spacelift-promex.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.spaceliftPromex.imagePullSecrets }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
         - name: spacelift-promex
-          {{- if .Values.spaceliftPromex.image.digest }}
-          image: "{{ .Values.spaceliftPromex.image.repository }}@{{ .Values.spaceliftPromex.image.digest }}"
+          {{- if .Values.image.digest }}
+          image: "{{ .Values.image.repository }}@{{ .Values.image.digest }}"
           {{- else }}
-          image: "{{ .Values.spaceliftPromex.image.repository }}:{{ .Values.spaceliftPromex.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           {{- end }}
-          imagePullPolicy: {{ .Values.spaceliftPromex.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: metrics
               containerPort: 9953
@@ -43,13 +43,13 @@ spec:
             periodSeconds: 5
           env:
             - name: "SPACELIFT_PROMEX_API_ENDPOINT"
-              value: "{{ required "must include spacelift.apiEndpoint in values" .Values.spacelift.apiEndpoint }}"
+              value: "{{ .Values.apiEndpoint | required "must include apiEndpoint in values" }}"
             - name: "SPACELIFT_PROMEX_API_KEY_ID"
-              value: "{{ required "must include spacelift.apiKeyId in values" .Values.spacelift.apiKeyId }}"
+              value: "{{ .Values.apiKeyId | required "must include apiKeyId in values" }}"
             - name: "SPACELIFT_PROMEX_API_KEY_SECRET"
               valueFrom:
                 secretKeyRef:
-                  name: {{ required "must include spacelift.apiKeySecretName in values" .Values.spacelift.apiKeySecretName }}
+                  name: {{ .Values.apiKeySecretName | required "must include apiKeySecretName in values" }}
                   key: "SPACELIFT_PROMEX_API_KEY_SECRET"
             - name: "SPACELIFT_PROMEX_LISTEN_ADDRESS"
-              value: "{{ .Values.spaceliftPromex.listenAddress}}"
+              value: "{{ .Values.listenAddress}}"
