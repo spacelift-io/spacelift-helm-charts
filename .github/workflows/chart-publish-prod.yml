@@ -73,7 +73,9 @@ jobs:
         run: helm lint spacelift-promex/
 
       - name: Lint Spacelift Worker Pool chart
-        run: helm lint spacelift-worker-pool/
+        run: |
+          helm dependency update spacelift-workerpool-controller/
+          helm lint spacelift-worker-pool/
 
       - name: Lint Spacelift VCS Agent chart
         run: helm lint vcs-agent/

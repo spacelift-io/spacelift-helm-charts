@@ -76,7 +76,9 @@ jobs:
         run: helm lint vcs-agent/
 
       - name: Lint spacelift-workerpool-controller chart
-        run: helm lint spacelift-workerpool-controller/
+        run: |
+          helm dependency update spacelift-workerpool-controller/
+          helm lint spacelift-workerpool-controller/
 
       - name: Lint spacelift-operator chart
         run: helm lint spacelift-operator/
