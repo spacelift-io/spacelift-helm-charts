@@ -4,3 +4,13 @@ description: A Helm chart for deploying spacelift workerpool controller
 type: application
 version: 0.1.0
 appVersion: "v0.0.12"
+
+# TODO:// Make spacelift-promex a dependency of this chart
+# This should be done after spacelift-promex is published to the Helm repository
+#dependencies:
+#  - name: spacelift-promex
+#    version: 0.0.1
+#    repository: "https://downloads.spacelift.io/helm"
+#    # For local testing
+#    #repository: "file://../spacelift-promex"
+#    condition: spacelift-promex.enabled

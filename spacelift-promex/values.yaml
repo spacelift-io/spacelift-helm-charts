@@ -1,0 +1,27 @@
+replicaCount: 1
+
+image:
+  repository: public.ecr.aws/spacelift/promex
+  tag: v0.3.1
+  pullPolicy: IfNotPresent
+
+
+# The address to listen on for HTTP requests
+listenAddress: ":9953"
+
+# Labels to add to the deployment
+labels:
+    app.spacelift.io/example: spacelift-promx
+
+# Annotations to add to the deployment
+annotations:
+  app.spacelift.io/example: spacelift-promx
+
+## Your api endpoint, must be provided
+#apiEndpoint: https://{myaccount}.app.spacelift.io
+#
+## Your api key id, must be provided
+#apiKeyId: ""
+#
+## your api key secret, the secret should contain the key "SPACELIFT_PROMEX_API_KEY_SECRET"
+#apiKeySecretName: ""
