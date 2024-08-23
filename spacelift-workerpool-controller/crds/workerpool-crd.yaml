@@ -4639,14 +4639,18 @@ spec:
                 desiredPoolSize:
                   format: int32
                   type: integer
+                selector:
+                  type: string
               required:
                 - actualPoolSize
+                - selector
               type: object
           type: object
       served: true
       storage: true
       subresources:
         scale:
+          labelSelectorPath: .status.selector
           specReplicasPath: .spec.poolSize
           statusReplicasPath: .status.actualPoolSize
         status: {}
