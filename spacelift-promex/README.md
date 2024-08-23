@@ -19,9 +19,9 @@ kubectl create secret generic spacelift-api-key --from-literal=SPACELIFT_PROMEX_
 You can then install the controller using this chart
 ```shell
 helm upgrade spacelift-prometheus-exporter spacelift/spacelift-promex --install \
-    --set spacelift.apiEndpoint="https://{yourAccount}.app.spacelift.io" \
-    --set spacelift.apiKeyId="{yourApiToken}" \
-    --set spacelift.apiKeySecretName="spacelift-api-key"
+    --set apiEndpoint="https://{yourAccount}.app.spacelift.io" \
+    --set apiKeyId="{yourApiToken}" \
+    --set apiKeySecretName="spacelift-api-key"
 ```
 
 Follow the instructions on the [user-documentation](https://github.com/spacelift-io/prometheus-exporter) for more detailed instructions.
