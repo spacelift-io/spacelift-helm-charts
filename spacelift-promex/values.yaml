@@ -17,6 +17,10 @@ labels:
 annotations:
   app.spacelift.io/example: spacelift-promx
 
+# Annotations to add to the pod
+# podAnnotations:
+#   app.spacelift.io/example: spacelift-promx
+
 ## Your api endpoint, must be provided
 #apiEndpoint: https://{myaccount}.app.spacelift.io
 #
