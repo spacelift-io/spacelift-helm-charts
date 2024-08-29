@@ -22,7 +22,7 @@ spec:
         {{- include "spacelift-promex.selectorLabels" . | nindent 8 }}
       {{- with .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 4 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
