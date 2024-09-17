@@ -7,6 +7,6 @@ appVersion: "v0.0.13"
 
 dependencies:
   - name: spacelift-promex
-    version: 0.25.0
+    version: 0.29.0
     repository: "https://downloads.spacelift.io/helm"
     condition: spacelift-promex.enabled
