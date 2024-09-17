@@ -40,6 +40,15 @@ spec:
           ports:
             - name: metrics
               containerPort: 9953
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: "RuntimeDefault"
+            runAsUser: 1983
           readinessProbe:
             httpGet:
               path: /health
