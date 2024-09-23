@@ -2,7 +2,7 @@ apiVersion: v2
 name: vcs-agent
 description: A Helm chart for deploying Spacelift VCS Agent
 type: application
-version: 0.1.0
+version: 0.2.0
 
 # The appVersion is the version of the VCS Agent binary. Since the chart is currently configured
 # to always use the latest version, this is set to "latest".
