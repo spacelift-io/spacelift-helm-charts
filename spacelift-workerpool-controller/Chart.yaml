@@ -2,7 +2,7 @@ apiVersion: v2
 name: spacelift-workerpool-controller
 description: A Helm chart for deploying spacelift workerpool controller
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: "v0.0.13"
 
 dependencies:

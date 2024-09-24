@@ -53,6 +53,7 @@ controllerManager:
   podAnnotations: {}
   serviceAccount:
     annotations: {}
+    labels: {}
   nodeSelector: {}
   tolerations: []
   topologySpreadConstraints: []
