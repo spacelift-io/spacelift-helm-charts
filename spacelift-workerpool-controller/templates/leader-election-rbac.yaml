@@ -3,9 +3,6 @@ kind: Role
 metadata:
   name: {{ include "spacelift-workerpool-controller.fullname" . }}-leader-election-role
   labels:
-    app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: spacelift-workerpool-controller
-    app.kubernetes.io/part-of: spacelift-workerpool-controller
   {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
 rules:
 - apiGroups:
@@ -45,9 +42,6 @@ kind: RoleBinding
 metadata:
   name: {{ include "spacelift-workerpool-controller.fullname" . }}-leader-election-rolebinding
   labels:
-    app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: spacelift-workerpool-controller
-    app.kubernetes.io/part-of: spacelift-workerpool-controller
   {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
