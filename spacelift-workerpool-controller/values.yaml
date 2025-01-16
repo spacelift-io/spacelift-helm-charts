@@ -3,33 +3,7 @@ controllerManager:
   # and will be able to manage WorkerPools across all namespaces in your cluster.
   # If you do not want to grant cluster wide permissions to the controller, you can specify a list
   # of namespaces. That will create a Role per namespace and bind it to the service account used by the controller.
-  #
-  # PLEASE NOTE: currently the metrics service requires a ClusterRole in order to function, so
-  # if `metricsService.enabled` is set to true, a ClusterRole will be created even if you
-  # specify namespaces.
   namespaces: []
-  kubeRbacProxy:
-    args:
-    - --secure-listen-address=0.0.0.0:8443
-    - --upstream=http://127.0.0.1:8080/
-    - --logtostderr=true
-    - --v=0
-    containerSecurityContext:
-      readOnlyRootFilesystem: true
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop:
-        - ALL
-    image:
-      repository: gcr.io/kubebuilder/kube-rbac-proxy
-      tag: v0.14.1
-    resources:
-      limits:
-        cpu: 500m
-        memory: 128Mi
-      requests:
-        cpu: 5m
-        memory: 64Mi
   manager:
     args:
     - --health-probe-bind-address=:8081
@@ -42,7 +16,7 @@ controllerManager:
         - ALL
     image:
       repository: public.ecr.aws/spacelift/kube-workerpool-controller
-      tag: v0.0.14
+      tag: v0.0.17
     resources:
       limits:
         memory: 128Mi
@@ -62,11 +36,19 @@ kubernetesClusterDomain: cluster.local
 # This is disabled by default, enable this if you want to enable controller observability.
 metricsService:
   enabled: false
+  # Enabling secure will also create ClusterRole to enable authn/authz to the metrics endpoint through RBAC.
+  # More details here https://book.kubebuilder.io/reference/metrics#by-using-authnauthz-enabled-by-default
+  # Secure is enabled by default to be consistent with Kubebuilder defaults.
+  #
+  # If you want to avoid cluster roles, you can keep this set to false and configure a NetworkPolicu instead.
+  # An example can be found in Kubebuilder docs here https://github.com/kubernetes-sigs/kubebuilder/blob/d063d5af162a772379a761fae5aaea8c91b877d4/docs/book/src/getting-started/testdata/project/config/network-policy/allow-metrics-traffic.yaml#L2
+  secure: true
+  enableHTTP2: false
   ports:
   - name: https
     port: 8443
     protocol: TCP
-    targetPort: https
+    targetPort: metrics
   type: ClusterIP
 
 spacelift-promex:
