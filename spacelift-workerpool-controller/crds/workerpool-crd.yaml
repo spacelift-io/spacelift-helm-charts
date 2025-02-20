@@ -1950,6 +1950,8 @@ spec:
                       required:
                         - name
                       type: object
+                    customBinariesPath:
+                      type: string
                     customInitContainers:
                       items:
                         properties:
