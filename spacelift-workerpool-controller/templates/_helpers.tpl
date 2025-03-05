@@ -61,9 +61,5 @@ Default controller manager service account name
 Create the name of the service account to use
 */}}
 {{- define "spacelift-workerpool-controller.serviceAccountName" -}}
-{{- if .Values.controllerManager.serviceAccount.create }}
 {{- default (include "spacelift-workerpool-controller.defaultServiceAccountName" .) .Values.controllerManager.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.controllerManager.serviceAccount.name }}
-{{- end }}
 {{- end }}
