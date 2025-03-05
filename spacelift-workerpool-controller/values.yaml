@@ -24,7 +24,9 @@ controllerManager:
         cpu: 100m
         memory: 128Mi
     extraVolumeMounts: []
+    extraPodLabels: {}
   replicas: 1
+  annotations: {}
   podAnnotations: {}
   serviceAccount:
     create: true
@@ -35,6 +37,7 @@ controllerManager:
   nodeSelector: {}
   tolerations: []
   topologySpreadConstraints: []
+  extraLabels: {}
   extraVolumes: []
 kubernetesClusterDomain: cluster.local
 # The metric service will expose a metrics endpoint that can be scraped by a prometheus instance.
