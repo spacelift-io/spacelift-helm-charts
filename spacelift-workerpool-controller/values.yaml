@@ -23,6 +23,7 @@ controllerManager:
       requests:
         cpu: 100m
         memory: 128Mi
+    extraVolumeMounts: []
   replicas: 1
   podAnnotations: {}
   serviceAccount:
@@ -34,6 +35,7 @@ controllerManager:
   nodeSelector: {}
   tolerations: []
   topologySpreadConstraints: []
+  extraVolumes: []
 kubernetesClusterDomain: cluster.local
 # The metric service will expose a metrics endpoint that can be scraped by a prometheus instance.
 # This is disabled by default, enable this if you want to enable controller observability.

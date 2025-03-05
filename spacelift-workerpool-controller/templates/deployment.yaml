@@ -77,6 +77,10 @@ spec:
           }}
         securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
           | nindent 10 }}
+        {{- with .Values.controllerManager.manager.extraVolumeMounts }}
+        volumeMounts:
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
       securityContext:
         runAsNonRoot: true
         seccompProfile:
@@ -93,5 +97,9 @@ spec:
       {{- end }}
       {{- with .Values.controllerManager.tolerations }}
       tolerations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controllerManager.extraVolumes }}
+      volumes:
       {{- toYaml . | nindent 8 }}
       {{- end }}
