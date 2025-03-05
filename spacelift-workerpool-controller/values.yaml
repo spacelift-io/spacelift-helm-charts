@@ -26,8 +26,11 @@ controllerManager:
   replicas: 1
   podAnnotations: {}
   serviceAccount:
+    create: true
     annotations: {}
     labels: {}
+    # If you are using a custom service account, you can specify it here.
+    # name:
   nodeSelector: {}
   tolerations: []
   topologySpreadConstraints: []
