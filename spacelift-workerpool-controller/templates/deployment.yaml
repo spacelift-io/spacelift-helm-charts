@@ -4,7 +4,14 @@ metadata:
   name: {{ include "spacelift-workerpool-controller.fullname" . }}-controller-manager
   labels:
     control-plane: controller-manager
-  {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
+    {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
+    {{- with .Values.controllerManager.extraLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.controllerManager.annotations }}
+  annotations:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.controllerManager.replicas }}
   selector:
@@ -15,7 +22,10 @@ spec:
     metadata:
       labels:
         control-plane: controller-manager
-      {{- include "spacelift-workerpool-controller.selectorLabels" . | nindent 8 }}
+        {{- include "spacelift-workerpool-controller.selectorLabels" . | nindent 8 }}
+        {{- with .Values.controllerManager.manager.extraPodLabels }}
+        {{- toYaml . | nindent 8}}
+        {{- end }}
       annotations:
         kubectl.kubernetes.io/default-container: manager
         {{- with .Values.controllerManager.podAnnotations }}
@@ -77,11 +87,15 @@ spec:
           }}
         securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
           | nindent 10 }}
+        {{- with .Values.controllerManager.manager.extraVolumeMounts }}
+        volumeMounts:
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
       securityContext:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
-      serviceAccountName: {{ include "spacelift-workerpool-controller.fullname" . }}-controller-manager
+      serviceAccountName: {{ include "spacelift-workerpool-controller.serviceAccountName" . }}
       terminationGracePeriodSeconds: 10
       {{- with .Values.controllerManager.topologySpreadConstraints }}
       topologySpreadConstraints:
@@ -93,5 +107,9 @@ spec:
       {{- end }}
       {{- with .Values.controllerManager.tolerations }}
       tolerations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controllerManager.extraVolumes }}
+      volumes:
       {{- toYaml . | nindent 8 }}
       {{- end }}

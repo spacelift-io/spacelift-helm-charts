@@ -70,7 +70,7 @@ roleRef:
   name: '{{ include "spacelift-workerpool-controller.fullname" . }}-manager-role'
 subjects:
 - kind: ServiceAccount
-  name: '{{ include "spacelift-workerpool-controller.fullname" . }}-controller-manager'
+  name: {{ include "spacelift-workerpool-controller.serviceAccountName" . }}
   namespace: '{{ .Release.Namespace }}'
 {{ else }}
 {{ range $index, $namespace := .Values.controllerManager.namespaces }}
@@ -98,7 +98,7 @@ roleRef:
   name: '{{ include "spacelift-workerpool-controller.fullname" $ }}-manager-role'
 subjects:
   - kind: ServiceAccount
-    name: '{{ include "spacelift-workerpool-controller.fullname" $ }}-controller-manager'
+    name: {{ include "spacelift-workerpool-controller.serviceAccountName" $ }}
     namespace: '{{ $.Release.Namespace }}'
 {{ end }}
 {{ end }}
