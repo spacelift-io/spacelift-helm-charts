@@ -31,6 +31,7 @@ controllerManager:
   nodeSelector: {}
   tolerations: []
   topologySpreadConstraints: []
+  imagePullSecrets: []
 kubernetesClusterDomain: cluster.local
 # The metric service will expose a metrics endpoint that can be scraped by a prometheus instance.
 # This is disabled by default, enable this if you want to enable controller observability.
