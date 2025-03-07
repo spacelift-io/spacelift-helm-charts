@@ -51,12 +51,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Default controller manager service account name
+*/}}
+{{- define "spacelift-workerpool-controller.defaultServiceAccountName" -}}
+{{- printf "%s-controller-manager" (include "spacelift-workerpool-controller.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "spacelift-workerpool-controller.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "spacelift-workerpool-controller.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
+{{- default (include "spacelift-workerpool-controller.defaultServiceAccountName" .) .Values.controllerManager.serviceAccount.name }}
 {{- end }}
