@@ -37,6 +37,7 @@ controllerManager:
   nodeSelector: {}
   tolerations: []
   topologySpreadConstraints: []
+  imagePullSecrets: []
   extraLabels: {}
   extraVolumes: []
 kubernetesClusterDomain: cluster.local
