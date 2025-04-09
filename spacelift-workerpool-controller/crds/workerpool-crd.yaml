@@ -5691,6 +5691,11 @@ spec:
                           type: array
                           x-kubernetes-list-type: atomic
                       type: object
+                    dnsPolicy:
+                      description: |-
+                        Specifies the DNS policy of a pod.
+                        Parameters specified here will be merged to the generated DNSPolicy.
+                      type: string
                     grpcServerContainer:
                       description: GRPCServerContainer allows you to override parts
                         of the builtin grpc-server container.
