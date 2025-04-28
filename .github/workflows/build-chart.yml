@@ -78,7 +78,7 @@ jobs:
       - name: Lint spacelift-operator chart
         run: helm lint --strict spacelift-operator/
 
-      - name: Lint Spacelift VCS Agent chart
+      - name: Lint spacelift-self-hosted chart
         run: helm lint --strict spacelift-self-hosted/
 
       - name: Package Spacelift PromEx chart
