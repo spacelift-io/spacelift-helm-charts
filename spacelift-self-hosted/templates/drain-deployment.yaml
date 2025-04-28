@@ -1,0 +1,148 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spacelift.fullname" . }}-drain
+  labels:
+    {{- include "spacelift.drainLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.drain.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "spacelift.drainSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.drain.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "spacelift.drainLabels" . | nindent 8 }}
+        {{- with .Values.drain.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "spacelift.drainServiceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.drain.podSecurityContext | nindent 8 }}
+      {{- if .Values.cloudSqlProxy.enabled }}
+      initContainers:
+        - name: cloud-sql-proxy
+          image: {{ .Values.cloudSqlProxy.image }}
+          restartPolicy: Always
+          env:
+            # Enable HTTP healthchecks on port 9801. This enables /liveness,
+            # /readiness and /startup health check endpoints. Allow connections
+            # listen for connections on any interface (0.0.0.0) so that the
+            # k8s management components can reach these endpoints.
+            - name: CSQL_PROXY_HEALTH_CHECK
+              value: "true"
+            - name: CSQL_PROXY_HTTP_PORT
+              value: "9801"
+            - name: CSQL_PROXY_HTTP_ADDRESS
+              value: 0.0.0.0
+          args:
+            - "--private-ip"
+            - "--structured-logs"
+            - "--port=5432"
+            - "--auto-iam-authn"
+            - "{{ .Values.cloudSqlProxy.dbConnectionName }}"
+          ports:
+            - containerPort: 9801
+              protocol: TCP
+          # The /startup probe returns OK when the proxy is ready to receive
+          # connections from the application. In this example, k8s will check
+          # once a second for 60 seconds.
+          #
+          # We strongly recommend adding a startup probe to the proxy sidecar
+          # container. This will ensure that service traffic will be routed to
+          # the pod only after the proxy has successfully started.
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: /startup
+              port: 9801
+              scheme: HTTP
+            periodSeconds: 1
+            successThreshold: 1
+            timeoutSeconds: 10
+          # The /liveness probe returns OK as soon as the proxy application has
+          # begun its startup process and continues to return OK until the
+          # process stops.
+          #
+          # We recommend adding a liveness probe to the proxy sidecar container.
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /liveness
+              port: 9801
+              scheme: HTTP
+            # The probe will be checked every 10 seconds.
+            periodSeconds: 10
+            # Number of times the probe is allowed to fail before the transition
+            # from healthy to failure state.
+            #
+            # If periodSeconds = 60, 5 tries will result in five minutes of
+            # checks. The proxy starts to refresh a certificate five minutes
+            # before its expiration. If those five minutes lapse without a
+            # successful refresh, the liveness probe will fail and the pod will be
+            # restarted.
+            successThreshold: 1
+            # The probe will fail if it does not respond in 10 seconds
+            timeoutSeconds: 10
+          securityContext:
+            # The default Cloud SQL Auth Proxy image runs as the
+            # "nonroot" user and group (uid: 65532) by default.
+            runAsNonRoot: true
+            # Use a read-only filesystem
+            readOnlyRootFilesystem: true
+            # Do not allow privilege escalation
+            allowPrivilegeEscalation: false
+          resources:
+            {{- toYaml .Values.cloudSqlProxy.resources | nindent 12 }}
+      {{- end }}
+      containers:
+        - name: drain
+          securityContext:
+            {{- toYaml .Values.drain.securityContext | nindent 12 }}
+          image: "{{ .Values.shared.image }}"
+          imagePullPolicy: {{ .Values.drain.pullPolicy }}
+          command:
+            - spacelift
+            - backend
+            - drain-local
+          env:
+            - name: ENABLE_INSTRUMENTATION_ENDPOINTS
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: {{ .Values.shared.secretRef }}
+            - secretRef:
+                name: {{ .Values.drain.secretRef }}
+          ports:
+            - name: instrumentation
+              containerPort: 8080
+              protocol: TCP
+          startupProbe:
+            {{- toYaml .Values.drain.startupProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.drain.resources | nindent 12 }}
+          {{- with .Values.drain.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.drain.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.drain.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.drain.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.drain.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

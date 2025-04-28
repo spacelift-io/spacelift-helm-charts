@@ -1,0 +1,11 @@
+{{- if .Values.ingress.enabled }}
+1. Get the application URL by running this command:
+
+  kubectl get ingresses --namespace "{{ .Release.Namespace }}"
+{{- end }}
+
+{{- if eq .Values.mqttService.type "LoadBalancer" }}
+2. Get the MQTT service address by running this command:
+
+  kubectl get services --namespace "{{ .Release.Namespace }}" "{{ include "spacelift.fullname" . }}-mqtt"
+{{- end }}
