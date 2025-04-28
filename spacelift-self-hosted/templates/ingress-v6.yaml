@@ -1,0 +1,28 @@
+{{- if .Values.ingressV6.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: server-v6
+  labels:
+    {{- include "spacelift.serverLabels" . | nindent 4 }}
+  {{- with .Values.ingressV6.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  tls:
+    - hosts:
+        - {{ .Values.shared.serverHostname }}
+      secretName: cert
+  rules:
+    - host: {{ .Values.shared.serverHostname }}
+      http:
+        paths:
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "spacelift.fullname" $ }}-server
+                port:
+                  name: server
+{{- end }}

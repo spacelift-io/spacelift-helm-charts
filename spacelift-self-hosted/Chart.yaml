@@ -1,0 +1,6 @@
+apiVersion: v2
+name: spacelift
+description: A Helm chart for deploying spacelift self-hosted
+type: application
+version: 0.1.0
+appVersion: "3.0.0"

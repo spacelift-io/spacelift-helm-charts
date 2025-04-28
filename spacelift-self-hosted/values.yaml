@@ -1,0 +1,134 @@
+shared:
+  secretRef:
+  image:
+  serverHostname:
+
+server:
+  replicaCount: 3
+  port: 1983
+  secretRef:
+  mqttPort: 1984
+  pullPolicy: Always
+  securityContext:
+  # TODO Make sure we can run the image as non root user
+  #  runAsNonRoot: true
+    allowPrivilegeEscalation : false
+  resources:
+    requests:
+      memory: "200Mi"
+      cpu: "200m"
+  readinessProbe:
+    httpGet:
+      path: /readiness
+      port: instrumentation
+  podLabels: {}
+  podSecurityContext: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  # serviceAccount controls whether an individual service account should be created for the server.
+  # If create is set to true, a name must be specified.
+  serviceAccount:
+    create: false
+    name: "spacelift-server"
+    automount: true
+    annotations: {}
+
+drain:
+  replicaCount: 3
+  secretRef:
+  pullPolicy: Always
+  securityContext:
+  # TODO Make sure we can run the image as non root user
+  #  runAsNonRoot: true
+    allowPrivilegeEscalation : false
+  resources:
+    requests:
+      memory: "100Mi"
+      cpu: "100m"
+  startupProbe:
+    httpGet:
+      path: /startup
+      port: instrumentation
+  podLabels: {}
+  podSecurityContext: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  # serviceAccount controls whether an individual service account should be created for the drain.
+  # If create is set to true, a name must be specified.
+  serviceAccount:
+    create: false
+    name: "spacelift-drain"
+    automount: true
+    annotations: {}
+
+scheduler:
+  replicaCount: 3
+  pullPolicy: Always
+  securityContext:
+  # TODO Make sure we can run the image as non root user
+  #  runAsNonRoot: true
+    allowPrivilegeEscalation : false
+  resources:
+    requests:
+      memory: "50Mi"
+      cpu: "50m"
+  startupProbe:
+    httpGet:
+      path: /startup
+      port: instrumentation
+  podLabels: {}
+  podSecurityContext: {}
+  volumes: []
+  volumeMounts: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  # serviceAccount controls whether an individual service account should be created for the scheduler.
+  # If create is set to true, a name must be specified.
+  serviceAccount:
+    create: false
+    name: "spacelift-scheduler"
+    automount: true
+    annotations: {}
+
+cloudSqlProxy:
+  enabled: false
+  image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.4
+  dbConnectionName:
+  resources:
+    requests:
+      memory: "200Mi"
+      cpu:    "100m"
+
+# Whether to create a single service account that all the services should use.
+serviceAccount:
+  create: true
+  name: "spacelift-backend"
+  automount: true
+  annotations: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+mqttService:
+  type: ClusterIP
+  port: 1984
+  annotations: {}
+
+ingress:
+  enabled: true
+  ingressClassName: ""
+  annotations: {}
+
+ingressV6:
+  enabled: true
+
+nameOverride: ""
+fullnameOverride: ""
