@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "spacelift.fullname" . }}-mqtt
+  name: {{ .Values.mqttService.name }}
   {{- with .Values.mqttService.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
