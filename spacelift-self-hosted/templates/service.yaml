@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "spacelift.fullname" . }}-server
+  name: {{ .Values.service.name }}
   labels:
     {{- include "spacelift.serverLabels" . | nindent 4 }}
 spec:
