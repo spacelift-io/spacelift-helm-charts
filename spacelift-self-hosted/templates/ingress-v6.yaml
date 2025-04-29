@@ -22,7 +22,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ include "spacelift.fullname" $ }}-server
+                name: {{ .Values.service.name }}
                 port:
                   name: server
 {{- end }}
