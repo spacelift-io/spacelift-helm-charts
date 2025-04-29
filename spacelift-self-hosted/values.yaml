@@ -114,12 +114,10 @@ serviceAccount:
   annotations: {}
 
 service:
-  name: "spacelift-server"
   type: ClusterIP
   port: 80
 
 mqttService:
-  name: "spacelift-mqtt"
   type: ClusterIP
   port: 1984
   annotations: {}
@@ -133,4 +131,4 @@ ingressV6:
   enabled: true
 
 nameOverride: ""
-fullnameOverride: ""
+fullnameOverride: "spacelift"
