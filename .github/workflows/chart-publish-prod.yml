@@ -8,12 +8,13 @@ on:
 concurrency:
   group: ${{ github.ref }}-chart-publish-prod
 
+env:
+  HELM_VERSION: "3.17.3"
+
 jobs:
   registry:
     name: Publish the Helm chart to the Helm repository
     runs-on: ubuntu-latest
-    env:
-      HELM_VERSION: "3.7.1"
     permissions:
       id-token: write
       contents: read
@@ -22,13 +23,10 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@main
 
-      - name: Install Helm
-        run: |
-          curl -s https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm-v${HELM_VERSION}-linux-amd64.tar.gz
-          tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz
-          sudo mv linux-amd64/helm /usr/local/bin
-          rm helm-v${HELM_VERSION}-linux-amd64.tar.gz
-          rm -rf linux-amd64
+      - name: Install helm
+        uses: azure/setup-helm@v4
+        with:
+           version: ${{ env.HELM_VERSION }}
 
       - name: Install Helm S3 Plugin
         run: helm plugin install https://github.com/hypnoglow/helm-s3.git
@@ -132,16 +130,11 @@ jobs:
     name: Test that the new chart version can be pulled
     runs-on: ubuntu-latest
     needs: [registry]
-    env:
-      HELM_VERSION: "3.7.1"
     steps:
-      - name: Install Helm
-        run: |
-          curl -s https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm-v${HELM_VERSION}-linux-amd64.tar.gz
-          tar -zxf helm-v${HELM_VERSION}-linux-amd64.tar.gz
-          sudo mv linux-amd64/helm /usr/local/bin
-          rm helm-v${HELM_VERSION}-linux-amd64.tar.gz
-          rm -rf linux-amd64
+      - name: Install helm
+        uses: azure/setup-helm@v4
+        with:
+           version: ${{ env.HELM_VERSION }}
 
       - name: Pull chart
         run: |
