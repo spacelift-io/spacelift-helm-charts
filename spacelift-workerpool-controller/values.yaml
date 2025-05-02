@@ -16,7 +16,7 @@ controllerManager:
         - ALL
     image:
       repository: public.ecr.aws/spacelift/kube-workerpool-controller
-      tag: v0.0.20
+      tag: v0.0.21
     resources:
       limits:
         memory: 128Mi
@@ -40,6 +40,7 @@ controllerManager:
   imagePullSecrets: []
   extraLabels: {}
   extraVolumes: []
+  enforceFips140: false
 kubernetesClusterDomain: cluster.local
 # The metric service will expose a metrics endpoint that can be scraped by a prometheus instance.
 # This is disabled by default, enable this if you want to enable controller observability.
