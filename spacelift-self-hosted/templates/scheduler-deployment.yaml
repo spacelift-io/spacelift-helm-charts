@@ -123,7 +123,7 @@ spec:
             {{- toYaml .Values.scheduler.startupProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.scheduler.resources | nindent 12 }}
-          {{- with .Values.server.lifecycle }}
+          {{- with .Values.scheduler.lifecycle }}
           lifecycle:
             {{- toYaml . | nindent 12 }}
           {{- end }}
