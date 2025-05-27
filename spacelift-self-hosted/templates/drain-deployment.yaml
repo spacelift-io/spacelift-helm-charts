@@ -126,6 +126,10 @@ spec:
             {{- toYaml .Values.drain.startupProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.drain.resources | nindent 12 }}
+          {{- with .Values.drain.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.drain.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}

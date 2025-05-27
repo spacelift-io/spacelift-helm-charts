@@ -147,6 +147,10 @@ spec:
             {{- toYaml .Values.server.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.server.resources | nindent 12 }}
+          {{- with .Values.server.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.server.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
