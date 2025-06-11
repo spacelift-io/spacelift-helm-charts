@@ -1,7 +1,0 @@
-apiVersion: v2
-name: spacelift-operator
-description: A Helm chart for deploying the spacelift operator
-type: application
-version: 0.1.1
-appVersion: "0.1.0"
-deprecated: true
