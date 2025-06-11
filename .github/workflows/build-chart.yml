@@ -39,9 +39,6 @@ jobs:
       - name: Create output directory for spacelift-workerpool-controller Chart
         run: mkdir -p build/chart/spacelift-workerpool-controller
 
-      - name: Create output directory for spacelift-operator Chart
-        run: mkdir -p build/chart/spacelift-operator
-
       - name: Create output directory for Spacelift VCS Agent Chart
         run: mkdir -p build/chart/vcs-agent
 
@@ -72,9 +69,6 @@ jobs:
           helm dependency update spacelift-workerpool-controller/
           helm lint --strict spacelift-workerpool-controller/
 
-      - name: Lint spacelift-operator chart
-        run: helm lint --strict spacelift-operator/
-
       - name: Lint spacelift-self-hosted chart
         run: helm lint --strict spacelift-self-hosted/
 
@@ -93,10 +87,6 @@ jobs:
       - name: Package spacelift-workerpool-controller chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-workerpool-controller spacelift-workerpool-controller/
-
-      - name: Package spacelift-operator chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-operator spacelift-operator/
 
       - name: Package spacelift-self-hosted chart
         run: |
