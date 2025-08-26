@@ -4,5 +4,5 @@ This chart allows to deploy an instance of Spacelift in a self-hosted environmen
 
 ## Quick Start
 
-Depending on your environment, you can check the [guides here](https:/docs.spacelift.io/self-hosted/latest/installing-spacelift/reference-architecture/guides) 
+Depending on your environment, you can check the [guides here](https://docs.spacelift.io/self-hosted/latest/installing-spacelift/reference-architecture/guides) 
 for more details about how to use this chart.
