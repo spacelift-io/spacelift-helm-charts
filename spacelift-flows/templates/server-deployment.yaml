@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spacelift-flows.fullname" . }}-server
+  labels:
+    {{- include "spacelift-flows.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+spec:
+  replicas: {{ .Values.server.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "spacelift-flows.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: server
+  template:
+    metadata:
+      annotations:
+        {{- with .Values.server.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "spacelift-flows.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: server
+    spec:
+      securityContext:
+        {{- toYaml .Values.server.podSecurityContext | nindent 8 }}
+      containers:
+        - name: server
+          securityContext:
+            {{- toYaml .Values.server.securityContext | nindent 12 }}
+          image: "{{ .Values.global.image.repository  }}:{{ .Values.global.image.tag  }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          command: [ "/usr/bin/spacelift-flows" ]
+          args:
+            - "server"
+          ports:
+            - name: public
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: CONFIG_FILE
+              value: "/etc/flows/config.yaml"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/flows
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: public
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: public
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.server.resources | nindent 12 }}
+      volumes:
+        - name: config
+          secret:
+            secretName: {{.Values.secretName}}
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
