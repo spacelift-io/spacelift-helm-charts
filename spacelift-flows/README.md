@@ -11,10 +11,11 @@ This Helm chart deploys Spacelift flows, a workflow automation platform, on Kube
 
 ### Install the Chart
 
-```bash
+```shell
+helm repo add spacelift https://downloads.spacelift.io/helm
+helm repo update
 
-# Install from local chart
-helm install spacelift-flows ./helm/spacelift-flows
+helm upgrade spacelift-flows spacelift/spacelift-flows --install -f values.yaml
 ```
 
 ## Configuration
@@ -127,12 +128,6 @@ ingress:
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: "10",
     alb.ingress.kubernetes.io/scheme: internet-facing
   }
-```
-
-## Upgrading
-
-```bash
-helm upgrade spacelift-flows spacelift-flows/spacelift-flows -f values.yaml
 ```
 
 ## Uninstalling
