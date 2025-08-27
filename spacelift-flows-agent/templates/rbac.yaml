@@ -3,7 +3,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ include "spacelift-flows-agent.fullname" . }}-pod-manager
-  namespace: {{ include "spacelift-flows-agent.namespace" . }}
   labels:
     {{- include "spacelift-flows-agent.labels" . | nindent 4 }}
 rules:
@@ -13,7 +12,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ include "spacelift-flows-agent.fullname" . }}-pod-manager-binding
-  namespace: {{ include "spacelift-flows-agent.namespace" . }}
   labels:
     {{- include "spacelift-flows-agent.labels" . | nindent 4 }}
 roleRef:
@@ -23,5 +21,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: {{ include "spacelift-flows-agent.serviceAccountName" . }}
-    namespace: {{ include "spacelift-flows-agent.namespace" . }}
 {{- end }}
