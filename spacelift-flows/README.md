@@ -117,7 +117,7 @@ The following table lists the configurable parameters and their default values.
 ## Example Values
 
 ```yaml
-appDomain: "ilyah.spacelift.sh"
+appDomain: "your.domain.com"
 
 ingress:
   className: "spacelift-flows"
