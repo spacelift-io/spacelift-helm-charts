@@ -49,12 +49,6 @@ spec:
             - name: config
               mountPath: /etc/flows
               readOnly: true
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: public
-            initialDelaySeconds: 30
-            periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /health
