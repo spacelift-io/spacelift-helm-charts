@@ -1,0 +1,102 @@
+# Default values for spacelift-flows.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  # Image configuration
+  image:
+    repository: public.ecr.aws/u4b1s0s6/spacelift-flows-backend
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  nameOverride: ""
+  fullnameOverride: ""
+
+secretName: spacelift-flows-secret
+
+appDomain: ""
+
+# Server service configuration
+server:
+  replicaCount: 1
+  
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+    annotations: {}
+  
+  resources:
+    limits:
+      cpu: 512m
+      memory: 1024Mi
+    requests:
+      cpu: 512m
+      memory: 1024Mi
+  
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+# Worker service configuration
+worker:
+  replicaCount: 1
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+    requests:
+      cpu: 1000m
+      memory: 2048Mi
+  
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+# Gateway service configuration
+gateway:
+  replicaCount: 1
+  
+  service:
+    type: ClusterIP
+    ports:
+      http: 3000
+      grpc: 6237
+      public: 8080
+    annotations: {}
+  
+  resources:
+    limits:
+      cpu: 512m
+      memory: 1024Mi
+    requests:
+      cpu: 512m
+      memory: 1024Mi
+  
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext: {}
+
+# Ingress configuration
+ingress:
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # For AWS ALB:
+    # alb.ingress.kubernetes.io/scheme: internet-facing
+    # alb.ingress.kubernetes.io/target-type: ip
+    # alb.ingress.kubernetes.io/healthcheck-path: /health

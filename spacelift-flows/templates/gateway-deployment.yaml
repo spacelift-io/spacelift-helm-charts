@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spacelift-flows.fullname" . }}-gateway
+  labels:
+    {{- include "spacelift-flows.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+spec:
+  replicas: {{ .Values.gateway.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "spacelift-flows.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: gateway
+  template:
+    metadata:
+      annotations:
+        {{- with .Values.gateway.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "spacelift-flows.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: gateway
+    spec:
+      securityContext:
+        {{- toYaml .Values.gateway.podSecurityContext | nindent 8 }}
+      containers:
+        - name: gateway
+          securityContext:
+            {{- toYaml .Values.gateway.securityContext | nindent 12 }}
+          image: "{{ .Values.global.image.repository  }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy  }}
+          command: [ "/usr/bin/spacelift-flows" ]
+          args:
+            - "gateway"
+          ports:
+            - name: http
+              containerPort: {{ .Values.gateway.service.ports.http }}
+              protocol: TCP
+            - name: grpc
+              containerPort: {{ .Values.gateway.service.ports.grpc }}
+              protocol: TCP
+            - name: public
+              containerPort: {{ .Values.gateway.service.ports.public }}
+              protocol: TCP
+          env:
+            - name: CONFIG_FILE
+              value: "/etc/flows/config.yaml"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/flows
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: public
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.gateway.resources | nindent 12 }}
+      volumes:
+        - name: config
+          secret:
+            secretName: {{.Values.secretName}}
+      {{- with .Values.gateway.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gateway.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gateway.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

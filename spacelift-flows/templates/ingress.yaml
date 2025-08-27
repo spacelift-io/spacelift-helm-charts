@@ -1,0 +1,59 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "spacelift-flows.fullname" . }}
+  labels:
+    {{- include "spacelift-flows.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ required "ingress.className is required" .Values.ingress.className }}
+  tls:
+    - hosts:
+        - {{ required "appDomain is required" .Values.appDomain}}
+  rules:
+    - host: {{ .Values.appDomain}}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "spacelift-flows.fullname" $ }}-server
+                port:
+                  name: public
+
+    - host: "*.endpoints.{{ .Values.appDomain}}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "spacelift-flows.fullname" $ }}-server
+                port:
+                  name: public
+
+    - host: "mcp.{{ .Values.appDomain}}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "spacelift-flows.fullname" $ }}-server
+                port:
+                  name: public
+
+    - host: "oauth.{{ .Values.appDomain}}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "spacelift-flows.fullname" $ }}-server
+                port:
+                  name: public

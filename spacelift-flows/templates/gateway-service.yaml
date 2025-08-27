@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "spacelift-flows.fullname" . }}-gateway
+  labels:
+    {{- include "spacelift-flows.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+  {{- with .Values.gateway.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.gateway.service.type }}
+  ports:
+    - port: {{ .Values.gateway.service.ports.http }}
+      targetPort: {{ .Values.gateway.service.ports.http }}
+      protocol: TCP
+      name: http
+    - port: {{ .Values.gateway.service.ports.grpc }}
+      targetPort: {{ .Values.gateway.service.ports.grpc }}
+      protocol: TCP
+      name: grpc
+    - port: {{ .Values.gateway.service.ports.public }}
+      targetPort: {{ .Values.gateway.service.ports.public }}
+      protocol: TCP
+      name: public
+  selector:
+    {{- include "spacelift-flows.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
