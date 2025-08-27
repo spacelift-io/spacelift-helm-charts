@@ -45,6 +45,9 @@ jobs:
       - name: Create output directory for Spacelift self hosted chart
         run: mkdir -p build/chart/spacelift-self-hosted
 
+      - name: Create output directory for spacelift-flows-agent Chart
+        run: mkdir -p build/chart/spacelift-flows-agent
+
       - name: Add the Spacelift Helm registry
         run: helm repo add spacelift s3://${{ secrets.PREPROD_AWS_S3_BUCKET }}/helm
         # The first time this step runs the index file won't exist, so allow the step to fail
@@ -72,6 +75,9 @@ jobs:
       - name: Lint spacelift-self-hosted chart
         run: helm lint --strict spacelift-self-hosted/
 
+      - name: Lint spacelift-flows-agent chart
+        run: helm lint --strict spacelift-flows-agent/
+
       - name: Package Spacelift PromEx chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-promex spacelift-promex/
@@ -91,3 +97,7 @@ jobs:
       - name: Package spacelift-self-hosted chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-self-hosted spacelift-self-hosted/
+
+      - name: Package spacelift-flows-agent chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-flows-agent spacelift-flows-agent/

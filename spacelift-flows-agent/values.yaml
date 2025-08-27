@@ -1,0 +1,88 @@
+# Default values for spacelift-flows-agent
+# This is a YAML-formatted file.
+
+# Image configuration
+image:
+  repository: public.ecr.aws/u4b1s0s6/spacelift-flows-agent
+  tag: "agent-latest"
+  pullPolicy: IfNotPresent
+
+# JavaScript executor image configuration
+jsExecutorImage:
+  repository: public.ecr.aws/u4b1s0s6/spacelift-flows-agent
+  tag: "k8s-js-executor-latest"
+
+# Deployment configuration
+replicaCount: 1
+
+# Service Account
+serviceAccount:
+  create: true
+  name: "spacelift-flows-agent"
+  annotations: {}
+
+# RBAC configuration
+rbac:
+  create: true
+  rules:
+    - apiGroups: [""]
+      resources: ["pods"]
+      verbs: ["create", "get", "list", "delete", "watch"]
+    - apiGroups: [""]
+      resources: ["pods/log"]
+      verbs: ["get", "list"]
+    - apiGroups: [""]
+      resources: ["pods/exec"]
+      verbs: ["create", "get"]
+
+# Agent configuration
+agent:
+  # Gateway endpoint for WebSocket connection
+  gatewayEndpoint: ""
+  
+  # Agent pool configuration from secret
+  secretName: "spacelift-flows-agentpool"  # Secret containing pool token and ID
+  poolTokenKey: "token"     # Key in secret for pool token
+  poolIdKey: "pool-id"      # Key in secret for pool ID
+  
+  # Flows endpoint
+  endpoint: ""
+  
+  # Executor configuration
+  executor: "kubernetes"
+  
+  # Kubernetes configuration
+  kubernetes:
+    namespace: "default"
+
+# OpenTelemetry configuration
+otel:
+  enabled: false
+  collectorEndpoint: "http://otel-collector:4317"
+
+# Resource configuration
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext: {}
+
+# Security context
+securityContext: {}
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}

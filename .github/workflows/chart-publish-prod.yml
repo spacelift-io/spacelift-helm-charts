@@ -49,6 +49,9 @@ jobs:
       - name: Create output directory for spacelift-flows chart
         run: mkdir -p build/chart/spacelift-flows
 
+      - name: Create output directory for spacelift-flows-agent chart
+        run: mkdir -p build/chart/spacelift-flows-agent
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -90,6 +93,9 @@ jobs:
       - name: Lint spacelift-flows chart
         run: helm lint --strict spacelift-flows/
 
+      - name: Lint spacelift-flows-agent chart
+        run: helm lint --strict spacelift-flows-agent/
+
       - name: Package Spacelift PromEx chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-promex spacelift-promex/
@@ -120,6 +126,11 @@ jobs:
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-flows/ spacelift-flows
           helm s3 push --force --relative build/chart/spacelift-flows/spacelift-flows-${CHART_VERSION}.tgz spacelift
 
+      - name: Package spacelift-flows-agent chart
+        run: |
+          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-flows-agent/ spacelift-flows-agent
+          helm s3 push --force --relative build/chart/spacelift-flows-agent/spacelift-flows-agent-${CHART_VERSION}.tgz spacelift
+
       - name: Invalidate cache
         run: >-
           aws cloudfront create-invalidation
@@ -146,3 +157,4 @@ jobs:
           helm pull spacelift/spacelift-workerpool-controller
           helm pull spacelift/spacelift-self-hosted
           helm pull spacelift/spacelift-flows
+          helm pull spacelift/spacelift-flows-agent
