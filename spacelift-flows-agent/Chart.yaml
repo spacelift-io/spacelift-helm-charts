@@ -1,0 +1,15 @@
+apiVersion: v2
+name: spacelift-flows-agent
+description: A Helm chart for Spacelift Flows Agent Kubernetes deployment
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - spacelift
+  - flows
+  - agent
+  - kubernetes
+  - workflow
+maintainers:
+  - name: Spacelift Team
+    email: support@spacelift.io

@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spacelift-flows-agent.fullname" . }}
+  labels:
+    {{- include "spacelift-flows-agent.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "spacelift-flows-agent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "spacelift-flows-agent.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "spacelift-flows-agent.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: agent
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/usr/bin/agent"]
+          ports:
+            - name: public
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: FLOWS_GATEWAY_ENDPOINT
+              value: {{ required "agent.gatewayEndpoint is required" .Values.agent.gatewayEndpoint | quote }}
+            - name: FLOWS_AGENT_POOL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.agent.secretName }}
+                  key: {{ .Values.agent.poolTokenKey }}
+            - name: FLOWS_AGENT_POOL_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.agent.secretName }}
+                  key: {{ .Values.agent.poolIdKey }}
+            - name: FLOWS_ENDPOINT
+              value: {{ required "agent.endpoint is required" .Values.agent.endpoint | quote }}
+            - name: FLOWS_EXECUTOR
+              value: {{ .Values.agent.executor | quote }}
+            - name: KUBERNETES_NAMESPACE
+              value: {{ .Values.agent.kubernetes.namespace | quote }}
+            - name: FLOWS_KUBERNETES_IMAGE
+              value: "{{ .Values.jsExecutorImage.repository }}:{{ .Values.jsExecutorImage.tag }}"
+            # Downward API for owner references
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- if .Values.otel.enabled }}
+            # OpenTelemetry configuration
+            - name: OTLP_COLLECTOR_ENDPOINT
+              value: {{ .Values.otel.collectorEndpoint | quote }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: public
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
