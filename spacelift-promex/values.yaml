@@ -29,3 +29,10 @@ annotations:
 #
 ## your api key secret, the secret should contain the key "SPACELIFT_PROMEX_API_KEY_SECRET"
 #apiKeySecretName: ""
+#
+# nodeSelector allows you to schedule pods on specific nodes.
+# Uncomment and modify the following lines to use it.
+# nodeSelector:
+#   kubernetes.io/arch: amd64
+#   disktype: ssd
+nodeSelector: {}
