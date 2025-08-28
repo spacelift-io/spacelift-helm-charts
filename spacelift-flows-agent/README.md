@@ -79,8 +79,8 @@ The chart creates the following RBAC resources by default:
 First create the secret:
 ```bash
 kubectl create secret generic spacelift-flows-agentpool \
-  --from-literal=token=wsr1f89iotrjbf4vyyd9ha2q6qsdlafgwxgxyu9tbopumemz91sgrc1lv6n0frin \
-  --from-literal=pool-id=f5643e6a-b6b5-7f89-ea28-9ba4fa57056f
+  --from-literal=token=your-agent-pool-token \
+  --from-literal=pool-id=your-agent-pool-id
 ```
 
 Then use this values file:
