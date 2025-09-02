@@ -2,7 +2,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.3
+    controller-gen.kubebuilder.io/version: v0.18.0
   name: workerpools.workers.spacelift.io
 spec:
   group: workers.spacelift.io
@@ -54,13 +54,25 @@ spec:
                 items:
                   type: string
                 type: array
-              keepSuccessfulPods:
+              failedPodsHistoryLimit:
                 description: |-
-                  KeepSuccessfulPods indicates whether run Pods should automatically be removed as soon
-                  as they complete successfully, or be kept so that they can be inspected later. By default
-                  run Pods are removed as soon as they complete successfully. Failed Pods are not automatically
-                  removed to allow debugging.
-                type: boolean
+                  FailedPodsHistoryLimit specifies the number of failed Pods to keep for debugging purposes.
+                  When set to a positive number, only the N most recent failed Pods are kept per worker.
+                  When set to 0, all failed Pods are removed immediately.
+                  When unset and FailedPodsHistoryTTL is also unset, defaults to 5 (keep 5 most recent).
+                  When unset but FailedPodsHistoryTTL is set, count-based cleanup is disabled (TTL-only).
+                format: int32
+                minimum: 0
+                type: integer
+              failedPodsHistoryTTL:
+                description: |-
+                  FailedPodsHistoryTTL specifies the duration to keep failed Pods after they are created.
+                  When set, failed Pods that have been created for longer than this duration are removed.
+                  The TTL timer starts from Pod creation time for consistency with history limit ordering.
+                  Running pods are never affected by this TTL.
+                  When unset (nil), no time-based cleanup is performed for failed Pods.
+                  This works in combination with FailedPodsHistoryLimit - pods are removed if they exceed EITHER limit.
+                type: string
               mqttReconnectRetryCount:
                 default: 5
                 description: |-
@@ -11453,6 +11465,25 @@ spec:
                 required:
                 - secretKeyRef
                 type: object
+              successfulPodsHistoryLimit:
+                description: |-
+                  SuccessfulPodsHistoryLimit specifies the number of successful Pods to keep for inspection purposes.
+                  When set to a positive number, only the N most recent successful Pods are kept per worker.
+                  When set to 0, all successful Pods are removed immediately.
+                  When unset and SuccessfulPodsHistoryTTL is also unset, defaults to 0 (remove all).
+                  When unset but SuccessfulPodsHistoryTTL is set, count-based cleanup is disabled (TTL-only).
+                format: int32
+                minimum: 0
+                type: integer
+              successfulPodsHistoryTTL:
+                description: |-
+                  SuccessfulPodsHistoryTTL specifies the duration to keep successful Pods after they are created.
+                  When set, successful Pods that have been created for longer than this duration are removed.
+                  The TTL timer starts from Pod creation time for consistency with history limit ordering.
+                  Running pods are never affected by this TTL.
+                  When unset (nil), no time-based cleanup is performed for successful Pods.
+                  This works in combination with SuccessfulPodsHistoryLimit - pods are removed if they exceed EITHER limit.
+                type: string
               token:
                 description: Token is the token generated when creating your worker
                   pool.
