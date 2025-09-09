@@ -47,6 +47,8 @@ spec:
               value: {{ required "agent.endpoint is required" .Values.agent.endpoint | quote }}
             - name: FLOWS_EXECUTOR
               value: {{ .Values.agent.executor | quote }}
+            - name: FLOWS_POOL_SIZE
+              value: {{ .Values.agent.poolSize }}
             - name: KUBERNETES_NAMESPACE
               value: {{ .Values.agent.kubernetes.namespace | quote }}
             - name: FLOWS_KUBERNETES_IMAGE

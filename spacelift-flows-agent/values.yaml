@@ -47,6 +47,8 @@ agent:
   
   # Flows endpoint
   endpoint: ""
+
+  poolSize: 3
   
   # Executor configuration
   executor: "kubernetes"
