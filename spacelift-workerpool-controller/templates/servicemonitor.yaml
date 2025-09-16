@@ -1,0 +1,48 @@
+{{ if and .Values.metricsService.enabled .Values.metricsService.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "spacelift-workerpool-controller.fullname" . }}-metrics-service
+  {{- if .Values.metricsService.serviceMonitor.namespace }}
+  namespace: {{ .Values.metricsService.serviceMonitor.namespace }}
+  {{- end }}
+  labels:
+    control-plane: controller-manager
+  {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
+  {{- if .Values.metricsService.serviceMonitor.additionalLabels }}
+  {{- toYaml .Values.metricsService.serviceMonitor.additionalLabels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.metricsService.serviceMonitor.annotations }}
+  annotations:
+  {{- toYaml .Values.metricsService.serviceMonitor.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+    {{- include "spacelift-workerpool-controller.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  endpoints:
+  - port: {{ .Values.metricsService.serviceMonitor.port | default "https" }}
+    {{- if .Values.metricsService.serviceMonitor.interval }}
+    interval: {{ .Values.metricsService.serviceMonitor.interval }}
+    {{- end }}
+    {{- if .Values.metricsService.serviceMonitor.scrapeTimeout }}
+    scrapeTimeout: {{ .Values.metricsService.serviceMonitor.scrapeTimeout }}
+    {{- end }}
+    {{- if .Values.metricsService.serviceMonitor.path }}
+    path: {{ .Values.metricsService.serviceMonitor.path }}
+    {{- end }}
+    {{- if .Values.metricsService.serviceMonitor.scheme }}
+    scheme: {{ .Values.metricsService.serviceMonitor.scheme }}
+    {{- end }}
+    {{- if .Values.metricsService.serviceMonitor.tlsConfig }}
+    tlsConfig:
+    {{- toYaml .Values.metricsService.serviceMonitor.tlsConfig | nindent 6 }}
+    {{- end }}
+    {{- if .Values.metricsService.serviceMonitor.bearerTokenFile }}
+    bearerTokenFile: {{ .Values.metricsService.serviceMonitor.bearerTokenFile }}
+    {{- end }}
+{{- end }}

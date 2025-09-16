@@ -60,6 +60,18 @@ metricsService:
     protocol: TCP
     targetPort: metrics
   type: ClusterIP
-
+  # ServiceMonitor configuration for Prometheus monitoring
+  serviceMonitor:
+    enabled: false
+    # namespace: monitoring  # Optional: specify namespace for ServiceMonitor
+    port: https
+    interval: 30s
+    scrapeTimeout: 10s
+    path: /metrics
+    scheme: https
+    # additionalLabels: {}  # Optional: additional labels for ServiceMonitor
+    # annotations: {}       # Optional: annotations for ServiceMonitor
+    # tlsConfig: {}         # Optional: TLS configuration for scraping
+    # bearerTokenFile: ""   # Optional: bearer token file for authentication
 spacelift-promex:
   enabled: false
