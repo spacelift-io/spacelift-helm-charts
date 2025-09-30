@@ -1,1 +1,20 @@
-* @spacelift-io/sirius
+# Ecosystem Team - External integrations and VCS connectivity
+/vcs-agent/ @spacelift-io/ecosystem-backend
+
+# EnterpriseReady Team - Self-hosted deployments and enterprise features
+/spacelift-self-hosted/ @spacelift-io/enterprise-ready-backend
+
+# Flows Team
+/spacelift-flows/ @spacelift-io/flows
+/spacelift-flows-agent/ @spacelift-io/flows
+
+# Foundations Team - Core IaC execution and workflow automation
+/spacelift-worker-pool/ @spacelift-io/foundations
+/spacelift-workerpool-controller/ @spacelift-io/foundations
+
+# Platform Team - Infrastructure, monitoring, and observability
+/spacelift-promex/ @spacelift-io/platform
+
+# Default owners for all files (fallback)
+# Platform team handles infrastructure and tooling, making them suitable for general chart maintenance.
+* @spacelift-io/platform
