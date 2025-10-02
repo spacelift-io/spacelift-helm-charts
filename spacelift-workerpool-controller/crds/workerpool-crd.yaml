@@ -1,3 +1,4 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -5697,6 +5698,20 @@ spec:
                       - name
                       type: object
                     type: array
+                  defaultAnsibleRunnerImage:
+                    description: |-
+                      DefaultAnsibleRunnerImage overrides the default runner image for Ansible runs.
+                      When set, this image will be used instead of the backend-provided runner image
+                      for Ansible stacks.
+                      Default: public.ecr.aws/spacelift/runner-ansible:latest
+                    type: string
+                  defaultRunnerImage:
+                    description: |-
+                      DefaultRunnerImage overrides the default runner image for non-Ansible runs.
+                      When set, this image will be used instead of the backend-provided runner image
+                      for Terraform and other non-Ansible stacks.
+                      Default: public.ecr.aws/spacelift/runner-terraform:latest
+                    type: string
                   dnsConfig:
                     description: |-
                       Specifies the DNS parameters of a pod.
