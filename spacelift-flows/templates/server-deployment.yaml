@@ -21,6 +21,10 @@ spec:
         {{- include "spacelift-flows.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: server
     spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.server.podSecurityContext | nindent 8 }}
       containers:
