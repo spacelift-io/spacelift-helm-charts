@@ -39,6 +39,9 @@ spec:
           env:
             - name: CONFIG_FILE
               value: "/etc/flows/config.yaml"
+            {{- with .Values.server.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           volumeMounts:
             - name: config
               mountPath: /etc/flows
