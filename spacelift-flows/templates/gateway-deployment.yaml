@@ -21,6 +21,10 @@ spec:
         {{- include "spacelift-flows.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: gateway
     spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.gateway.podSecurityContext | nindent 8 }}
       containers:
@@ -45,6 +49,9 @@ spec:
           env:
             - name: CONFIG_FILE
               value: "/etc/flows/config.yaml"
+            {{- with .Values.gateway.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           volumeMounts:
             - name: config
               mountPath: /etc/flows
