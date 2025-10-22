@@ -16,7 +16,7 @@ controllerManager:
         - ALL
     image:
       repository: public.ecr.aws/spacelift/kube-workerpool-controller
-      tag: v0.0.26
+      tag: v0.0.27
     resources:
       limits:
         memory: 128Mi

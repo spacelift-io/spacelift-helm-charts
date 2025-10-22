@@ -21,6 +21,9 @@ spec:
     - jsonPath: .status.actualPoolSize
       name: Actual pool size
       type: integer
+    - jsonPath: .status.autoRegistered
+      name: Auto registered
+      type: boolean
     name: v1beta1
     schema:
       openAPIV3Schema:
@@ -55,6 +58,32 @@ spec:
                 items:
                   type: string
                 type: array
+              description:
+                description: description sets the pool description.
+                type: string
+              driftDetectionRunLimits:
+                description: DriftDetectionRunLimit configures limits for drift detection
+                  runs executed on this worker pool.
+                properties:
+                  disabled:
+                    default: false
+                    description: |-
+                      Disabled indicates whether drift detection runs are disabled for this worker pool.
+                      When true, maxRuns must not be set.
+                    type: boolean
+                  maxRuns:
+                    description: |-
+                      MaxRuns specifies the maximum number of drift detection runs allowed.
+                      Cannot be set when disabled is true.
+                    format: int32
+                    minimum: 0
+                    type: integer
+                type: object
+                x-kubernetes-validations:
+                - message: maxRuns cannot be set when disabled is true
+                  rule: '!self.disabled || !has(self.maxRuns)'
+                - message: either disabled must be true or maxRuns must be set
+                  rule: self.disabled || has(self.maxRuns)
               failedPodsHistoryLimit:
                 description: |-
                   FailedPodsHistoryLimit specifies the number of failed Pods to keep for debugging purposes.
@@ -11450,8 +11479,9 @@ spec:
                 minimum: 0
                 type: integer
               privateKey:
-                description: Private key is the key generated when creating your worker
-                  pool.
+                description: |-
+                  Private key is the key generated when creating your worker pool.
+                  Must be set together with token, or both must be unset.
                 properties:
                   secretKeyRef:
                     description: SecretKeySelector selects a key of a Secret.
@@ -11479,6 +11509,41 @@ spec:
                     x-kubernetes-map-type: atomic
                 required:
                 - secretKeyRef
+                type: object
+              space:
+                description: space allows us to choose where the pool is created.
+                type: string
+              spaceliftAPICredentials:
+                description: |-
+                  SpaceliftAPICredentials references a secret containing API credentials. This takes
+                  precedence over the controller level credentials
+                properties:
+                  secretKeyRef:
+                    description: SecretKeySelector selects a key of a Secret.
+                    properties:
+                      key:
+                        description: The key of the secret to select from.  Must be
+                          a valid secret key.
+                        type: string
+                      name:
+                        default: ""
+                        description: |-
+                          Name of the referent.
+                          This field is effectively required, but due to backwards compatibility is
+                          allowed to be empty. Instances of this type with an empty value here are
+                          almost certainly wrong.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        type: string
+                      optional:
+                        description: Specify whether the Secret or its key must be
+                          defined
+                        type: boolean
+                    required:
+                      - key
+                    type: object
+                    x-kubernetes-map-type: atomic
+                required:
+                  - secretKeyRef
                 type: object
               successfulPodsHistoryLimit:
                 description: |-
@@ -11500,8 +11565,9 @@ spec:
                   This works in combination with SuccessfulPodsHistoryLimit - pods are removed if they exceed EITHER limit.
                 type: string
               token:
-                description: Token is the token generated when creating your worker
-                  pool.
+                description: |-
+                  Token is the token generated when creating your worker pool.
+                  Must be set together with privateKey, or both must be unset.
                 properties:
                   secretKeyRef:
                     description: SecretKeySelector selects a key of a Secret.
@@ -11530,10 +11596,11 @@ spec:
                 required:
                 - secretKeyRef
                 type: object
-            required:
-            - privateKey
-            - token
             type: object
+            x-kubernetes-validations:
+            - message: token and privateKey must both be set or both be unset
+              rule: (has(self.token) && has(self.privateKey)) || (!has(self.token)
+                && !has(self.privateKey))
           status:
             description: WorkerPoolStatus defines the observed state of WorkerPool
             properties:
@@ -11542,7 +11609,14 @@ spec:
                   exist in the pool.
                 format: int32
                 type: integer
+              autoRegistered:
+                description: |-
+                  AutoRegistered indicates that the Spacelift worker pool resource was created by the
+                  Kubernetes controller (vs being created manually by users).
+                type: boolean
               desiredPoolSize:
+                description: DesiredPoolSize defines the number of workers that the
+                  pool should contain.
                 format: int32
                 type: integer
               selector:
@@ -11560,6 +11634,7 @@ spec:
                 type: string
             required:
             - actualPoolSize
+            - autoRegistered
             - selector
             type: object
         type: object
