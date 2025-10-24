@@ -3,13 +3,13 @@
 
 # Image configuration
 image:
-  repository: public.ecr.aws/u4b1s0s6/spacelift-flows-agent
+  repository: public.ecr.aws/w5z2f6e8/spacelift-flows-agent
   tag: "agent-latest"
   pullPolicy: IfNotPresent
 
 # JavaScript executor image configuration
 jsExecutorImage:
-  repository: public.ecr.aws/u4b1s0s6/spacelift-flows-agent
+  repository: public.ecr.aws/w5z2f6e8/spacelift-flows-agent
   tag: "k8s-js-executor-latest"
 
 # Deployment configuration
