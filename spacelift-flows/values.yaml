@@ -5,7 +5,7 @@
 global:
   # Image configuration
   image:
-    repository: public.ecr.aws/u4b1s0s6/spacelift-flows-backend
+    repository: public.ecr.aws/w5z2f6e8/spacelift-flows-backend
     pullPolicy: IfNotPresent
     tag: "latest"
 
