@@ -2,8 +2,8 @@ apiVersion: v2
 name: spacelift-workerpool-controller
 description: A Helm chart for deploying spacelift workerpool controller
 type: application
-version: 0.10.0
-appVersion: "v0.0.26"
+version: 0.11.0
+appVersion: "v0.0.27"
 
 dependencies:
   - name: spacelift-promex
