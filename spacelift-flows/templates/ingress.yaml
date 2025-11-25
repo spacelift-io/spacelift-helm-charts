@@ -58,4 +58,16 @@ spec:
                 name: {{ include "spacelift-flows.fullname" $ }}-server
                 port:
                   name: public
+{{- if .Values.ingress.exposeGateway }}
+    - host: "gateway.{{ .Values.appDomain}}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "spacelift-flows.fullname" $ }}-gateway
+                port:
+                  name: public
+{{- end }}
 {{- end }}
