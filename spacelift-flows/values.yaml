@@ -41,6 +41,7 @@ server:
   podAnnotations: {}
   podSecurityContext: {}
   securityContext: {}
+  lifecycle: {}
 
   extraEnv: []
   # Example:
