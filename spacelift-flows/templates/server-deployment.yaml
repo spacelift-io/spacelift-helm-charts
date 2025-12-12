@@ -58,6 +58,10 @@ spec:
             periodSeconds: 5
           resources:
             {{- toYaml .Values.server.resources | nindent 12 }}
+          {{- with .Values.server.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       volumes:
         - name: config
           secret:
