@@ -108,7 +108,7 @@ vcsGateway:
   replicaCount: 3
   # Container ports
   externalPort: 1984  # gRPC port for remote VCS agents exposed via a load balancer
-  internalPort: 1985  # HTTP port for internal usage from server/drain. not exposed, just used internally via service discovery (service-to-service).
+  internalPort: 1985  # HTTP port for internal usage from server/drain. not exposed, just used internally via for pod-to-pod communication.
   secretRef: ""
   pullPolicy: Always
   securityContext:
@@ -134,20 +134,28 @@ vcsGateway:
     automount: true
     annotations: {}
   lifecycle: {}
+  service:
+    annotations: {}
   ingress:
-    enabled: true
+    enabled: true # Set to true for AWS, false for GKE
     ingressClassName: ""
     annotations:
-      # For AWS ALB, use these:
+      # For AWS ALB:
       # alb.ingress.kubernetes.io/backend-protocol-version: GRPC
       # alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
       # alb.ingress.kubernetes.io/healthcheck-path: /grpc.health.v1.Health/Check
       # alb.ingress.kubernetes.io/healthcheck-port: traffic-port
       # alb.ingress.kubernetes.io/success-codes: "0"
+  gateway:
+    enabled: false # Set to true if using GKE
+    gatewayClassName: "" # Use 'gke-l7-global-external-managed' for GKE
+    certificateRef: "vcs-gateway-cert"
+    annotations: {}
 
 cloudSqlProxy:
   enabled: false
-  image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.4
+  quiet: true
+  image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.21.0
   dbConnectionName:
   resources:
     requests:

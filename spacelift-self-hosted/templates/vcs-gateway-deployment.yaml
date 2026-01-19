@@ -30,6 +30,54 @@ spec:
       serviceAccountName: {{ include "spacelift.vcsGatewayServiceAccountName" . }}
       securityContext:
         {{- toYaml .Values.vcsGateway.podSecurityContext | nindent 8 }}
+      {{- if .Values.cloudSqlProxy.enabled }}
+      initContainers:
+        - name: cloud-sql-proxy
+          image: {{ .Values.cloudSqlProxy.image }}
+          restartPolicy: Always
+          env:
+            - name: CSQL_PROXY_HEALTH_CHECK
+              value: "true"
+            - name: CSQL_PROXY_HTTP_PORT
+              value: "9801"
+            - name: CSQL_PROXY_HTTP_ADDRESS
+              value: 0.0.0.0
+            - name: CSQL_PROXY_QUIET
+              value: {{ .Values.cloudSqlProxy.quiet | quote }}
+          args:
+            - "--private-ip"
+            - "--structured-logs"
+            - "--port=5432"
+            - "--auto-iam-authn"
+            - "{{ .Values.cloudSqlProxy.dbConnectionName }}"
+          ports:
+            - containerPort: 9801
+              protocol: TCP
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: /startup
+              port: 9801
+              scheme: HTTP
+            periodSeconds: 1
+            successThreshold: 1
+            timeoutSeconds: 10
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /liveness
+              port: 9801
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          resources:
+            {{- toYaml .Values.cloudSqlProxy.resources | nindent 12 }}
+      {{- end }}
       containers:
         - name: vcs-gateway
           securityContext:

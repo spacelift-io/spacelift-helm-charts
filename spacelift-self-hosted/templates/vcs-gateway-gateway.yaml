@@ -1,0 +1,23 @@
+{{- if and .Values.vcsGateway.enabled .Values.vcsGateway.gateway.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: vcs-gateway
+  labels:
+    {{- include "spacelift.vcsGatewayLabels" . | nindent 4 }}
+  {{- with .Values.vcsGateway.gateway.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  gatewayClassName: {{ required "vcsGateway.gateway.gatewayClassName is required when gateway.create is true" .Values.vcsGateway.gateway.gatewayClassName }}
+  listeners:
+    - name: https
+      hostname: {{ required "vcsGateway.domain is required when vcsGateway is enabled" .Values.vcsGateway.domain }}
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: {{ .Values.vcsGateway.gateway.certificateRef | default "vcs-gateway-cert" }}
+{{- end }}
