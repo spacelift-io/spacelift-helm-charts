@@ -67,6 +67,9 @@ spec:
             - name: OTLP_COLLECTOR_ENDPOINT
               value: {{ .Values.otel.collectorEndpoint | quote }}
             {{- end }}
+            {{- with .Values.agent.extraEnv }}
+            {{ toYaml . | nindent 12 }}
+            {{- end }}
           readinessProbe:
             httpGet:
               path: /health
