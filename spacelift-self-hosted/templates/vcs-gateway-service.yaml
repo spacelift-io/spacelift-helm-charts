@@ -1,0 +1,28 @@
+{{- if .Values.vcsGateway.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "spacelift.fullname" . }}-vcs-gateway
+  labels:
+    {{- include "spacelift.vcsGatewayLabels" . | nindent 4 }}
+  {{- with .Values.vcsGateway.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.vcsGateway.service.type | default .Values.service.type }}
+  ports:
+    - name: grpc
+      port: {{ .Values.vcsGateway.externalPort }}
+      targetPort: external
+      protocol: TCP
+      {{- if .Values.vcsGateway.service.appProtocol }}
+      appProtocol: {{ .Values.vcsGateway.service.appProtocol }}
+      {{- end }}
+    - name: http
+      port: {{ .Values.vcsGateway.internalPort }}
+      targetPort: internal
+      protocol: TCP
+  selector:
+    {{- include "spacelift.vcsGatewaySelectorLabels" . | nindent 4 }}
+{{- end }}

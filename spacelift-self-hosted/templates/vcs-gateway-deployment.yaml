@@ -1,0 +1,140 @@
+{{- if .Values.vcsGateway.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spacelift.fullname" . }}-vcs-gateway
+  labels:
+    {{- include "spacelift.vcsGatewayLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.vcsGateway.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 90%
+  selector:
+    matchLabels:
+      {{- include "spacelift.vcsGatewaySelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.vcsGateway.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "spacelift.vcsGatewayLabels" . | nindent 8 }}
+        {{- with .Values.vcsGateway.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "spacelift.vcsGatewayServiceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.vcsGateway.podSecurityContext | nindent 8 }}
+      {{- if .Values.cloudSqlProxy.enabled }}
+      initContainers:
+        - name: cloud-sql-proxy
+          image: {{ .Values.cloudSqlProxy.image }}
+          restartPolicy: Always
+          env:
+            - name: CSQL_PROXY_HEALTH_CHECK
+              value: "true"
+            - name: CSQL_PROXY_HTTP_PORT
+              value: "9801"
+            - name: CSQL_PROXY_HTTP_ADDRESS
+              value: 0.0.0.0
+            - name: CSQL_PROXY_QUIET
+              value: {{ .Values.cloudSqlProxy.quiet | quote }}
+          args:
+            - "--private-ip"
+            - "--structured-logs"
+            - "--port=5432"
+            - "--auto-iam-authn"
+            - "{{ .Values.cloudSqlProxy.dbConnectionName }}"
+          ports:
+            - containerPort: 9801
+              protocol: TCP
+          startupProbe:
+            failureThreshold: 60
+            httpGet:
+              path: /startup
+              port: 9801
+              scheme: HTTP
+            periodSeconds: 1
+            successThreshold: 1
+            timeoutSeconds: 10
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /liveness
+              port: 9801
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+          resources:
+            {{- toYaml .Values.cloudSqlProxy.resources | nindent 12 }}
+      {{- end }}
+      containers:
+        - name: vcs-gateway
+          securityContext:
+            {{- toYaml .Values.vcsGateway.securityContext | nindent 12 }}
+          image: "{{ .Values.shared.image }}"
+          imagePullPolicy: {{ .Values.vcsGateway.pullPolicy }}
+          command:
+            - spacelift
+            - backend
+            - vcs-gateway
+          env:
+            - name: GATEWAY_GRPC_PORT
+              value: "{{ .Values.vcsGateway.externalPort }}"
+            - name: GATEWAY_HTTP_PORT
+              value: "{{ .Values.vcsGateway.internalPort }}"
+            - name: VCS_GATEWAY_FORCE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          envFrom:
+            - secretRef:
+                name: {{ .Values.shared.secretRef }}
+            {{- if .Values.vcsGateway.secretRef }}
+            - secretRef:
+                name: {{ .Values.vcsGateway.secretRef }}
+            {{- end }}
+          ports:
+            - name: external
+              containerPort: {{ .Values.vcsGateway.externalPort }}
+              protocol: TCP
+            - name: internal
+              containerPort: {{ .Values.vcsGateway.internalPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.vcsGateway.resources | nindent 12 }}
+          {{- with .Values.vcsGateway.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.vcsGateway.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.vcsGateway.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.vcsGateway.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.vcsGateway.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.vcsGateway.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

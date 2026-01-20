@@ -147,3 +147,41 @@ Create the name of the service account to use for the scheduler.
 {{- include "spacelift.serviceAccountName" . }}
 {{- end }}
 {{- end }}
+
+{{/*
+Expand the name of the VCS Gateway.
+*/}}
+{{- define "spacelift.vcsGatewayName" -}}
+{{- printf "%s-vcs-gateway" (default .Values.nameOverride .Chart.Name) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+VCS Gateway labels
+*/}}
+{{- define "spacelift.vcsGatewayLabels" -}}
+helm.sh/chart: {{ include "spacelift.chart" . }}
+{{ include "spacelift.vcsGatewaySelectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+VCS Gateway Selector labels
+*/}}
+{{- define "spacelift.vcsGatewaySelectorLabels" -}}
+app.kubernetes.io/name: {{ include "spacelift.vcsGatewayName" . }}
+app.kubernetes.io/instance: {{ printf "%s-vcs-gateway" .Release.Name }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use for the VCS Gateway.
+*/}}
+{{- define "spacelift.vcsGatewayServiceAccountName" -}}
+{{- if .Values.vcsGateway.serviceAccount.create }}
+{{- .Values.vcsGateway.serviceAccount.name }}
+{{- else }}
+{{- include "spacelift.serviceAccountName" . }}
+{{- end }}
+{{- end }}
