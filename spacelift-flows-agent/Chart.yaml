@@ -2,7 +2,7 @@ apiVersion: v2
 name: spacelift-flows-agent
 description: A Helm chart for Spacelift Flows Agent Kubernetes deployment
 type: application
-version: 0.2.0
+version: 0.3.0
 appVersion: "0.1.0"
 keywords:
   - spacelift
