@@ -1,0 +1,843 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Spacelift Self-Hosted Helm Chart Values",
+  "description": "Schema for validating values.yaml for the spacelift-self-hosted Helm chart",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "shared": {
+      "type": "object",
+      "description": "Shared configuration across all components",
+      "additionalProperties": false,
+      "properties": {
+        "secretRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Reference to a shared Kubernetes secret containing environment variables"
+        },
+        "image": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Container image for all Spacelift components"
+        },
+        "serverHostname": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Server hostname for ingress configuration (required when ingress is enabled). Format: hostname without protocol and port (e.g., 'spacelift.mycorp.com')"
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "description": "API server component configuration",
+      "additionalProperties": false,
+      "properties": {
+        "replicaCount": {
+          "type": "integer",
+          "default": 3,
+          "description": "Number of server replicas"
+        },
+        "port": {
+          "$ref": "#/$defs/port",
+          "default": 1983,
+          "description": "HTTP port for the server"
+        },
+        "mqttPort": {
+          "$ref": "#/$defs/port",
+          "default": 1984,
+          "description": "MQTT port for the server"
+        },
+        "secretRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Reference to a Kubernetes secret for server-specific environment variables"
+        },
+        "pullPolicy": {
+          "$ref": "#/$defs/imagePullPolicy"
+        },
+        "securityContext": {
+          "$ref": "#/$defs/securityContext"
+        },
+        "resources": {
+          "$ref": "#/$defs/resources"
+        },
+        "readinessProbe": {
+          "$ref": "#/$defs/httpGetProbe"
+        },
+        "podLabels": {
+          "$ref": "#/$defs/labels"
+        },
+        "podAnnotations": {
+          "$ref": "#/$defs/annotations"
+        },
+        "podSecurityContext": {
+          "$ref": "#/$defs/podSecurityContext"
+        },
+        "volumes": {
+          "$ref": "#/$defs/volumes"
+        },
+        "volumeMounts": {
+          "$ref": "#/$defs/volumeMounts"
+        },
+        "nodeSelector": {
+          "$ref": "#/$defs/nodeSelector"
+        },
+        "tolerations": {
+          "$ref": "#/$defs/tolerations"
+        },
+        "affinity": {
+          "$ref": "#/$defs/affinity"
+        },
+        "serviceAccount": {
+          "$ref": "#/$defs/serviceAccount"
+        },
+        "lifecycle": {
+          "$ref": "#/$defs/lifecycle"
+        }
+      }
+    },
+    "drain": {
+      "type": "object",
+      "description": "Drain component configuration",
+      "additionalProperties": false,
+      "properties": {
+        "replicaCount": {
+          "type": "integer",
+          "default": 3,
+          "description": "Number of drain replicas"
+        },
+        "secretRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Reference to a Kubernetes secret for drain-specific environment variables"
+        },
+        "pullPolicy": {
+          "$ref": "#/$defs/imagePullPolicy"
+        },
+        "securityContext": {
+          "$ref": "#/$defs/securityContext"
+        },
+        "resources": {
+          "$ref": "#/$defs/resources"
+        },
+        "startupProbe": {
+          "$ref": "#/$defs/httpGetProbe"
+        },
+        "podLabels": {
+          "$ref": "#/$defs/labels"
+        },
+        "podAnnotations": {
+          "$ref": "#/$defs/annotations"
+        },
+        "podSecurityContext": {
+          "$ref": "#/$defs/podSecurityContext"
+        },
+        "volumes": {
+          "$ref": "#/$defs/volumes"
+        },
+        "volumeMounts": {
+          "$ref": "#/$defs/volumeMounts"
+        },
+        "nodeSelector": {
+          "$ref": "#/$defs/nodeSelector"
+        },
+        "tolerations": {
+          "$ref": "#/$defs/tolerations"
+        },
+        "affinity": {
+          "$ref": "#/$defs/affinity"
+        },
+        "serviceAccount": {
+          "$ref": "#/$defs/serviceAccount"
+        },
+        "lifecycle": {
+          "$ref": "#/$defs/lifecycle"
+        }
+      }
+    },
+    "scheduler": {
+      "type": "object",
+      "description": "Scheduler component configuration",
+      "additionalProperties": false,
+      "properties": {
+        "replicaCount": {
+          "type": "integer",
+          "default": 3,
+          "description": "Number of scheduler replicas"
+        },
+        "pullPolicy": {
+          "$ref": "#/$defs/imagePullPolicy"
+        },
+        "securityContext": {
+          "$ref": "#/$defs/securityContext"
+        },
+        "resources": {
+          "$ref": "#/$defs/resources"
+        },
+        "startupProbe": {
+          "$ref": "#/$defs/httpGetProbe"
+        },
+        "podLabels": {
+          "$ref": "#/$defs/labels"
+        },
+        "podAnnotations": {
+          "$ref": "#/$defs/annotations"
+        },
+        "podSecurityContext": {
+          "$ref": "#/$defs/podSecurityContext"
+        },
+        "volumes": {
+          "$ref": "#/$defs/volumes"
+        },
+        "volumeMounts": {
+          "$ref": "#/$defs/volumeMounts"
+        },
+        "nodeSelector": {
+          "$ref": "#/$defs/nodeSelector"
+        },
+        "tolerations": {
+          "$ref": "#/$defs/tolerations"
+        },
+        "affinity": {
+          "$ref": "#/$defs/affinity"
+        },
+        "serviceAccount": {
+          "$ref": "#/$defs/serviceAccount"
+        },
+        "lifecycle": {
+          "$ref": "#/$defs/lifecycle"
+        }
+      }
+    },
+    "vcsGateway": {
+      "type": "object",
+      "description": "VCS Gateway component configuration",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable the VCS Gateway component"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain for external VCS Gateway endpoint (required when enabled). Format: hostname without protocol and port"
+        },
+        "replicaCount": {
+          "type": "integer",
+          "default": 3,
+          "description": "Number of VCS Gateway replicas"
+        },
+        "externalPort": {
+          "$ref": "#/$defs/port",
+          "default": 1984,
+          "description": "gRPC port for remote VCS agents exposed via load balancer"
+        },
+        "internalPort": {
+          "$ref": "#/$defs/port",
+          "default": 1985,
+          "description": "HTTP port for internal pod-to-pod communication"
+        },
+        "secretRef": {
+          "type": "string",
+          "description": "Reference to a Kubernetes secret for VCS Gateway-specific environment variables"
+        },
+        "pullPolicy": {
+          "$ref": "#/$defs/imagePullPolicy"
+        },
+        "securityContext": {
+          "$ref": "#/$defs/securityContext"
+        },
+        "resources": {
+          "$ref": "#/$defs/resources"
+        },
+        "podLabels": {
+          "$ref": "#/$defs/labels"
+        },
+        "podAnnotations": {
+          "$ref": "#/$defs/annotations"
+        },
+        "podSecurityContext": {
+          "$ref": "#/$defs/podSecurityContext"
+        },
+        "volumes": {
+          "$ref": "#/$defs/volumes"
+        },
+        "volumeMounts": {
+          "$ref": "#/$defs/volumeMounts"
+        },
+        "nodeSelector": {
+          "$ref": "#/$defs/nodeSelector"
+        },
+        "tolerations": {
+          "$ref": "#/$defs/tolerations"
+        },
+        "affinity": {
+          "$ref": "#/$defs/affinity"
+        },
+        "serviceAccount": {
+          "$ref": "#/$defs/serviceAccount"
+        },
+        "lifecycle": {
+          "$ref": "#/$defs/lifecycle"
+        },
+        "service": {
+          "type": "object",
+          "description": "VCS Gateway service configuration",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "$ref": "#/$defs/serviceType"
+            },
+            "annotations": {
+              "$ref": "#/$defs/annotations"
+            },
+            "appProtocol": {
+              "type": "string",
+              "description": "Application protocol for the service port"
+            }
+          }
+        },
+        "ingress": {
+          "type": "object",
+          "description": "VCS Gateway ingress configuration",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable ingress for VCS Gateway"
+            },
+            "ingressClassName": {
+              "type": "string",
+              "description": "Ingress class name"
+            },
+            "annotations": {
+              "$ref": "#/$defs/annotations"
+            }
+          }
+        },
+        "gateway": {
+          "type": "object",
+          "description": "VCS Gateway Gateway API configuration",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable Gateway API for VCS Gateway"
+            },
+            "gatewayClassName": {
+              "type": "string",
+              "description": "Gateway class name"
+            },
+            "certificateRef": {
+              "type": "string",
+              "default": "vcs-gateway-cert",
+              "description": "Reference to the TLS certificate"
+            },
+            "annotations": {
+              "$ref": "#/$defs/annotations"
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "enabled": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "domain"
+        ]
+      }
+    },
+    "cloudSqlProxy": {
+      "type": "object",
+      "description": "Cloud SQL Proxy sidecar configuration",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Cloud SQL Proxy sidecar"
+        },
+        "quiet": {
+          "type": "boolean",
+          "default": true,
+          "description": "Suppress info and debug logs from Cloud SQL Proxy (error logs are always shown)"
+        },
+        "image": {
+          "type": "string",
+          "default": "gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.21.0",
+          "description": "Cloud SQL Proxy container image"
+        },
+        "dbConnectionName": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Cloud SQL instance connection name"
+        },
+        "resources": {
+          "$ref": "#/$defs/resources"
+        }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "description": "Global service account configuration used by all components",
+      "additionalProperties": false,
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to create the service account"
+        },
+        "name": {
+          "type": "string",
+          "default": "spacelift-backend",
+          "description": "Name of the service account"
+        },
+        "automount": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to automount the service account token"
+        },
+        "annotations": {
+          "$ref": "#/$defs/annotations"
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "description": "Main ClusterIP service configuration",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/serviceType",
+          "default": "ClusterIP"
+        },
+        "port": {
+          "$ref": "#/$defs/port",
+          "default": 80,
+          "description": "Service port"
+        }
+      }
+    },
+    "mqttService": {
+      "type": "object",
+      "description": "MQTT service configuration",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/serviceType",
+          "default": "ClusterIP"
+        },
+        "port": {
+          "$ref": "#/$defs/port",
+          "default": 1984,
+          "description": "MQTT service port"
+        },
+        "annotations": {
+          "$ref": "#/$defs/annotations"
+        },
+        "additionalSpec": {
+          "type": "object",
+          "description": "Additional service spec fields"
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "description": "IPv4 ingress configuration",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable IPv4 ingress"
+        },
+        "ingressClassName": {
+          "type": "string",
+          "description": "Ingress class name"
+        },
+        "annotations": {
+          "$ref": "#/$defs/annotations"
+        }
+      }
+    },
+    "ingressV6": {
+      "type": "object",
+      "description": "IPv6 ingress configuration",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable IPv6 ingress"
+        },
+        "annotations": {
+          "$ref": "#/$defs/annotations"
+        }
+      }
+    },
+    "nameOverride": {
+      "type": "string",
+      "description": "Override the chart name"
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "default": "spacelift",
+      "description": "Override the full name used for resources"
+    }
+  },
+  "$defs": {
+    "port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535,
+      "description": "Port number"
+    },
+    "imagePullPolicy": {
+      "type": "string",
+      "enum": [
+        "Always",
+        "IfNotPresent",
+        "Never"
+      ],
+      "default": "Always",
+      "description": "Image pull policy"
+    },
+    "serviceType": {
+      "type": "string",
+      "enum": [
+        "ClusterIP",
+        "NodePort",
+        "LoadBalancer",
+        "ExternalName"
+      ],
+      "description": "Kubernetes service type"
+    },
+    "serviceAccount": {
+      "type": "object",
+      "description": "Service account configuration",
+      "additionalProperties": false,
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to create an individual service account for this component"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the service account"
+        },
+        "automount": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to automount the service account token"
+        },
+        "annotations": {
+          "$ref": "#/$defs/annotations"
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "description": "Container resource requirements",
+      "additionalProperties": false,
+      "properties": {
+        "requests": {
+          "type": "object",
+          "description": "Resource requests",
+          "additionalProperties": false,
+          "properties": {
+            "memory": {
+              "type": "string",
+              "description": "Memory request (e.g., '200Mi')"
+            },
+            "cpu": {
+              "type": "string",
+              "description": "CPU request (e.g., '200m')"
+            }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "description": "Resource limits",
+          "additionalProperties": false,
+          "properties": {
+            "memory": {
+              "type": "string",
+              "description": "Memory limit (e.g., '512Mi')"
+            },
+            "cpu": {
+              "type": "string",
+              "description": "CPU limit (e.g., '500m')"
+            }
+          }
+        }
+      }
+    },
+    "securityContext": {
+      "type": "object",
+      "description": "Container security context",
+      "properties": {
+        "allowPrivilegeEscalation": {
+          "type": "boolean",
+          "description": "Whether the container can gain more privileges than its parent process"
+        },
+        "runAsNonRoot": {
+          "type": "boolean",
+          "description": "Whether the container must run as a non-root user"
+        },
+        "runAsUser": {
+          "type": "integer",
+          "description": "The UID to run the container as"
+        },
+        "runAsGroup": {
+          "type": "integer",
+          "description": "The GID to run the container as"
+        },
+        "readOnlyRootFilesystem": {
+          "type": "boolean",
+          "description": "Whether the container has a read-only root filesystem"
+        },
+        "capabilities": {
+          "type": "object",
+          "description": "Linux capabilities",
+          "properties": {
+            "add": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Capabilities to add"
+            },
+            "drop": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Capabilities to drop"
+            }
+          }
+        }
+      }
+    },
+    "podSecurityContext": {
+      "type": "object",
+      "description": "Pod security context",
+      "properties": {
+        "fsGroup": {
+          "type": "integer",
+          "description": "A special supplemental group that applies to all containers in a pod"
+        },
+        "runAsUser": {
+          "type": "integer",
+          "description": "The UID to run the entrypoint of the container process"
+        },
+        "runAsGroup": {
+          "type": "integer",
+          "description": "The GID to run the entrypoint of the container process"
+        },
+        "runAsNonRoot": {
+          "type": "boolean",
+          "description": "Indicates that the container must run as a non-root user"
+        },
+        "supplementalGroups": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "description": "A list of groups applied to the first process run in each container"
+        }
+      }
+    },
+    "httpGetProbe": {
+      "type": "object",
+      "description": "HTTP probe configuration",
+      "properties": {
+        "httpGet": {
+          "type": "object",
+          "description": "HTTP GET probe settings",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Path to probe"
+            },
+            "port": {
+              "type": [
+                "string",
+                "integer"
+              ],
+              "description": "Port to probe (can be a port name or number)"
+            },
+            "scheme": {
+              "type": "string",
+              "enum": [
+                "HTTP",
+                "HTTPS"
+              ],
+              "description": "Scheme to use (HTTP or HTTPS)"
+            }
+          },
+          "required": [
+            "path",
+            "port"
+          ]
+        },
+        "initialDelaySeconds": {
+          "type": "integer",
+          "description": "Number of seconds after the container has started before probes are initiated"
+        },
+        "periodSeconds": {
+          "type": "integer",
+          "description": "How often to perform the probe"
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "description": "Number of seconds after which the probe times out"
+        },
+        "successThreshold": {
+          "type": "integer",
+          "description": "Minimum consecutive successes for the probe to be considered successful"
+        },
+        "failureThreshold": {
+          "type": "integer",
+          "description": "Number of times the probe can fail before giving up"
+        }
+      }
+    },
+    "nodeSelector": {
+      "type": "object",
+      "description": "Node selector for pod scheduling",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "tolerations": {
+      "type": "array",
+      "description": "Tolerations for pod scheduling",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Taint key"
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "Exists",
+              "Equal"
+            ],
+            "description": "Toleration operator"
+          },
+          "value": {
+            "type": "string",
+            "description": "Taint value"
+          },
+          "effect": {
+            "type": "string",
+            "enum": [
+              "NoSchedule",
+              "PreferNoSchedule",
+              "NoExecute"
+            ],
+            "description": "Taint effect"
+          },
+          "tolerationSeconds": {
+            "type": "integer",
+            "description": "Period of time the toleration tolerates the taint"
+          }
+        }
+      }
+    },
+    "affinity": {
+      "type": "object",
+      "description": "Affinity rules for pod scheduling"
+    },
+    "volumes": {
+      "type": "array",
+      "description": "Additional volumes to add to the pod",
+      "items": {
+        "type": "object"
+      }
+    },
+    "volumeMounts": {
+      "type": "array",
+      "description": "Additional volume mounts for the container",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the volume"
+          },
+          "mountPath": {
+            "type": "string",
+            "description": "Path within the container at which the volume should be mounted"
+          },
+          "readOnly": {
+            "type": "boolean",
+            "description": "Whether the volume is mounted read-only"
+          },
+          "subPath": {
+            "type": "string",
+            "description": "Path within the volume from which the container's volume should be mounted"
+          }
+        },
+        "required": [
+          "name",
+          "mountPath"
+        ]
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "description": "Container lifecycle hooks",
+      "properties": {
+        "preStop": {
+          "type": "object",
+          "description": "Called before container is terminated"
+        },
+        "postStart": {
+          "type": "object",
+          "description": "Called immediately after container is created"
+        }
+      }
+    },
+    "annotations": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Annotations to add",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "labels": {
+      "type": "object",
+      "description": "Labels to add",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}

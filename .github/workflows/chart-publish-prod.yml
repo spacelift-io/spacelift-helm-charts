@@ -9,7 +9,7 @@ concurrency:
   group: ${{ github.ref }}-chart-publish-prod
 
 env:
-  HELM_VERSION: "3.17.3"
+  HELM_VERSION: "3.20.0"
 
 jobs:
   registry:
