@@ -1,3 +1,7 @@
+crds:
+  install: true
+  annotations: {}
+
 controllerManager:
   # If you do not specify a list of namespaces here, the controller will be assigned a ClusterRole,
   # and will be able to manage WorkerPools across all namespaces in your cluster.

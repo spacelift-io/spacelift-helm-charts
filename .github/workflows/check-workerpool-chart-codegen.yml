@@ -1,0 +1,30 @@
+name: Check workerpool chart codegen
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - "spacelift-workerpool-controller/**"
+
+jobs:
+  codegen:
+    name: Verify spacelift-workerpool-controller codegen
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@main
+
+      - name: Run codegen
+        working-directory: spacelift-workerpool-controller
+        run: make codegen-helm
+
+      - name: Verify clean working tree
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "Working tree is dirty after codegen. Run 'make codegen-helm' and commit the changes."
+            git status --porcelain
+            exit 1
+          fi
