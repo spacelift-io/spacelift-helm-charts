@@ -70,3 +70,19 @@ spec:
                   key: "SPACELIFT_PROMEX_API_KEY_SECRET"
             - name: "SPACELIFT_PROMEX_LISTEN_ADDRESS"
               value: "{{ .Values.listenAddress}}"
+            {{- if .Values.caCert.enabled }}
+            - name: "SPACELIFT_PROMEX_CA_CERT_PATH"
+              value: "{{ .Values.caCert.mountPath }}/{{ .Values.caCert.secretKey }}"
+            {{- end }}
+          {{- if .Values.caCert.enabled }}
+          volumeMounts:
+            - name: ca-cert
+              mountPath: {{ .Values.caCert.mountPath }}
+              readOnly: true
+          {{- end }}
+      {{- if .Values.caCert.enabled }}
+      volumes:
+        - name: ca-cert
+          secret:
+            secretName: {{ .Values.caCert.secretName | required "caCert.secretName is required when caCert.enabled is true" }}
+      {{- end }}

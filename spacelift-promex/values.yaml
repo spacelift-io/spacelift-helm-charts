@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: public.ecr.aws/spacelift/promex
-  tag: v0.3.1
+  tag: v0.7.0
   pullPolicy: IfNotPresent
 
 
@@ -35,4 +35,16 @@ annotations:
 # nodeSelector:
 #   kubernetes.io/arch: amd64
 #   disktype: ssd
+
+## Custom CA certificate to trust when connecting to the Spacelift API
+## Use this when the endpoint uses a certificate chain not covered by system CAs
+caCert:
+  enabled: false
+  # Name of the Kubernetes secret containing the CA certificate
+  secretName: ""
+  # Key within the secret that holds the PEM-encoded CA certificate
+  secretKey: "ca.crt"
+  # Directory to mount the CA certificate into
+  mountPath: "/certs"
+
 nodeSelector: {}
