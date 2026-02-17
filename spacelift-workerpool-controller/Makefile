@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 CRDS_PATH ?= config/crd/bases
 CRDS_OUT_DIR ?= charts/crds/templates
-CHART_VERSION ?= v0.13.0
+CHART_VERSION ?= v0.14.0
 
 .PHONY: codegen-helm
 codegen-helm: codegen-helm-crds codegen-helm-update-versions
