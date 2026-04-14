@@ -1,0 +1,47 @@
+{{- if .Values.pdb.enabled }}
+{{- if and .Values.pdb.minAvailable .Values.pdb.maxUnavailable }}
+{{- fail "pdb.minAvailable and pdb.maxUnavailable are mutually exclusive; set only one" }}
+{{- end }}
+{{ if default .Values.controllerManager.namespaces | empty }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "spacelift-workerpool-controller.fullname" . }}-worker-pdb
+  labels:
+  {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.pdb.minAvailable }}
+  minAvailable: {{ .Values.pdb.minAvailable }}
+  {{- end }}
+  {{- if .Values.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.pdb.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchExpressions:
+      - key: workers.spacelift.io/workerpool
+        operator: Exists
+{{ else }}
+{{ range $index, $namespace := .Values.controllerManager.namespaces }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "spacelift-workerpool-controller.fullname" $ }}-worker-pdb
+  namespace: '{{ $namespace }}'
+  labels:
+  {{- include "spacelift-workerpool-controller.labels" $ | nindent 4 }}
+spec:
+  {{- if $.Values.pdb.minAvailable }}
+  minAvailable: {{ $.Values.pdb.minAvailable }}
+  {{- end }}
+  {{- if $.Values.pdb.maxUnavailable }}
+  maxUnavailable: {{ $.Values.pdb.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchExpressions:
+      - key: workers.spacelift.io/workerpool
+        operator: Exists
+{{ end }}
+{{ end }}
+{{- end }}

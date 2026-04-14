@@ -77,5 +77,13 @@ metricsService:
     # annotations: {}       # Optional: annotations for ServiceMonitor
     # tlsConfig: {}         # Optional: TLS configuration for scraping
     # bearerTokenFile: ""   # Optional: bearer token file for authentication
+
+# Pod Disruption Budget for worker pods.
+# This protects worker pods (not the controller) from voluntary disruptions during node drains
+# and rolling upgrades. Only one of minAvailable or maxUnavailable should be set.
+pdb:
+  enabled: false
+  minAvailable: "100%"
+  # maxUnavailable: 1
 spacelift-promex:
   enabled: false
