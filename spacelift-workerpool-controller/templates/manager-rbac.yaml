@@ -93,7 +93,7 @@ metadata:
   labels:
   {{- include "spacelift-workerpool-controller.labels" $ | nindent 4 }}
 rules:
-{{ include "rules" . -}}
+{{ include "rules" $ -}}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -111,4 +111,37 @@ subjects:
     name: {{ include "spacelift-workerpool-controller.serviceAccountName" $ }}
     namespace: '{{ $.Release.Namespace }}'
 {{ end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "spacelift-workerpool-controller.fullname" . }}-manager-release-secrets-role
+  namespace: '{{ .Release.Namespace }}'
+  labels:
+  {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "spacelift-workerpool-controller.fullname" . }}-manager-release-secrets-rolebinding
+  namespace: '{{ .Release.Namespace }}'
+  labels:
+  {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: '{{ include "spacelift-workerpool-controller.fullname" . }}-manager-release-secrets-role'
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "spacelift-workerpool-controller.serviceAccountName" . }}
+    namespace: '{{ .Release.Namespace }}'
 {{ end }}
