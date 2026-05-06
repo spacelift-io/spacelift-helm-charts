@@ -1,5 +1,5 @@
 {{- if .Values.pdb.enabled }}
-{{- if and .Values.pdb.minAvailable .Values.pdb.maxUnavailable }}
+{{- if and (hasKey .Values.pdb "minAvailable") (hasKey .Values.pdb "maxUnavailable") }}
 {{- fail "pdb.minAvailable and pdb.maxUnavailable are mutually exclusive; set only one" }}
 {{- end }}
 {{ if default .Values.controllerManager.namespaces | empty }}
@@ -11,10 +11,10 @@ metadata:
   labels:
   {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.pdb.minAvailable }}
+  {{- if hasKey .Values.pdb "minAvailable" }}
   minAvailable: {{ .Values.pdb.minAvailable }}
   {{- end }}
-  {{- if .Values.pdb.maxUnavailable }}
+  {{- if hasKey .Values.pdb "maxUnavailable" }}
   maxUnavailable: {{ .Values.pdb.maxUnavailable }}
   {{- end }}
   selector:
@@ -32,10 +32,10 @@ metadata:
   labels:
   {{- include "spacelift-workerpool-controller.labels" $ | nindent 4 }}
 spec:
-  {{- if $.Values.pdb.minAvailable }}
+  {{- if hasKey $.Values.pdb "minAvailable" }}
   minAvailable: {{ $.Values.pdb.minAvailable }}
   {{- end }}
-  {{- if $.Values.pdb.maxUnavailable }}
+  {{- if hasKey $.Values.pdb "maxUnavailable" }}
   maxUnavailable: {{ $.Values.pdb.maxUnavailable }}
   {{- end }}
   selector:
