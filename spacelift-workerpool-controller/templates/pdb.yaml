@@ -2,6 +2,9 @@
 {{- if and (hasKey .Values.pdb "minAvailable") (hasKey .Values.pdb "maxUnavailable") }}
 {{- fail "pdb.minAvailable and pdb.maxUnavailable are mutually exclusive; set only one" }}
 {{- end }}
+{{- if and (not (hasKey .Values.pdb "minAvailable")) (not (hasKey .Values.pdb "maxUnavailable")) }}
+{{- fail "pdb.enabled is true but neither pdb.minAvailable nor pdb.maxUnavailable is set; set exactly one" }}
+{{- end }}
 {{ if default .Values.controllerManager.namespaces | empty }}
 ---
 apiVersion: policy/v1

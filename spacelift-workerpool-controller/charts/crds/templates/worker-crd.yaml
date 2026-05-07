@@ -74,7 +74,10 @@ spec:
               registered:
                 type: boolean
               replicas:
-                description: Replicas mirrors Spec.Replicas for the scale subresource.
+                description: |-
+                  Replicas reports how many pods are currently associated with this Worker:
+                  1 while a run is executing (BUSY), 0 otherwise (IDLE or being deleted).
+                  Required by the scale subresource contract.
                 format: int32
                 type: integer
               selector:

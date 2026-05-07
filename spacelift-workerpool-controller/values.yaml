@@ -80,10 +80,11 @@ metricsService:
 
 # Pod Disruption Budget for worker pods.
 # This protects worker pods (not the controller) from voluntary disruptions during node drains
-# and rolling upgrades. Only one of minAvailable or maxUnavailable should be set.
+# and rolling upgrades. When enabled, set exactly one of minAvailable or maxUnavailable.
+# See README for example configurations.
 pdb:
   enabled: false
-  minAvailable: "100%"
+  # minAvailable: "100%"
   # maxUnavailable: 1
 spacelift-promex:
   enabled: false

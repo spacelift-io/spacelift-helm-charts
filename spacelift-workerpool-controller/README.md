@@ -43,7 +43,8 @@ once runs complete and pods terminate naturally.
 | `pdb.minAvailable` | Minimum available worker pods (number or percentage) | - |
 | `pdb.maxUnavailable` | Maximum unavailable worker pods (number or percentage) | - |
 
-Only one of `minAvailable` or `maxUnavailable` should be set.
+Exactly one of `minAvailable` or `maxUnavailable` must be set when `pdb.enabled: true`. Setting
+both, or neither, fails the install/upgrade with a template error.
 
 ### Namespace Considerations
 
