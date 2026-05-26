@@ -12,6 +12,12 @@ global:
   nameOverride: ""
   fullnameOverride: ""
 
+# Service Account
+serviceAccount:
+  create: true
+  name: "spacelift-flows"
+  annotations: {}
+
 secretName: spacelift-flows-secret
 
 appDomain: ""
