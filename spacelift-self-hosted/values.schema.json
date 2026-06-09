@@ -503,6 +503,14 @@
       "type": "string",
       "default": "spacelift",
       "description": "Override the full name used for resources"
+    },
+    "extraManifests": {
+      "type": "array",
+      "description": "List of additional Kubernetes manifests to render. Each item is rendered through the Helm template engine.",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
     }
   },
   "$defs": {
