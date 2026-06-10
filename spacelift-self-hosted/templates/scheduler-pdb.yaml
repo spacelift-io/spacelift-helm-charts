@@ -1,0 +1,22 @@
+{{- with .Values.scheduler.pdb }}
+{{- if .enabled }}
+{{ include "spacelift.validatePodDisruptionBudget" . }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "spacelift.fullname" $ }}-scheduler
+  labels:
+    {{- include "spacelift.schedulerLabels" $ | nindent 4 }}
+spec:
+  {{- if hasKey . "minAvailable" }}
+  minAvailable: {{ .minAvailable }}
+  {{- end }}
+  {{- if hasKey . "maxUnavailable" }}
+  maxUnavailable: {{ .maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "spacelift.schedulerSelectorLabels" $ | nindent 6 }}
+{{- end }}
+{{- end }}

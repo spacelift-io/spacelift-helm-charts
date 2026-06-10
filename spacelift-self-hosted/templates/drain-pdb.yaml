@@ -1,0 +1,22 @@
+{{- with .Values.drain.pdb }}
+{{- if .enabled }}
+{{ include "spacelift.validatePodDisruptionBudget" . }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "spacelift.fullname" $ }}-drain
+  labels:
+    {{- include "spacelift.drainLabels" $ | nindent 4 }}
+spec:
+  {{- if hasKey . "minAvailable" }}
+  minAvailable: {{ .minAvailable }}
+  {{- end }}
+  {{- if hasKey . "maxUnavailable" }}
+  maxUnavailable: {{ .maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "spacelift.drainSelectorLabels" $ | nindent 6 }}
+{{- end }}
+{{- end }}

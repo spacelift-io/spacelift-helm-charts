@@ -185,3 +185,15 @@ Create the name of the service account to use for the VCS Gateway.
 {{- include "spacelift.serviceAccountName" . }}
 {{- end }}
 {{- end }}
+
+{{/*
+Validates PodDisruptionBudget configuration
+*/}}
+{{- define "spacelift.validatePodDisruptionBudget" -}}
+{{- if and (hasKey . "minAvailable") (hasKey . "maxUnavailable") }}
+{{- fail "pdb.minAvailable and pdb.maxUnavailable are mutually exclusive; set only one" }}
+{{- end }}
+{{- if and (not (hasKey . "minAvailable")) (not (hasKey . "maxUnavailable")) }}
+{{- fail "pdb.enabled is true but neither pdb.minAvailable nor pdb.maxUnavailable is set; set exactly one" }}
+{{- end }}
+{{- end }}

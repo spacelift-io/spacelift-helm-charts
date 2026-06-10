@@ -105,6 +105,9 @@
         "terminationGracePeriodSeconds": {
           "type": "integer",
           "description": "Duration in seconds that Kubernetes waits for the pod to terminate gracefully"
+        },
+        "pdb": {
+          "$ref": "#/$defs/podDisruptionBudget"
         }
       }
     },
@@ -170,6 +173,9 @@
         "terminationGracePeriodSeconds": {
           "type": "integer",
           "description": "Duration in seconds that Kubernetes waits for the pod to terminate gracefully"
+        },
+        "pdb": {
+          "$ref": "#/$defs/podDisruptionBudget"
         }
       }
     },
@@ -228,6 +234,9 @@
         "terminationGracePeriodSeconds": {
           "type": "integer",
           "description": "Duration in seconds that Kubernetes waits for the pod to terminate gracefully"
+        },
+        "pdb": {
+          "$ref": "#/$defs/podDisruptionBudget"
         }
       }
     },
@@ -306,6 +315,9 @@
         "terminationGracePeriodSeconds": {
           "type": "integer",
           "description": "Duration in seconds that Kubernetes waits for the pod to terminate gracefully"
+        },
+        "pdb": {
+          "$ref": "#/$defs/podDisruptionBudget"
         },
         "service": {
           "type": "object",
@@ -861,6 +873,32 @@
       "description": "Labels to add",
       "additionalProperties": {
         "type": "string"
+      }
+    },
+    "podDisruptionBudget": {
+      "type": "object",
+      "description": "PodDisruptionBudget configuration",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable PodDisruptionBudget"
+        },
+        "minAvailable": {
+          "type": [
+            "integer",
+            "string"
+          ],
+          "description": "Minimum number or percentage of pods that must remain available (e.g., 1 or '50%') during voluntary disruptions (like node maintenance, draining, or scaling)"
+        },
+        "maxUnavailable": {
+          "type": [
+            "integer",
+            "string"
+          ],
+          "description": "Maximum number or percentage of pods that can be unavailable (e.g., 1 or '50%') during voluntary disruptions (like node maintenance, draining, or scaling)"
+        }
       }
     }
   }
