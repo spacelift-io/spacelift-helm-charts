@@ -1,3 +1,7 @@
+# Default owners for all files (fallback unless a later rule matches)
+# Platform team handles infrastructure and tooling, making them suitable for general chart maintenance.
+* @spacelift-io/platform
+
 # Ecosystem Team - External integrations and VCS connectivity
 /vcs-agent/ @spacelift-io/ecosystem-backend
 
@@ -14,7 +18,3 @@
 
 # Platform Team - Infrastructure, monitoring, and observability
 /spacelift-promex/ @spacelift-io/platform
-
-# Default owners for all files (fallback)
-# Platform team handles infrastructure and tooling, making them suitable for general chart maintenance.
-* @spacelift-io/platform
