@@ -101,6 +101,10 @@
         },
         "lifecycle": {
           "$ref": "#/$defs/lifecycle"
+        },
+        "terminationGracePeriodSeconds": {
+          "type": "integer",
+          "description": "Duration in seconds that Kubernetes waits for the pod to terminate gracefully"
         }
       }
     },
@@ -162,6 +166,10 @@
         },
         "lifecycle": {
           "$ref": "#/$defs/lifecycle"
+        },
+        "terminationGracePeriodSeconds": {
+          "type": "integer",
+          "description": "Duration in seconds that Kubernetes waits for the pod to terminate gracefully"
         }
       }
     },
@@ -216,6 +224,10 @@
         },
         "lifecycle": {
           "$ref": "#/$defs/lifecycle"
+        },
+        "terminationGracePeriodSeconds": {
+          "type": "integer",
+          "description": "Duration in seconds that Kubernetes waits for the pod to terminate gracefully"
         }
       }
     },
@@ -290,6 +302,10 @@
         },
         "lifecycle": {
           "$ref": "#/$defs/lifecycle"
+        },
+        "terminationGracePeriodSeconds": {
+          "type": "integer",
+          "description": "Duration in seconds that Kubernetes waits for the pod to terminate gracefully"
         },
         "service": {
           "type": "object",

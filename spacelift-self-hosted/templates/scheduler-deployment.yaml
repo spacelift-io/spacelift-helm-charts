@@ -24,6 +24,9 @@ spec:
       serviceAccountName: {{ include "spacelift.schedulerServiceAccountName" . }}
       securityContext:
         {{- toYaml .Values.scheduler.podSecurityContext | nindent 8 }}
+      {{- if .Values.scheduler.terminationGracePeriodSeconds | empty | not }}
+      terminationGracePeriodSeconds: {{ .Values.scheduler.terminationGracePeriodSeconds }}
+      {{- end }}
       {{- if .Values.cloudSqlProxy.enabled }}
       initContainers:
         - name: cloud-sql-proxy

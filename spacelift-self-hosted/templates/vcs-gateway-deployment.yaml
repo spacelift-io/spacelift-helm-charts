@@ -30,6 +30,9 @@ spec:
       serviceAccountName: {{ include "spacelift.vcsGatewayServiceAccountName" . }}
       securityContext:
         {{- toYaml .Values.vcsGateway.podSecurityContext | nindent 8 }}
+      {{- if .Values.vcsGateway.terminationGracePeriodSeconds | empty | not }}
+      terminationGracePeriodSeconds: {{ .Values.vcsGateway.terminationGracePeriodSeconds }}
+      {{- end }}
       {{- if .Values.cloudSqlProxy.enabled }}
       initContainers:
         - name: cloud-sql-proxy

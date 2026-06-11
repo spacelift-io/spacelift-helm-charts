@@ -24,6 +24,9 @@ spec:
       serviceAccountName: {{ include "spacelift.drainServiceAccountName" . }}
       securityContext:
         {{- toYaml .Values.drain.podSecurityContext | nindent 8 }}
+      {{- if .Values.drain.terminationGracePeriodSeconds | empty | not }}
+      terminationGracePeriodSeconds: {{ .Values.drain.terminationGracePeriodSeconds }}
+      {{- end }}
       {{- if .Values.cloudSqlProxy.enabled }}
       initContainers:
         - name: cloud-sql-proxy
