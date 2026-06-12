@@ -3,6 +3,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
+    {{- if .Values.keepOnUninstall }}
+    helm.sh/resource-policy: keep
+    {{- end }}
     {{- with .Values.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -5736,6 +5739,12 @@ spec:
                       When set, this image will be used instead of the backend-provided runner image
                       for Ansible stacks.
                       Default: public.ecr.aws/spacelift/runner-ansible:latest
+                    type: string
+                  defaultIntentImage:
+                    description: |-
+                      DefaultIntentImage overrides the image used for the intent-worker container when
+                      running intent tasks. When set, this image is used instead of the backend-provided
+                      image for every intent task on this pool.
                     type: string
                   defaultRunnerImage:
                     description: |-
@@ -11521,32 +11530,29 @@ spec:
                   SpaceliftAPICredentials references a secret containing API credentials. This takes
                   precedence over the controller level credentials
                 properties:
-                  secretKeyRef:
-                    description: SecretKeySelector selects a key of a Secret.
-                    properties:
-                      key:
-                        description: The key of the secret to select from.  Must be
-                          a valid secret key.
-                        type: string
-                      name:
-                        default: ""
-                        description: |-
-                          Name of the referent.
-                          This field is effectively required, but due to backwards compatibility is
-                          allowed to be empty. Instances of this type with an empty value here are
-                          almost certainly wrong.
-                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                        type: string
-                      optional:
-                        description: Specify whether the Secret or its key must be
-                          defined
-                        type: boolean
-                    required:
-                    - key
-                    type: object
-                    x-kubernetes-map-type: atomic
+                  keyEndpointField:
+                    default: endpoint
+                    description: KeyEndpointField is the key within the Secret that
+                      holds the Spacelift API endpoint.
+                    type: string
+                  keyIdField:
+                    default: keyId
+                    description: KeyIDField is the key within the Secret that holds
+                      the Spacelift API key ID.
+                    type: string
+                  keySecretField:
+                    default: keySecret
+                    description: KeySecretField is the key within the Secret that
+                      holds the Spacelift API key secret.
+                    type: string
+                  secretName:
+                    description: |-
+                      SecretName is the name of the Secret, in the WorkerPool's namespace, containing
+                      the Spacelift API credentials.
+                    minLength: 1
+                    type: string
                 required:
-                - secretKeyRef
+                - secretName
                 type: object
               successfulPodsHistoryLimit:
                 description: |-

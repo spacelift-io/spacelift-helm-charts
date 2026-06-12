@@ -1,5 +1,9 @@
 crds:
   install: true
+  # When true, CRDs are annotated with helm.sh/resource-policy: keep so that
+  # `helm uninstall` does not delete them (and cascade-delete every WorkerPool
+  # and Worker custom resource users have created).
+  keepOnUninstall: true
   annotations: {}
 
 controllerManager:
@@ -20,7 +24,7 @@ controllerManager:
         - ALL
     image:
       repository: public.ecr.aws/spacelift/kube-workerpool-controller
-      tag: v0.0.33
+      tag: v0.0.35
     resources:
       limits:
         memory: 128Mi

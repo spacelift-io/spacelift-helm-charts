@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 CRDS_PATH ?= config/crd/bases
 CRDS_OUT_DIR ?= charts/crds/templates
-CHART_VERSION ?= v0.16.0
+CHART_VERSION ?= v0.17.0
 
 .PHONY: codegen-helm
 codegen-helm: codegen-helm-crds codegen-helm-update-versions
@@ -21,6 +21,9 @@ define generate_crd
 		| awk ' \
 			/^  annotations:/ { \
 				print; \
+				print "    {{- if .Values.keepOnUninstall }}"; \
+				print "    helm.sh/resource-policy: keep"; \
+				print "    {{- end }}"; \
 				print "    {{- with .Values.annotations }}"; \
 				print "    {{- toYaml . | nindent 4 }}"; \
 				print "    {{- end }}"; \
