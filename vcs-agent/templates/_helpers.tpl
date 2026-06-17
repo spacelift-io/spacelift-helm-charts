@@ -51,6 +51,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Name of the secret holding the VCS Agent credentials. Uses the externally-managed
+secret when set, otherwise the chart-managed secret.
+*/}}
+{{- define "vcs-agent.secretName" -}}
+{{- default (include "vcs-agent.fullname" .) .Values.credentials.existingSecret }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "vcs-agent.serviceAccountName" -}}

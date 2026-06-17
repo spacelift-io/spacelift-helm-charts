@@ -32,8 +32,33 @@ To authenticate with Spacelift, you need to set the `SPACELIFT_VCS_AGENT_POOL_TO
 environment variables. By default, this chart will create a Kubernetes secret for you and configure both environment variables if you set the `credentials.token`, `credentials.endpoint` and `credentials.vendor`
 variables.
 
-If you want to provide your credentials another way, set `credentials.create` to `false`, and
-use the `vcs-agent.extraEnv` value to provide the variables yourself. For example:
+### Using an existing secret
+
+If you manage the credentials secret outside of the chart (for example with the
+[External Secrets Operator](https://external-secrets.io/)), set `credentials.existingSecret` to the
+name of that secret. The chart will not create or manage a secret of its own, and will source the
+environment variables from the secret you reference:
+
+```yaml
+credentials:
+  existingSecret: spacelift-vcs-agent
+```
+
+The secret is expected to contain the keys `token`, `endpoint` and `vendor`. If your secret uses
+different key names, override them:
+
+```yaml
+credentials:
+  existingSecret: spacelift-vcs-agent
+  tokenSecretKey: SPACELIFT_VCS_AGENT_POOL_TOKEN
+  endpointSecretKey: SPACELIFT_VCS_AGENT_TARGET_BASE_ENDPOINT
+  vendorSecretKey: SPACELIFT_VCS_AGENT_VENDOR
+```
+
+### Providing credentials another way
+
+Alternatively, set `credentials.create` to `false` and use the `vcs-agent.extraEnv` value to provide
+the variables yourself. For example:
 
 ```yaml
 credentials:

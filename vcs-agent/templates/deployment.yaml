@@ -39,22 +39,23 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            {{- if .Values.credentials.create }}
+            {{- if or .Values.credentials.create .Values.credentials.existingSecret }}
+            {{- $secretName := include "vcs-agent.secretName" . }}
             - name: SPACELIFT_VCS_AGENT_POOL_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "vcs-agent.fullname" . }}
-                  key: token
+                  name: {{ $secretName }}
+                  key: {{ .Values.credentials.tokenSecretKey }}
             - name: SPACELIFT_VCS_AGENT_TARGET_BASE_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "vcs-agent.fullname" . }}
-                  key: endpoint
+                  name: {{ $secretName }}
+                  key: {{ .Values.credentials.endpointSecretKey }}
             - name: SPACELIFT_VCS_AGENT_VENDOR
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "vcs-agent.fullname" . }}
-                  key: vendor
+                  name: {{ $secretName }}
+                  key: {{ .Values.credentials.vendorSecretKey }}
             {{- end }}
             {{- with .Values.vcsagent.extraEnv }}
             {{- toYaml . | nindent 12 }}
