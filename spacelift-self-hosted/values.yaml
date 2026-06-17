@@ -182,6 +182,7 @@ service:
   port: 80
 
 mqttService:
+  enabled: true
   type: ClusterIP
   port: 1984
   annotations: {}

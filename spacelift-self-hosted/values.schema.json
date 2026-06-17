@@ -471,6 +471,11 @@
       "description": "MQTT service configuration",
       "additionalProperties": false,
       "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the MQTT service"
+        },
         "type": {
           "$ref": "#/$defs/serviceType",
           "default": "ClusterIP"

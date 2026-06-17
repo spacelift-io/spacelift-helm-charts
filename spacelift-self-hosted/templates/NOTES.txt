@@ -4,7 +4,7 @@
   kubectl get ingresses --namespace "{{ .Release.Namespace }}"
 {{- end }}
 
-{{- if eq .Values.mqttService.type "LoadBalancer" }}
+{{- if and .Values.mqttService.enabled (eq .Values.mqttService.type "LoadBalancer") }}
 2. Get the MQTT service address by running this command:
 
   kubectl get services --namespace "{{ .Release.Namespace }}" "{{ include "spacelift.fullname" . }}-mqtt"
