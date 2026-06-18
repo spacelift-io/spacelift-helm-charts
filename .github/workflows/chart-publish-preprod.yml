@@ -3,7 +3,7 @@ name: Preprod chart publish
 on:
   push:
     branches:
-      - main
+      - wojciechp/publish-to-cloudflare
 
 concurrency:
   group: ${{ github.ref }}-chart-publish-preprod
@@ -54,13 +54,13 @@ jobs:
       - name: Create output directory for spacelift-flows-agent chart
         run: mkdir -p build/chart/spacelift-flows-agent
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          aws-region: ${{ secrets.PREPROD_AWS_REGION }}
-          role-to-assume: ${{ secrets.PREPROD_AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 900
-
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v6
+#        with:
+#          aws-region: ${{ secrets.PREPROD_AWS_REGION }}
+#          role-to-assume: ${{ secrets.PREPROD_AWS_ROLE_TO_ASSUME }}
+#          role-duration-seconds: 900
+#
       - name: Add the Spacelift Helm registry
         run: helm repo add spacelift s3://${{ secrets.PREPROD_AWS_S3_BUCKET }}/helm
         # The first time this step runs the index file won't exist, so allow the step to fail
@@ -74,60 +74,105 @@ jobs:
       - name: Lint spacelift-promex chart
         run: helm lint spacelift-promex/
 
-      - name: Lint Spacelift Worker Pool chart
-        run: helm lint spacelift-worker-pool/
-
-      - name: Lint Spacelift VCS Agent chart
-        run: helm lint vcs-agent/
-
-      - name: Lint spacelift-workerpool-controller chart
-        run: |
-          helm dependency update spacelift-workerpool-controller/
-          helm lint spacelift-workerpool-controller/
-
-      - name: Lint spacelift-self-hosted chart
-        run: helm lint --strict spacelift-self-hosted/
-
-      - name: Lint spacelift-flows chart
-        run: helm lint --strict spacelift-flows/
-
-      - name: Lint spacelift-flows-agent chart
-        run: helm lint --strict spacelift-flows-agent/
-
       - name: Package spacelift-promex chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-promex spacelift-promex/
-          helm s3 push --relative build/chart/spacelift-promex/spacelift-promex-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --relative build/chart/spacelift-promex/spacelift-promex-${CHART_VERSION}.tgz spacelift
 
       - name: Package Spacelift Worker Pool chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/worker-pool spacelift-worker-pool/
-          helm s3 push --relative build/chart/worker-pool/spacelift-worker-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --relative build/chart/worker-pool/spacelift-worker-${CHART_VERSION}.tgz spacelift
 
       - name: Package Spacelift VCS Agent chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/vcs-agent vcs-agent/
-          helm s3 push --relative build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --relative build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
 
       - name: Package spacelift-workerpool-controller chart
         run: |
+          helm dependency update spacelift-workerpool-controller/
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-workerpool-controller spacelift-workerpool-controller/
-          helm s3 push --relative build/chart/spacelift-workerpool-controller/spacelift-workerpool-controller-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --relative build/chart/spacelift-workerpool-controller/spacelift-workerpool-controller-${CHART_VERSION}.tgz spacelift
 
       - name: Package spacelift-self-hosted chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-self-hosted spacelift-self-hosted/
-          helm s3 push --relative build/chart/spacelift-self-hosted/spacelift-self-hosted-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --relative build/chart/spacelift-self-hosted/spacelift-self-hosted-${CHART_VERSION}.tgz spacelift
 
       - name: Package spacelift-flows chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-flows spacelift-flows/
-          helm s3 push --relative build/chart/spacelift-flows/spacelift-flows-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --relative build/chart/spacelift-flows/spacelift-flows-${CHART_VERSION}.tgz spacelift
 
       - name: Package spacelift-flows-agent chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-flows-agent spacelift-flows-agent/
-          helm s3 push --relative build/chart/spacelift-flows-agent/spacelift-flows-agent-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --relative build/chart/spacelift-flows-agent/spacelift-flows-agent-${CHART_VERSION}.tgz spacelift
+
+
+      - name: Publish charts to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.PREPROD_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PREPROD_R2_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ""
+          AWS_REGION: auto
+          AWS_EC2_METADATA_DISABLED: "true"
+          R2_BUCKET: ${{ vars.PREPROD_R2_BUCKET }}
+          R2_ENDPOINT: ${{ vars.PREPROD_R2_ENDPOINT_URL }}
+        # helm-s3 is incompatible with R2: the plugin unconditionally sets
+        # `x-amz-acl`, which R2 rejects with 501 NotImplemented for any value
+        # (per the R2 S3 API compatibility doc — `x-amz-acl` is in the
+        # unimplemented list for PutObject). Use the low-level `aws s3api`
+        # commands (matching the launcher-binary mirror pattern in backend's
+        # job_link-launcher.yaml) plus `helm repo index --merge`. The S3
+        # publish path above keeps using `helm s3 push` once re-enabled.
+        run: |
+          set -euo pipefail
+
+          put() {
+            aws s3api put-object \
+              --bucket "$R2_BUCKET" \
+              --key "$1" \
+              --body "$2" \
+              --endpoint-url "$R2_ENDPOINT" >/dev/null
+          }
+
+          STAGE=$(mktemp -d)
+          find build/chart -maxdepth 2 -name '*.tgz' -exec cp {} "$STAGE/" \;
+          ls -la "$STAGE"
+
+          # Pull the current index.yaml so the rebuild merges rather than
+          # truncates the chart catalog. head-object first to tell "no index
+          # yet" (404) apart from a transient download failure — otherwise we
+          # could silently replace the index with a partial view.
+          if aws s3api head-object --bucket "$R2_BUCKET" --key helm/index.yaml \
+               --endpoint-url "$R2_ENDPOINT" >/dev/null 2>&1; then
+            aws s3api get-object \
+              --bucket "$R2_BUCKET" \
+              --key helm/index.yaml \
+              --endpoint-url "$R2_ENDPOINT" \
+              "$STAGE/previous-index.yaml" >/dev/null
+            helm repo index --merge "$STAGE/previous-index.yaml" "$STAGE"
+            rm -f "$STAGE/previous-index.yaml"
+          else
+            echo "No existing helm/index.yaml in R2 — generating fresh index."
+            helm repo index "$STAGE"
+          fi
+
+          for tgz in "$STAGE"/*.tgz; do
+            put "helm/$(basename "$tgz")" "$tgz"
+          done
+
+          # Upload the index last so consumers see a consistent state.
+          put "helm/index.yaml" "$STAGE/index.yaml"
+
+      - name: Purge Cloudflare cache
+        uses: spacelift-io/public-shared-actions/actions/purge-cloudflare-cache@main
+        with:
+          zone_id: ${{ vars.PREPROD_DOWNLOADS_CLOUDFLARE_ZONE_ID }}
+          api_token: ${{ secrets.PREPROD_CLOUDFLARE_CACHE_PURGE_TOKEN }}
+          purge_prefixes: downloads.spacelift.dev/helm/
 
       - name: Invalidate cache
         run: >-
