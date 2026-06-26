@@ -67,7 +67,7 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@@v7
+        uses: actions/checkout@v7
 
       - name: Install helm
         uses: azure/setup-helm@v5
@@ -77,12 +77,12 @@ jobs:
       - name: Install Helm S3 Plugin
         run: helm plugin install https://github.com/hypnoglow/helm-s3.git
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          aws-region: ${{ secrets.aws_region }}
-          role-to-assume: ${{ secrets.aws_role_to_assume }}
-          role-duration-seconds: 900
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v6
+#        with:
+#          aws-region: ${{ secrets.aws_region }}
+#          role-to-assume: ${{ secrets.aws_role_to_assume }}
+#          role-duration-seconds: 900
 
       - name: Add the Spacelift Helm registry
         run: helm repo add spacelift s3://${{ secrets.aws_s3_bucket }}/helm
@@ -136,38 +136,38 @@ jobs:
       - name: Package Spacelift PromEx chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-promex spacelift-promex/
-          helm s3 push --force --relative build/chart/spacelift-promex/spacelift-promex-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --force --relative build/chart/spacelift-promex/spacelift-promex-${CHART_VERSION}.tgz spacelift
 
       - name: Package Spacelift Worker Pool chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/worker-pool spacelift-worker-pool/
-          helm s3 push --force --relative build/chart/worker-pool/spacelift-worker-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --force --relative build/chart/worker-pool/spacelift-worker-${CHART_VERSION}.tgz spacelift
 
       - name: Package Spacelift VCS Agent chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/vcs-agent vcs-agent/
-          helm s3 push --force --relative build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --force --relative build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
 
       - name: Package spacelift-workerpool-controller chart
         run: |
           helm dependency update spacelift-workerpool-controller/
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-workerpool-controller spacelift-workerpool-controller/
-          helm s3 push --force --relative build/chart/spacelift-workerpool-controller/spacelift-workerpool-controller-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --force --relative build/chart/spacelift-workerpool-controller/spacelift-workerpool-controller-${CHART_VERSION}.tgz spacelift
 
       - name: Package spacelift-self-hosted chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-self-hosted spacelift-self-hosted/
-          helm s3 push --force --relative build/chart/spacelift-self-hosted/spacelift-self-hosted-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --force --relative build/chart/spacelift-self-hosted/spacelift-self-hosted-${CHART_VERSION}.tgz spacelift
 
       - name: Package spacelift-flows chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-flows spacelift-flows/
-          helm s3 push --force --relative build/chart/spacelift-flows/spacelift-flows-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --force --relative build/chart/spacelift-flows/spacelift-flows-${CHART_VERSION}.tgz spacelift
 
       - name: Package spacelift-flows-agent chart
         run: |
           helm package --version "$CHART_VERSION" --destination build/chart/spacelift-flows-agent spacelift-flows-agent/
-          helm s3 push --force --relative build/chart/spacelift-flows-agent/spacelift-flows-agent-${CHART_VERSION}.tgz spacelift
+#          helm s3 push --force --relative build/chart/spacelift-flows-agent/spacelift-flows-agent-${CHART_VERSION}.tgz spacelift
 
       - name: Publish charts to Cloudflare R2
         env:
@@ -227,11 +227,11 @@ jobs:
           api_token: ${{ secrets.cloudflare_purge_token }}
           purge_prefixes: ${{ inputs.cloudflare_purge_prefix }}
 
-      - name: Invalidate cache
-        run: >-
-          aws cloudfront create-invalidation
-          --distribution-id ${{ secrets.cf_distribution_id }}
-          --paths "/helm/*"
+#      - name: Invalidate cache
+#        run: >-
+#          aws cloudfront create-invalidation
+#          --distribution-id ${{ secrets.cf_distribution_id }}
+#          --paths "/helm/*"
 
   test-new-version:
     name: Test that the new chart version can be pulled
