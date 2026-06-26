@@ -8,152 +8,30 @@ on:
 concurrency:
   group: ${{ github.ref }}-chart-publish-preprod
 
-env:
-  HELM_VERSION: "3.20.0"
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  registry:
-    name: Publish the chart to the preprod Helm repository
-    runs-on: ubuntu-latest
-    env:
-      CHART_VERSION_PREFIX: "0.0.1-preprod"
-    permissions:
-      id-token: write
-      contents: read
+  publish:
+    uses: ./.github/workflows/job_chart-publish.yaml
+    with:
+      chart_version_strategy: timestamp
+      chart_version_prefix: 0.0.1-preprod
 
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@main
+      r2_bucket: ${{ vars.PREPROD_R2_BUCKET }}
+      r2_endpoint: ${{ vars.PREPROD_R2_ENDPOINT_URL }}
 
-      - name: Install helm
-        uses: azure/setup-helm@v5
-        with:
-           version: ${{ env.HELM_VERSION }}
+      cloudflare_zone_id: ${{ vars.PREPROD_DOWNLOADS_CLOUDFLARE_ZONE_ID }}
+      cloudflare_purge_prefix: downloads.spacelift.dev/helm/
 
-      - name: Install Helm S3 Plugin
-        run: helm plugin install https://github.com/hypnoglow/helm-s3.git
-
-      - name: Create output directory for Spacelift PromEx Chart
-        run: mkdir -p build/chart/spacelift-promex
-
-      - name: Create output directory for Spacelift Worker Pool Chart
-        run: mkdir -p build/chart/worker-pool
-
-      - name: Create output directory for Spacelift VCS Agent Chart
-        run: mkdir -p build/chart/vcs-agent
-
-      - name: Create output directory for spacelift-workerpool-controller Chart
-        run: mkdir -p build/chart/spacelift-workerpool-controller
-
-      - name: Create output directory for spacelift-self-hosted chart
-        run: mkdir -p build/chart/spacelift-self-hosted
-
-      - name: Create output directory for spacelift-flows chart
-        run: mkdir -p build/chart/spacelift-flows
-
-      - name: Create output directory for spacelift-flows-agent chart
-        run: mkdir -p build/chart/spacelift-flows-agent
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          aws-region: ${{ secrets.PREPROD_AWS_REGION }}
-          role-to-assume: ${{ secrets.PREPROD_AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 900
-
-      - name: Add the Spacelift Helm registry
-        run: helm repo add spacelift s3://${{ secrets.PREPROD_AWS_S3_BUCKET }}/helm
-        # The first time this step runs the index file won't exist, so allow the step to fail
-        continue-on-error: true
-
-      - name: Set chart version number
-        run: |
-          timestamp=$(date +'%s')
-          echo "CHART_VERSION=${CHART_VERSION_PREFIX}.${timestamp}" >> $GITHUB_ENV
-
-      - name: Lint spacelift-promex chart
-        run: helm lint spacelift-promex/
-
-      - name: Lint Spacelift Worker Pool chart
-        run: helm lint spacelift-worker-pool/
-
-      - name: Lint Spacelift VCS Agent chart
-        run: helm lint vcs-agent/
-
-      - name: Lint spacelift-workerpool-controller chart
-        run: |
-          helm dependency update spacelift-workerpool-controller/
-          helm lint spacelift-workerpool-controller/
-
-      - name: Lint spacelift-self-hosted chart
-        run: helm lint --strict spacelift-self-hosted/
-
-      - name: Lint spacelift-flows chart
-        run: helm lint --strict spacelift-flows/
-
-      - name: Lint spacelift-flows-agent chart
-        run: helm lint --strict spacelift-flows-agent/
-
-      - name: Package spacelift-promex chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-promex spacelift-promex/
-          helm s3 push --relative build/chart/spacelift-promex/spacelift-promex-${CHART_VERSION}.tgz spacelift
-
-      - name: Package Spacelift Worker Pool chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/worker-pool spacelift-worker-pool/
-          helm s3 push --relative build/chart/worker-pool/spacelift-worker-${CHART_VERSION}.tgz spacelift
-
-      - name: Package Spacelift VCS Agent chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/vcs-agent vcs-agent/
-          helm s3 push --relative build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
-
-      - name: Package spacelift-workerpool-controller chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-workerpool-controller spacelift-workerpool-controller/
-          helm s3 push --relative build/chart/spacelift-workerpool-controller/spacelift-workerpool-controller-${CHART_VERSION}.tgz spacelift
-
-      - name: Package spacelift-self-hosted chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-self-hosted spacelift-self-hosted/
-          helm s3 push --relative build/chart/spacelift-self-hosted/spacelift-self-hosted-${CHART_VERSION}.tgz spacelift
-
-      - name: Package spacelift-flows chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-flows spacelift-flows/
-          helm s3 push --relative build/chart/spacelift-flows/spacelift-flows-${CHART_VERSION}.tgz spacelift
-
-      - name: Package spacelift-flows-agent chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-flows-agent spacelift-flows-agent/
-          helm s3 push --relative build/chart/spacelift-flows-agent/spacelift-flows-agent-${CHART_VERSION}.tgz spacelift
-
-      - name: Invalidate cache
-        run: >-
-          aws cloudfront create-invalidation
-          --distribution-id ${{ secrets.PREPROD_DISTRIBUTION }}
-          --paths "/helm/*"
-
-  test-new-version:
-    name: Test that the new chart version can be pulled
-    runs-on: ubuntu-latest
-    needs: [registry]
-
-    steps:
-      - name: Install helm
-        uses: azure/setup-helm@v5
-        with:
-           version: ${{ env.HELM_VERSION }}
-
-      - name: Pull chart
-        run: |
-          helm repo add spacelift https://downloads.spacelift.dev/helm
-          helm repo update
-          helm pull --devel spacelift/spacelift-promex
-          helm pull --devel spacelift/spacelift-worker
-          helm pull --devel spacelift/vcs-agent
-          helm pull --devel spacelift/spacelift-workerpool-controller
-          helm pull --devel spacelift/spacelift-self-hosted
-          helm pull --devel spacelift/spacelift-flows
-          helm pull --devel spacelift/spacelift-flows-agent
+      smoke_pull_repo_url: https://downloads.spacelift.dev/helm
+      smoke_pull_devel: true
+    secrets:
+      aws_region: ${{ secrets.PREPROD_AWS_REGION }}
+      aws_role_to_assume: ${{ secrets.PREPROD_AWS_ROLE_TO_ASSUME }}
+      aws_s3_bucket: ${{ secrets.PREPROD_AWS_S3_BUCKET }}
+      cf_distribution_id: ${{ secrets.PREPROD_DISTRIBUTION }}
+      r2_access_key_id: ${{ secrets.PREPROD_R2_ACCESS_KEY_ID }}
+      r2_secret_access_key: ${{ secrets.PREPROD_R2_SECRET_ACCESS_KEY }}
+      cloudflare_purge_token: ${{ secrets.PREPROD_CLOUDFLARE_CACHE_PURGE_TOKEN }}
