@@ -64,6 +64,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    outputs:
+      chart_names: ${{ steps.discover.outputs.names }}
 
     steps:
       - name: Check out repository code
@@ -112,62 +114,38 @@ jobs:
               ;;
           esac
 
-      - name: Lint Spacelift PromEx chart
-        run: helm lint spacelift-promex/
-
-      - name: Lint Spacelift Worker Pool chart
-        run: helm lint spacelift-worker-pool/
-
-      - name: Lint Spacelift VCS Agent chart
-        run: helm lint vcs-agent/
-
-      - name: Lint spacelift-workerpool-controller chart
-        run: helm lint spacelift-workerpool-controller/
-
-      - name: Lint spacelift-self-hosted chart
-        run: helm lint --strict spacelift-self-hosted/
-
-      - name: Lint spacelift-flows chart
-        run: helm lint --strict spacelift-flows/
-
-      - name: Lint spacelift-flows-agent chart
-        run: helm lint --strict spacelift-flows-agent/
-
-      - name: Package Spacelift PromEx chart
+      - name: Discover charts
+        id: discover
         run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-promex spacelift-promex/
-          helm s3 push --force --relative build/chart/spacelift-promex/spacelift-promex-${CHART_VERSION}.tgz spacelift
+          set -euo pipefail
+          names=""
+          for f in */Chart.yaml; do
+            names+=" $(awk '$1=="name:"{print $2; exit}' "$f")"
+          done
+          echo "names=${names# }" >> "$GITHUB_OUTPUT"
 
-      - name: Package Spacelift Worker Pool chart
+      - name: Lint charts
         run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/worker-pool spacelift-worker-pool/
-          helm s3 push --force --relative build/chart/worker-pool/spacelift-worker-${CHART_VERSION}.tgz spacelift
+          set -euo pipefail
+          for f in */Chart.yaml; do
+            dir=$(dirname "$f")
+            echo "::group::helm lint --strict $dir"
+            helm dependency update "$dir"
+            helm lint --strict "$dir"
+            echo "::endgroup::"
+          done
 
-      - name: Package Spacelift VCS Agent chart
+      - name: Package charts
         run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/vcs-agent vcs-agent/
-          helm s3 push --force --relative build/chart/vcs-agent/vcs-agent-${CHART_VERSION}.tgz spacelift
-
-      - name: Package spacelift-workerpool-controller chart
-        run: |
-          helm dependency update spacelift-workerpool-controller/
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-workerpool-controller spacelift-workerpool-controller/
-          helm s3 push --force --relative build/chart/spacelift-workerpool-controller/spacelift-workerpool-controller-${CHART_VERSION}.tgz spacelift
-
-      - name: Package spacelift-self-hosted chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-self-hosted spacelift-self-hosted/
-          helm s3 push --force --relative build/chart/spacelift-self-hosted/spacelift-self-hosted-${CHART_VERSION}.tgz spacelift
-
-      - name: Package spacelift-flows chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-flows spacelift-flows/
-          helm s3 push --force --relative build/chart/spacelift-flows/spacelift-flows-${CHART_VERSION}.tgz spacelift
-
-      - name: Package spacelift-flows-agent chart
-        run: |
-          helm package --version "$CHART_VERSION" --destination build/chart/spacelift-flows-agent spacelift-flows-agent/
-          helm s3 push --force --relative build/chart/spacelift-flows-agent/spacelift-flows-agent-${CHART_VERSION}.tgz spacelift
+          set -euo pipefail
+          for f in */Chart.yaml; do
+            dir=$(dirname "$f")
+            name=$(awk '$1=="name:"{print $2; exit}' "$f")
+            echo "::group::package $name (from $dir/)"
+            helm package --version "$CHART_VERSION" --destination "build/chart/$dir" "$dir"
+            helm s3 push --force --relative "build/chart/$dir/${name}-${CHART_VERSION}.tgz" spacelift
+            echo "::endgroup::"
+          done
 
       - name: Publish charts to Cloudflare R2
         env:
@@ -244,17 +222,15 @@ jobs:
         with:
            version: ${{ env.HELM_VERSION }}
 
-      - name: Pull chart
+      - name: Pull charts
         env:
           REPO_URL: ${{ inputs.smoke_pull_repo_url }}
           DEVEL_FLAG: ${{ inputs.smoke_pull_devel && '--devel' || '' }}
+          CHART_NAMES: ${{ needs.registry.outputs.chart_names }}
         run: |
+          set -euo pipefail
           helm repo add spacelift "$REPO_URL"
           helm repo update
-          helm pull $DEVEL_FLAG spacelift/spacelift-promex
-          helm pull $DEVEL_FLAG spacelift/spacelift-worker
-          helm pull $DEVEL_FLAG spacelift/vcs-agent
-          helm pull $DEVEL_FLAG spacelift/spacelift-workerpool-controller
-          helm pull $DEVEL_FLAG spacelift/spacelift-self-hosted
-          helm pull $DEVEL_FLAG spacelift/spacelift-flows
-          helm pull $DEVEL_FLAG spacelift/spacelift-flows-agent
+          for name in $CHART_NAMES; do
+            helm pull $DEVEL_FLAG "spacelift/$name"
+          done
