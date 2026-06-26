@@ -67,7 +67,7 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@main
+        uses: actions/checkout@v7
 
       - name: Install helm
         uses: azure/setup-helm@v5
