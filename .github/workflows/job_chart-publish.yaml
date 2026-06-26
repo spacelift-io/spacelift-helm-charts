@@ -79,12 +79,12 @@ jobs:
       - name: Install Helm S3 Plugin
         run: helm plugin install https://github.com/hypnoglow/helm-s3.git
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          aws-region: ${{ secrets.aws_region }}
-          role-to-assume: ${{ secrets.aws_role_to_assume }}
-          role-duration-seconds: 900
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v6
+#        with:
+#          aws-region: ${{ secrets.aws_region }}
+#          role-to-assume: ${{ secrets.aws_role_to_assume }}
+#          role-duration-seconds: 900
 
       - name: Add the Spacelift Helm registry
         run: helm repo add spacelift s3://${{ secrets.aws_s3_bucket }}/helm
@@ -128,12 +128,17 @@ jobs:
           done
           echo "names=${names# }" >> "$GITHUB_OUTPUT"
 
+      # `helm dependency update` is required for charts with remote
+      # dependencies (e.g. spacelift-workerpool-controller pulls
+      # spacelift-promex from https://downloads.spacelift.io/helm).
+      # Without it, `helm lint --strict` fails on missing deps.
       - name: Lint charts
         run: |
           set -euo pipefail
           for f in */Chart.yaml; do
             dir=$(dirname "$f")
             echo "::group::helm lint --strict $dir"
+            helm dependency update "$dir"
             helm lint --strict "$dir"
             echo "::endgroup::"
           done
@@ -145,11 +150,8 @@ jobs:
             dir=$(dirname "$f")
             name=$(awk '$1=="name:"{print $2; exit}' "$f")
             echo "::group::package $name (from $dir/)"
-          
-            helm dependency update "$dir"
             helm package --version "$CHART_VERSION" --destination "build/chart/$dir" "$dir"
-            helm s3 push --force --relative "build/chart/$dir/${name}-${CHART_VERSION}.tgz" spacelift
-          
+            # helm s3 push --force --relative "build/chart/$dir/${name}-${CHART_VERSION}.tgz" spacelift
             echo "::endgroup::"
           done
 
@@ -211,11 +213,11 @@ jobs:
           api_token: ${{ secrets.cloudflare_purge_token }}
           purge_prefixes: ${{ inputs.cloudflare_purge_prefix }}
 
-      - name: Invalidate cache
-        run: >-
-          aws cloudfront create-invalidation
-          --distribution-id ${{ secrets.cf_distribution_id }}
-          --paths "/helm/*"
+#      - name: Invalidate cache
+#        run: >-
+#          aws cloudfront create-invalidation
+#          --distribution-id ${{ secrets.cf_distribution_id }}
+#          --paths "/helm/*"
 
   test-new-version:
     name: Test that the new chart version can be pulled

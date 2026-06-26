@@ -3,7 +3,7 @@ name: Preprod chart publish
 on:
   push:
     branches:
-      - main
+      - wojciechp/publish-to-cloudflare-simplify
 
 concurrency:
   group: ${{ github.ref }}-chart-publish-preprod
