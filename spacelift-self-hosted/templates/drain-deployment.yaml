@@ -114,6 +114,10 @@ spec:
           env:
             - name: ENABLE_INSTRUMENTATION_ENDPOINTS
               value: "true"
+            {{- if .Values.drain.schedulerEnabled }}
+            - name: DRAIN_SCHEDULER_ENABLED
+              value: "true"
+            {{- end }}
           envFrom:
             - secretRef:
                 name: {{ .Values.shared.secretRef }}

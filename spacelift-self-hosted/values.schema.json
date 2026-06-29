@@ -131,6 +131,11 @@
         "pullPolicy": {
           "$ref": "#/$defs/imagePullPolicy"
         },
+        "schedulerEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Run the cron scheduler inside the drain pod instead of the standalone scheduler deployment"
+        },
         "securityContext": {
           "$ref": "#/$defs/securityContext"
         },

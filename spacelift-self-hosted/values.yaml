@@ -43,6 +43,8 @@ drain:
   replicaCount: 3
   secretRef:
   pullPolicy: Always
+  # Run the cron scheduler inside the drain pod. Leave false if you run the standalone scheduler deployment.
+  schedulerEnabled: false
   securityContext:
   # TODO Make sure we can run the image as non root user
   #  runAsNonRoot: true
