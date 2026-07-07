@@ -117,9 +117,12 @@
       "additionalProperties": false,
       "properties": {
         "replicaCount": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "default": 3,
-          "description": "Number of drain replicas"
+          "description": "Number of drain replicas. Might be set to 'null' to enable external components to scale drain"
         },
         "secretRef": {
           "type": [
