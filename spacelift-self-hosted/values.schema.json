@@ -179,67 +179,6 @@
         }
       }
     },
-    "scheduler": {
-      "type": "object",
-      "description": "Scheduler component configuration",
-      "additionalProperties": false,
-      "properties": {
-        "replicaCount": {
-          "type": "integer",
-          "default": 3,
-          "description": "Number of scheduler replicas"
-        },
-        "pullPolicy": {
-          "$ref": "#/$defs/imagePullPolicy"
-        },
-        "securityContext": {
-          "$ref": "#/$defs/securityContext"
-        },
-        "resources": {
-          "$ref": "#/$defs/resources"
-        },
-        "startupProbe": {
-          "$ref": "#/$defs/httpGetProbe"
-        },
-        "podLabels": {
-          "$ref": "#/$defs/labels"
-        },
-        "podAnnotations": {
-          "$ref": "#/$defs/annotations"
-        },
-        "podSecurityContext": {
-          "$ref": "#/$defs/podSecurityContext"
-        },
-        "volumes": {
-          "$ref": "#/$defs/volumes"
-        },
-        "volumeMounts": {
-          "$ref": "#/$defs/volumeMounts"
-        },
-        "nodeSelector": {
-          "$ref": "#/$defs/nodeSelector"
-        },
-        "tolerations": {
-          "$ref": "#/$defs/tolerations"
-        },
-        "affinity": {
-          "$ref": "#/$defs/affinity"
-        },
-        "serviceAccount": {
-          "$ref": "#/$defs/serviceAccount"
-        },
-        "lifecycle": {
-          "$ref": "#/$defs/lifecycle"
-        },
-        "terminationGracePeriodSeconds": {
-          "type": "integer",
-          "description": "Duration in seconds that Kubernetes waits for the pod to terminate gracefully"
-        },
-        "pdb": {
-          "$ref": "#/$defs/podDisruptionBudget"
-        }
-      }
-    },
     "vcsGateway": {
       "type": "object",
       "description": "VCS Gateway component configuration",

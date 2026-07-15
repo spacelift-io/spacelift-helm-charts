@@ -73,39 +73,6 @@ drain:
   pdb:
     enabled: false
 
-scheduler:
-  replicaCount: 3
-  pullPolicy: Always
-  securityContext:
-  # TODO Make sure we can run the image as non root user
-  #  runAsNonRoot: true
-    allowPrivilegeEscalation : false
-  resources:
-    requests:
-      memory: "50Mi"
-      cpu: "50m"
-  startupProbe:
-    httpGet:
-      path: /startup
-      port: instrumentation
-  podLabels: {}
-  podSecurityContext: {}
-  volumes: []
-  volumeMounts: []
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-  # serviceAccount controls whether an individual service account should be created for the scheduler.
-  # If create is set to true, a name must be specified.
-  serviceAccount:
-    create: false
-    name: "spacelift-scheduler"
-    automount: true
-    annotations: {}
-  lifecycle: {}
-  pdb:
-    enabled: false
-
 vcsGateway:
   enabled: false
   # Domain for external VCS Gateway endpoint (required when enabled)

@@ -13,13 +13,6 @@ Expand the name of the chart.
 {{- end }}
 
 {{/*
-Expand the name of the chart.
-*/}}
-{{- define "spacelift.schedulerName" -}}
-{{- printf "%s-scheduler" (default .Values.nameOverride .Chart.Name) | trunc 63 | trimSuffix "-" }}
-{{- end }}
-
-{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
@@ -69,18 +62,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Common scheduler labels
-*/}}
-{{- define "spacelift.schedulerLabels" -}}
-helm.sh/chart: {{ include "spacelift.chart" . }}
-{{ include "spacelift.schedulerSelectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- end }}
-
-{{/*
 Server Selector labels
 */}}
 {{- define "spacelift.serverSelectorLabels" -}}
@@ -94,14 +75,6 @@ Selector drain labels
 {{- define "spacelift.drainSelectorLabels" -}}
 app.kubernetes.io/name: {{ include "spacelift.drainName" . }}
 app.kubernetes.io/instance: {{ printf "%s-drain" .Release.Name }}
-{{- end }}
-
-{{/*
-Selector scheduler labels
-*/}}
-{{- define "spacelift.schedulerSelectorLabels" -}}
-app.kubernetes.io/name: {{ include "spacelift.schedulerName" . }}
-app.kubernetes.io/instance: {{ printf "%s-scheduler" .Release.Name }}
 {{- end }}
 
 {{/*
@@ -132,17 +105,6 @@ Create the name of the service account to use for the drain.
 {{- define "spacelift.drainServiceAccountName" -}}
 {{- if .Values.drain.serviceAccount.create }}
 {{- .Values.drain.serviceAccount.name }}
-{{- else }}
-{{- include "spacelift.serviceAccountName" . }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use for the scheduler.
-*/}}
-{{- define "spacelift.schedulerServiceAccountName" -}}
-{{- if .Values.scheduler.serviceAccount.create }}
-{{- .Values.scheduler.serviceAccount.name }}
 {{- else }}
 {{- include "spacelift.serviceAccountName" . }}
 {{- end }}
