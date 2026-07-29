@@ -179,6 +179,10 @@
         }
       }
     },
+    "scheduler": {
+      "type": ["object", "null"],
+      "description": "DEPRECATED and ignored. The standalone scheduler workload was removed from this chart - the cron scheduler now runs inside the drain (DRAIN_SCHEDULER_ENABLED). This key is intentionally kept as a permissive no-op: the top-level object sets additionalProperties: false, so dropping it outright would make 'helm upgrade' fail schema validation for every installation whose values file still configures scheduler.*. Anything set here has no effect. Remove this key in a later release, once installations have had time to clean up their values."
+    },
     "vcsGateway": {
       "type": "object",
       "description": "VCS Gateway component configuration",

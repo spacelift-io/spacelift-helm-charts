@@ -73,6 +73,13 @@ drain:
   pdb:
     enabled: false
 
+# The standalone `scheduler` workload was removed from this chart: the cron scheduler
+# now runs inside the drain, controlled by DRAIN_SCHEDULER_ENABLED. No `scheduler`
+# defaults are shipped any more, but values.schema.json still accepts a `scheduler`
+# key as an ignored no-op so that existing values files keep passing validation on
+# upgrade (the schema sets additionalProperties: false at the top level). See the
+# deprecation note in values.schema.json - both can go once installations dropped it.
+
 vcsGateway:
   enabled: false
   # Domain for external VCS Gateway endpoint (required when enabled)
