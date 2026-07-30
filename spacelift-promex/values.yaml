@@ -21,6 +21,9 @@ annotations:
 # podAnnotations:
 #   app.spacelift.io/example: spacelift-promx
 
+# Priority class name for the pod
+priorityClassName: ""
+
 ## Your api endpoint, must be provided
 #apiEndpoint: https://{myaccount}.app.spacelift.io
 #
