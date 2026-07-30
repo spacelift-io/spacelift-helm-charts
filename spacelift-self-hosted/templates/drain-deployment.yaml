@@ -114,6 +114,13 @@ spec:
           env:
             - name: ENABLE_INSTRUMENTATION_ENDPOINTS
               value: "true"
+            # Bridge for applications older than v6.4.0, where the embedded cron
+            # scheduler is still opt-in and this chart no longer deploys a standalone
+            # scheduler. Being an inline env entry, it also overrides a stale "false"
+            # coming from the drain secret. From v6.4.0 on nothing reads it and this
+            # can be deleted.
+            - name: DRAIN_SCHEDULER_ENABLED
+              value: "true"
           envFrom:
             - secretRef:
                 name: {{ .Values.shared.secretRef }}
