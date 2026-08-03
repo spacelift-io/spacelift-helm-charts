@@ -187,6 +187,14 @@
       "description": "Standalone scheduler component configuration. Only used for applications older than v6.4.0, which is where the drain started running the cron scheduler itself. On v6.4.0 and newer the workload is not deployed and these values are ignored.",
       "additionalProperties": false,
       "properties": {
+        "enabled": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "default": null,
+          "description": "Whether to deploy the standalone scheduler workload. Leave null to decide from the application version read out of shared.image; set true to always deploy it, false to never deploy it. Useful when the image tag does not carry a readable version."
+        },
         "replicaCount": {
           "type": "integer",
           "default": 3,

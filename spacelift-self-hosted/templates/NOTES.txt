@@ -11,8 +11,13 @@
 {{- end }}
 
 {{- $core := include "spacelift.appVersionCore" . }}
+{{- $forced := not (kindIs "invalid" .Values.scheduler.enabled) }}
 {{- if include "spacelift.deployStandaloneScheduler" . }}
-{{- if $core }}
+{{- if $forced }}
+
+NOTE: the standalone "scheduler" workload is deployed because scheduler.enabled is
+set to true. Unset it to let the chart decide from the application version instead.
+{{- else if $core }}
 
 NOTE: this installation runs Spacelift {{ $core }}, which is older than v6.4.0, so
 the standalone "scheduler" workload is still deployed. From v6.4.0 on the drain
@@ -22,7 +27,14 @@ no action needed on your side.
 
 WARNING: no Spacelift version could be read from shared.image
 ({{ .Values.shared.image | default "not set" | quote }}), so this chart is keeping the
-standalone "scheduler" workload to be safe. Use an image tag of the form vX.Y.Z if
-you want the workload to be removed automatically once you reach v6.4.0.
+standalone "scheduler" workload to be safe. Use an image tag of the form vX.Y.Z, or
+set scheduler.enabled explicitly, to decide this yourself.
 {{- end }}
+{{- else if and $forced $core (semverCompare "<6.4.0" $core) }}
+
+WARNING: the standalone "scheduler" workload is not deployed because
+scheduler.enabled is set to false, but this installation runs Spacelift {{ $core }},
+which does not run the cron scheduler in the drain. Nothing will trigger recurring
+work - drift detection, scheduled runs, tasks and deletes - until you upgrade to
+v6.4.0 or set scheduler.enabled back to true.
 {{- end }}

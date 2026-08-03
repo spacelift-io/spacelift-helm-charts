@@ -159,8 +159,7 @@ a superset of the scheduler's, so it is a safe identity to borrow.
 The application version, taken from the tag of .Values.shared.image.
 
 Returns the "X.Y.Z" core of the tag, or an empty string when there is no tag or
-the tag is not a version at all. Released versions are always a plain vX.Y.Z, so
-anything else is a development build, which is newer than every release.
+the tag is not of the form vX.Y.Z. What an empty result means is up to the caller.
 */}}
 {{- define "spacelift.appVersionCore" -}}
 {{- $ref := .Values.shared.image | default "" -}}
@@ -176,6 +175,9 @@ anything else is a development build, which is newer than every release.
 {{/*
 Whether the standalone scheduler workload still has to be deployed.
 
+An explicit .Values.scheduler.enabled decides on its own, in both directions. Left
+unset (null), the chart works it out from the application version instead.
+
 From application v6.4.0 on, the drain always runs the cron scheduler itself, so a
 separate scheduler workload is redundant. Below that it is required, and so is
 the case where the version cannot be read: the scheduler is kept, because losing
@@ -183,8 +185,12 @@ it on an application that does not schedule on its own would silently stop all
 recurring work.
 */}}
 {{- define "spacelift.deployStandaloneScheduler" -}}
+{{- if not (kindIs "invalid" .Values.scheduler.enabled) -}}
+{{- if .Values.scheduler.enabled -}}true{{- end -}}
+{{- else -}}
 {{- $core := include "spacelift.appVersionCore" . -}}
 {{- if or (not $core) (semverCompare "<6.4.0" $core) -}}true{{- end -}}
+{{- end -}}
 {{- end -}}
 
 {{/*

@@ -78,6 +78,13 @@ drain:
 # below is ignored. The version is read from the tag of shared.image; if it cannot
 # be read, the workload is deployed. See templates/_helpers.tpl.
 scheduler:
+  # Whether to deploy the standalone scheduler workload:
+  #   null  - decide from the application version in shared.image (default)
+  #   true  - always deploy it
+  #   false - never deploy it
+  # Set it explicitly when the image tag does not carry a readable version, for
+  # example when a registry mirror rewrites tags or the build is not a release.
+  enabled: null
   replicaCount: 3
   pullPolicy: Always
   securityContext:
