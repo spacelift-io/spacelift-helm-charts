@@ -139,14 +139,53 @@ Create the name of the service account to use for the drain.
 
 {{/*
 Create the name of the service account to use for the scheduler.
+Falls back to the drain's service account when the scheduler has none of its own
+but the drain does. This is the case on installations whose infrastructure module
+already stopped provisioning a scheduler service account, while the application
+is still old enough to need the standalone scheduler. The drain's permissions are
+a superset of the scheduler's, so it is a safe identity to borrow.
 */}}
 {{- define "spacelift.schedulerServiceAccountName" -}}
 {{- if .Values.scheduler.serviceAccount.create }}
 {{- .Values.scheduler.serviceAccount.name }}
+{{- else if .Values.drain.serviceAccount.create }}
+{{- .Values.drain.serviceAccount.name }}
 {{- else }}
 {{- include "spacelift.serviceAccountName" . }}
 {{- end }}
 {{- end }}
+
+{{/*
+The application version, taken from the tag of .Values.shared.image.
+
+Returns the "X.Y.Z" core of the tag, or an empty string when there is no tag or
+the tag is not a version at all. Released versions are always a plain vX.Y.Z, so
+anything else is a development build, which is newer than every release.
+*/}}
+{{- define "spacelift.appVersionCore" -}}
+{{- $ref := .Values.shared.image | default "" -}}
+{{- $parts := $ref | splitList "/" | last | splitList ":" -}}
+{{- if eq (len $parts) 2 -}}
+{{- $tag := index $parts 1 -}}
+{{- if regexMatch "^v?[0-9]+\\.[0-9]+\\.[0-9]+([-+].*)?$" $tag -}}
+{{- regexFind "[0-9]+\\.[0-9]+\\.[0-9]+" $tag -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether the standalone scheduler workload still has to be deployed.
+
+From application v6.4.0 on, the drain always runs the cron scheduler itself, so a
+separate scheduler workload is redundant. Below that it is required, and so is
+the case where the version cannot be read: the scheduler is kept, because losing
+it on an application that does not schedule on its own would silently stop all
+recurring work.
+*/}}
+{{- define "spacelift.deployStandaloneScheduler" -}}
+{{- $core := include "spacelift.appVersionCore" . -}}
+{{- if or (not $core) (semverCompare "<6.4.0" $core) -}}true{{- end -}}
+{{- end -}}
 
 {{/*
 Expand the name of the VCS Gateway.

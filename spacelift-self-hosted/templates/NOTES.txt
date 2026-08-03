@@ -9,3 +9,20 @@
 
   kubectl get services --namespace "{{ .Release.Namespace }}" "{{ include "spacelift.fullname" . }}-mqtt"
 {{- end }}
+
+{{- $core := include "spacelift.appVersionCore" . }}
+{{- if include "spacelift.deployStandaloneScheduler" . }}
+{{- if $core }}
+
+NOTE: this installation runs Spacelift {{ $core }}, which is older than v6.4.0, so
+the standalone "scheduler" workload is still deployed. From v6.4.0 on the drain
+runs the cron scheduler itself and this chart stops deploying the workload, with
+no action needed on your side.
+{{- else }}
+
+WARNING: no Spacelift version could be read from shared.image
+({{ .Values.shared.image | default "not set" | quote }}), so this chart is keeping the
+standalone "scheduler" workload to be safe. Use an image tag of the form vX.Y.Z if
+you want the workload to be removed automatically once you reach v6.4.0.
+{{- end }}
+{{- end }}

@@ -73,6 +73,10 @@ drain:
   pdb:
     enabled: false
 
+# The standalone scheduler workload is only deployed for applications older than
+# v6.4.0. From v6.4.0 on the drain runs the cron scheduler itself, and everything
+# below is ignored. The version is read from the tag of shared.image; if it cannot
+# be read, the workload is deployed. See templates/_helpers.tpl.
 scheduler:
   replicaCount: 3
   pullPolicy: Always

@@ -184,7 +184,7 @@
     },
     "scheduler": {
       "type": "object",
-      "description": "Scheduler component configuration",
+      "description": "Standalone scheduler component configuration. Only used for applications older than v6.4.0, which is where the drain started running the cron scheduler itself. On v6.4.0 and newer the workload is not deployed and these values are ignored.",
       "additionalProperties": false,
       "properties": {
         "replicaCount": {
