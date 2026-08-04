@@ -139,17 +139,10 @@ Create the name of the service account to use for the drain.
 
 {{/*
 Create the name of the service account to use for the scheduler.
-Falls back to the drain's service account when the scheduler has none of its own
-but the drain does. This is the case on installations whose infrastructure module
-already stopped provisioning a scheduler service account, while the application
-is still old enough to need the standalone scheduler. The drain's permissions are
-a superset of the scheduler's, so it is a safe identity to borrow.
 */}}
 {{- define "spacelift.schedulerServiceAccountName" -}}
 {{- if .Values.scheduler.serviceAccount.create }}
 {{- .Values.scheduler.serviceAccount.name }}
-{{- else if .Values.drain.serviceAccount.create }}
-{{- .Values.drain.serviceAccount.name }}
 {{- else }}
 {{- include "spacelift.serviceAccountName" . }}
 {{- end }}
