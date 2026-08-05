@@ -1,0 +1,21 @@
+{{- $pdb := .Values.controllerManager.pdb }}
+{{- if $pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "spacelift-workerpool-controller.fullname" . }}-controller-manager-pdb
+  labels:
+    control-plane: controller-manager
+  {{- include "spacelift-workerpool-controller.labels" . | nindent 4 }}
+spec:
+  {{- with $pdb.minAvailable }}
+  minAvailable: {{ . }}
+  {{- end }}
+  {{- with $pdb.maxUnavailable }}
+  maxUnavailable: {{ . }}
+  {{- end }}
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+    {{- include "spacelift-workerpool-controller.selectorLabels" . | nindent 6 }}
+{{- end }}
