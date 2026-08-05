@@ -22,6 +22,11 @@ Follow the instructions on the [user-documentation](https://docs.spacelift.io/co
 
 ## Rolling Upgrades and Pod Disruption Budgets
 
+Two separate PDBs are available: `pdb` protects the **worker** pods that execute runs, and
+`controllerManager.pdb` protects the **controller** pods themselves. Both are disabled by default.
+
+### Worker pods
+
 When performing rolling Kubernetes upgrades (e.g., EKS node AMI updates), you can protect in-flight
 runs from disruption by enabling the Pod Disruption Budget (PDB):
 
@@ -35,7 +40,7 @@ This creates a PDB that targets all worker pods managed by the controller. With 
 `kubectl drain` will not evict any worker pod that is currently executing a run. The drain will proceed
 once runs complete and pods terminate naturally.
 
-### Configuration Options
+#### Configuration Options
 
 | Value | Description | Default |
 |-------|-------------|---------|
@@ -46,20 +51,41 @@ once runs complete and pods terminate naturally.
 Exactly one of `minAvailable` or `maxUnavailable` must be set when `pdb.enabled: true`. Setting
 both, or neither, fails the install/upgrade with a template error.
 
-### Namespace Considerations
+#### Namespace Considerations
 
 The PDB is namespace-scoped. When `controllerManager.namespaces` is configured, a PDB is created in
 each specified namespace. Otherwise, the PDB is created in the release namespace. If you run in
 cluster-wide mode and have WorkerPools in multiple namespaces, you may need to create additional PDBs
 manually in those namespaces.
 
-### Notes
+#### Notes
 
 - The PDB targets worker pods using the `workers.spacelift.io/workerpool` label, which is
   automatically applied to all worker pods by the controller.
 - A PDB with no matching pods (e.g., when no runs are active) is a no-op and will not block drains.
 - The PDB only affects voluntary disruptions (e.g., `kubectl drain`). It does not affect direct pod
   deletions or involuntary disruptions like node crashes.
+
+### Controller pods
+
+The controller runs active/passive under leader election: whatever the replica count, exactly one pod
+holds the lease and does the work.
+
+```yaml
+controllerManager:
+  replicas: 2
+  pdb:
+    enabled: true
+```
+
+| Value | Description | Default |
+|-------|-------------|---------|
+| `controllerManager.pdb.enabled` | Enable PDB for controller pods | `false` |
+| `controllerManager.pdb.maxUnavailable` | Maximum unavailable controller pods | `1` |
+| `controllerManager.pdb.minAvailable` | Minimum available controller pods | - |
+
+The controller PDB is always created in the release namespace, alongside the Deployment, regardless
+of `controllerManager.namespaces`.
 
 ## Maintaining CRDs and chart versions
 

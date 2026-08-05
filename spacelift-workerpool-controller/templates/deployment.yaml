@@ -109,7 +109,10 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       serviceAccountName: {{ include "spacelift-workerpool-controller.serviceAccountName" . }}
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: {{ .Values.controllerManager.terminationGracePeriodSeconds }}
+      {{- with .Values.controllerManager.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
       {{- with .Values.controllerManager.topologySpreadConstraints }}
       topologySpreadConstraints:
       {{- toYaml . | nindent 8}}

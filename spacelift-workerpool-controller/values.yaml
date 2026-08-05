@@ -49,6 +49,29 @@ controllerManager:
   extraLabels: {}
   extraVolumes: []
   enforceFips140: false
+
+  # How long Kubernetes waits for the controller to shut down gracefully before
+  # killing it.
+  terminationGracePeriodSeconds: 30
+
+  # Priority class for the controller pods, e.g. system-cluster-critical.
+  priorityClassName: ""
+
+  # Pod Disruption Budget for the controller-manager pods. Only meaningful with
+  # replicas > 1 — the controller runs active/passive under leader election, so a
+  # single replica has nothing to fall back to.
+  pdb:
+    enabled: false
+    # How many controller pods a voluntary disruption (node drain, rolling upgrade)
+    # may take down at once. Safe at any replica count, but with several replicas it
+    # forces one eviction at a time even though only one pod is ever active.
+    maxUnavailable: 1
+    # Alternative to maxUnavailable, expressed as a floor instead of a ceiling: how
+    # many controller pods must stay running. Since leader election keeps exactly one
+    # pod active, 1 is enough at any replica count, and it drains faster than
+    # maxUnavailable once you run more than two.
+    # minAvailable: 1
+
 kubernetesClusterDomain: cluster.local
 # The metric service will expose a metrics endpoint that can be scraped by a prometheus instance.
 # This is disabled by default, enable this if you want to enable controller observability.
