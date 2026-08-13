@@ -21,6 +21,10 @@ annotations:
 # podAnnotations:
 #   app.spacelift.io/example: spacelift-promx
 
+# Labels to add to the pod
+# podLabels:
+#   app.spacelift.io/example: spacelift-promx
+
 # Priority class name for the pod
 priorityClassName: ""
 
