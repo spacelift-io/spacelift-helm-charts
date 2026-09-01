@@ -149,6 +149,44 @@ Create the name of the service account to use for the scheduler.
 {{- end }}
 
 {{/*
+The application version, taken from the tag of .Values.shared.image.
+
+Returns the "X.Y.Z" core of the tag, or an empty string when there is no tag or
+the tag is not of the form vX.Y.Z. What an empty result means is up to the caller.
+*/}}
+{{- define "spacelift.appVersionCore" -}}
+{{- $ref := .Values.shared.image | default "" -}}
+{{- $parts := $ref | splitList "/" | last | splitList ":" -}}
+{{- if eq (len $parts) 2 -}}
+{{- $tag := index $parts 1 -}}
+{{- if regexMatch "^v?[0-9]+\\.[0-9]+\\.[0-9]+([-+].*)?$" $tag -}}
+{{- regexFind "[0-9]+\\.[0-9]+\\.[0-9]+" $tag -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether the standalone scheduler workload still has to be deployed.
+
+An explicit .Values.scheduler.enabled decides on its own, in both directions. Left
+unset (null), the chart works it out from the application version instead.
+
+From application v6.4.0 on, the drain always runs the cron scheduler itself, so a
+separate scheduler workload is redundant. Below that it is required, and so is
+the case where the version cannot be read: the scheduler is kept, because losing
+it on an application that does not schedule on its own would silently stop all
+recurring work.
+*/}}
+{{- define "spacelift.deployStandaloneScheduler" -}}
+{{- if not (kindIs "invalid" .Values.scheduler.enabled) -}}
+{{- if .Values.scheduler.enabled -}}true{{- end -}}
+{{- else -}}
+{{- $core := include "spacelift.appVersionCore" . -}}
+{{- if or (not $core) (semverCompare "<6.4.0" $core) -}}true{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Expand the name of the VCS Gateway.
 */}}
 {{- define "spacelift.vcsGatewayName" -}}

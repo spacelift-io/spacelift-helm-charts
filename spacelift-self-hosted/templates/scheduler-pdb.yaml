@@ -1,3 +1,4 @@
+{{- if include "spacelift.deployStandaloneScheduler" . }}
 {{- with .Values.scheduler.pdb }}
 {{- if .enabled }}
 {{ include "spacelift.validatePodDisruptionBudget" . }}
@@ -18,5 +19,6 @@ spec:
   selector:
     matchLabels:
       {{- include "spacelift.schedulerSelectorLabels" $ | nindent 6 }}
+{{- end }}
 {{- end }}
 {{- end }}
