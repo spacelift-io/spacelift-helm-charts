@@ -2,13 +2,13 @@ SHELL := /bin/bash
 
 CRDS_PATH ?= config/crd/bases
 CRDS_OUT_DIR ?= charts/crds/templates
-CHART_VERSION ?= v0.20.0
+CHART_VERSION ?= v0.21.0
 
 .PHONY: codegen-helm
 codegen-helm: codegen-helm-crds codegen-helm-update-versions
 
 .PHONY: codegen-helm-crds
-codegen-helm-crds: 
+codegen-helm-crds:
 	@echo "Generate helm CRDs..." >&2
 	@test -d $(CRDS_PATH) || (echo "CRDS_PATH not found: $(CRDS_PATH)" >&2; exit 1)
 	@rm -rf $(CRDS_OUT_DIR)
@@ -34,7 +34,7 @@ define generate_crd
 endef
 
 .PHONY: codegen-helm-update-versions
-codegen-helm-update-versions: 
+codegen-helm-update-versions:
 	@echo "Updating Chart.yaml files..." >&2
 	@sed -i.bak 's/version: .*  # VERSION/version: $(CHART_VERSION)  # VERSION/' Chart.yaml
 	@rm -f Chart.yaml.bak
