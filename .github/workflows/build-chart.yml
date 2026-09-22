@@ -20,12 +20,12 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@main
+        uses: actions/checkout@v7
 
       - name: Install helm
         uses: azure/setup-helm@v5
         with:
-           version: ${{ env.HELM_VERSION }}
+          version: ${{ env.HELM_VERSION }}
 
       - name: Install Helm S3 Plugin
         run: helm plugin install https://github.com/hypnoglow/helm-s3.git
