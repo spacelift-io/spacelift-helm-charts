@@ -114,9 +114,11 @@ spec:
           env:
             - name: ENABLE_INSTRUMENTATION_ENDPOINTS
               value: "true"
+          {{- with .Values.shared.secretRef }}
           envFrom:
             - secretRef:
-                name: {{ .Values.shared.secretRef }}
+                name: {{ . }}
+          {{- end }}
           ports:
             - name: instrumentation
               containerPort: 8080

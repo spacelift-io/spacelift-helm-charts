@@ -129,11 +129,17 @@ spec:
               value: "true"
             - name: FEATURE_FLAG_SELF_HOSTED_V3_INSTALLATION_FLOW
               value: "true"
+          {{- if or .Values.shared.secretRef .Values.server.secretRef }}
           envFrom:
+            {{- with .Values.shared.secretRef }}
             - secretRef:
-                name: {{ .Values.shared.secretRef }}
+                name: {{ . }}
+            {{- end }}
+            {{- with .Values.server.secretRef }}
             - secretRef:
-                name: {{ .Values.server.secretRef }}
+                name: {{ . }}
+            {{- end }}
+          {{- end }}
           ports:
             - name: server
               containerPort: {{ .Values.server.port }}
