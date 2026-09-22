@@ -1,0 +1,96 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: Cloud SQL proxy enablement
+templates:
+  - server-deployment.yaml
+  - drain-deployment.yaml
+  - scheduler-deployment.yaml
+  - vcs-gateway-deployment.yaml
+set:
+  scheduler.enabled: true
+  vcsGateway.enabled: true
+  vcsGateway.domain: vcs-gateway.example.com
+tests:
+  - it: omits the proxy from every workload by default
+    asserts:
+      - notExists:
+          path: spec.template.spec.initContainers
+        template: server-deployment.yaml
+      - notExists:
+          path: spec.template.spec.initContainers
+        template: drain-deployment.yaml
+      - notExists:
+          path: spec.template.spec.initContainers
+        template: scheduler-deployment.yaml
+      - notExists:
+          path: spec.template.spec.initContainers
+        template: vcs-gateway-deployment.yaml
+
+  - it: injects the configured proxy into every workload
+    set:
+      cloudSqlProxy.enabled: true
+      cloudSqlProxy.image: registry.example.com/cloud-sql-proxy:custom
+      cloudSqlProxy.dbConnectionName: example-project:region:database
+      cloudSqlProxy.quiet: false
+      cloudSqlProxy.resources:
+        requests:
+          cpu: 250m
+          memory: 300Mi
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: cloud-sql-proxy
+        template: server-deployment.yaml
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: cloud-sql-proxy
+        template: drain-deployment.yaml
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: cloud-sql-proxy
+        template: scheduler-deployment.yaml
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: cloud-sql-proxy
+        template: vcs-gateway-deployment.yaml
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: registry.example.com/cloud-sql-proxy:custom
+        template: server-deployment.yaml
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: registry.example.com/cloud-sql-proxy:custom
+        template: drain-deployment.yaml
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: registry.example.com/cloud-sql-proxy:custom
+        template: scheduler-deployment.yaml
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: registry.example.com/cloud-sql-proxy:custom
+        template: vcs-gateway-deployment.yaml
+      - contains:
+          path: spec.template.spec.initContainers[0].args
+          content: example-project:region:database
+        template: server-deployment.yaml
+      - contains:
+          path: spec.template.spec.initContainers[0].args
+          content: example-project:region:database
+        template: drain-deployment.yaml
+      - contains:
+          path: spec.template.spec.initContainers[0].args
+          content: example-project:region:database
+        template: scheduler-deployment.yaml
+      - contains:
+          path: spec.template.spec.initContainers[0].args
+          content: example-project:region:database
+        template: vcs-gateway-deployment.yaml
+      - equal:
+          path: spec.template.spec.initContainers[0].env[3].value
+          value: "false"
+        template: server-deployment.yaml
+      - equal:
+          path: spec.template.spec.initContainers[0].resources.requests
+          value:
+            cpu: 250m
+            memory: 300Mi
+        template: server-deployment.yaml

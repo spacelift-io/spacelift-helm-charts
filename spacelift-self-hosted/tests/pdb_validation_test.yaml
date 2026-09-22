@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: PodDisruptionBudget validation
+templates:
+  - server-pdb.yaml
+tests:
+  - it: rejects an enabled PDB without an availability setting
+    set:
+      server.pdb.enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: pdb.enabled is true but neither pdb.minAvailable nor pdb.maxUnavailable is set; set exactly one
+
+  - it: rejects mutually exclusive availability settings
+    set:
+      server.pdb.enabled: true
+      server.pdb.minAvailable: 1
+      server.pdb.maxUnavailable: 1
+    asserts:
+      - failedTemplate:
+          errorMessage: pdb.minAvailable and pdb.maxUnavailable are mutually exclusive; set only one
+
+  - it: accepts minAvailable by itself
+    set:
+      server.pdb.enabled: true
+      server.pdb.minAvailable: 1
+    asserts:
+      - notFailedTemplate: {}
+      - equal:
+          path: spec.minAvailable
+          value: 1
+      - notExists:
+          path: spec.maxUnavailable
+
+  - it: accepts maxUnavailable by itself
+    set:
+      server.pdb.enabled: true
+      server.pdb.maxUnavailable: 1
+    asserts:
+      - notFailedTemplate: {}
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - notExists:
+          path: spec.minAvailable
