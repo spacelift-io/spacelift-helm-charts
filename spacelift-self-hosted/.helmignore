@@ -22,3 +22,6 @@
 *.tmproj
 .vscode/
 tests/
+/Makefile
+CLAUDE.md
+AGENTS.md
