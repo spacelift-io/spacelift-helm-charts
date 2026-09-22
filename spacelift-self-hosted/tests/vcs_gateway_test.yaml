@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: VCS gateway components
+templates:
+  - vcs-gateway-deployment.yaml
+  - vcs-gateway-service.yaml
+  - vcs-gateway-serviceaccount.yaml
+  - vcs-gateway-ingress.yaml
+  - vcs-gateway-gateway.yaml
+  - vcs-gateway-httproute.yaml
+  - vcs-gateway-pdb.yaml
+tests:
+  - it: renders no components when the VCS gateway is disabled
+    set:
+      vcsGateway.domain: vcs-gateway.example.com
+      vcsGateway.serviceAccount.create: true
+      vcsGateway.ingress.enabled: true
+      vcsGateway.gateway.enabled: true
+      vcsGateway.gateway.gatewayClassName: example-gateway-class
+      vcsGateway.pdb.enabled: true
+      vcsGateway.pdb.minAvailable: 1
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-service.yaml
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-serviceaccount.yaml
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-ingress.yaml
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-gateway.yaml
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-httproute.yaml
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-pdb.yaml
+
+  - it: renders the default components when the VCS gateway is enabled
+    set:
+      vcsGateway.enabled: true
+      vcsGateway.domain: vcs-gateway.example.com
+    asserts:
+      - isKind:
+          of: Deployment
+        template: vcs-gateway-deployment.yaml
+      - isKind:
+          of: Service
+        template: vcs-gateway-service.yaml
+      - isKind:
+          of: Ingress
+        template: vcs-gateway-ingress.yaml
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-serviceaccount.yaml
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-gateway.yaml
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-httproute.yaml
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-pdb.yaml
+
+  - it: renders optional components when their values are enabled
+    set:
+      vcsGateway.enabled: true
+      vcsGateway.domain: vcs-gateway.example.com
+      vcsGateway.serviceAccount.create: true
+      vcsGateway.ingress.enabled: false
+      vcsGateway.gateway.enabled: true
+      vcsGateway.gateway.gatewayClassName: example-gateway-class
+      vcsGateway.pdb.enabled: true
+      vcsGateway.pdb.minAvailable: 1
+    asserts:
+      - isKind:
+          of: Deployment
+        template: vcs-gateway-deployment.yaml
+      - isKind:
+          of: Service
+        template: vcs-gateway-service.yaml
+      - isKind:
+          of: ServiceAccount
+        template: vcs-gateway-serviceaccount.yaml
+      - hasDocuments:
+          count: 0
+        template: vcs-gateway-ingress.yaml
+      - isKind:
+          of: Gateway
+        template: vcs-gateway-gateway.yaml
+      - isKind:
+          of: HTTPRoute
+        template: vcs-gateway-httproute.yaml
+      - isKind:
+          of: PodDisruptionBudget
+        template: vcs-gateway-pdb.yaml
