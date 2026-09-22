@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@main
+        uses: actions/checkout@v7
 
       - name: Run codegen
         working-directory: spacelift-workerpool-controller
