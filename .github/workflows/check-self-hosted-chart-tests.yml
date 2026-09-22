@@ -1,0 +1,23 @@
+name: Check self-hosted chart tests
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - "spacelift-self-hosted/**"
+      - ".github/workflows/check-self-hosted-chart-tests.yml"
+
+jobs:
+  helm-unittest:
+    name: Run spacelift-self-hosted Helm tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@main
+
+      - name: Run Helm unit tests
+        working-directory: spacelift-self-hosted
+        run: make test
