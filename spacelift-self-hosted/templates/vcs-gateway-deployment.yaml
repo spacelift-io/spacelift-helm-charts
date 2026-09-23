@@ -100,13 +100,17 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+          {{- if or .Values.shared.secretRef .Values.vcsGateway.secretRef }}
           envFrom:
+            {{- with .Values.shared.secretRef }}
             - secretRef:
-                name: {{ .Values.shared.secretRef }}
-            {{- if .Values.vcsGateway.secretRef }}
-            - secretRef:
-                name: {{ .Values.vcsGateway.secretRef }}
+                name: {{ . }}
             {{- end }}
+            {{- with .Values.vcsGateway.secretRef }}
+            - secretRef:
+                name: {{ . }}
+            {{- end }}
+          {{- end }}
           ports:
             - name: external
               containerPort: {{ .Values.vcsGateway.externalPort }}

@@ -63,3 +63,51 @@ tests:
             - secretRef:
                 name: vcs-gateway-secret
         template: vcs-gateway-deployment.yaml
+
+  - it: omits the per-component secret when it is not set
+    set:
+      scheduler.enabled: true
+      vcsGateway.enabled: true
+      vcsGateway.domain: vcs-gateway.example.com
+      shared.image: registry.example.com/spacelift/backend:v6.5.0
+      shared.secretRef: shared-backend-secret
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].envFrom
+          value:
+            - secretRef:
+                name: shared-backend-secret
+        template: server-deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].envFrom
+          value:
+            - secretRef:
+                name: shared-backend-secret
+        template: drain-deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].envFrom
+          value:
+            - secretRef:
+                name: shared-backend-secret
+        template: vcs-gateway-deployment.yaml
+
+  - it: never emits a secret reference without a name
+    set:
+      scheduler.enabled: true
+      vcsGateway.enabled: true
+      vcsGateway.domain: vcs-gateway.example.com
+      shared.image: registry.example.com/spacelift/backend:v6.5.0
+      shared.secretRef: shared-backend-secret
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: null
+        template: server-deployment.yaml
+      - notContains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            secretRef:
+              name: null
+        template: drain-deployment.yaml
