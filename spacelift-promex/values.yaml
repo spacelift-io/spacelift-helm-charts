@@ -55,3 +55,22 @@ caCert:
   mountPath: "/certs"
 
 nodeSelector: {}
+
+# Extra environment variables to add to the container
+# extraEnv:
+#   - name: MY_ENV_VAR
+#     value: "some-value"
+#   - name: MY_SECRET_ENV_VAR
+#     valueFrom:
+#       secretKeyRef:
+#         name: my-secret
+#         key: my-key
+extraEnv: []
+
+# Extra envFrom sources (ConfigMaps/Secrets) to add to the container
+# extraEnvFrom:
+#   - configMapRef:
+#       name: my-configmap
+#   - secretRef:
+#       name: my-secret
+extraEnvFrom: []

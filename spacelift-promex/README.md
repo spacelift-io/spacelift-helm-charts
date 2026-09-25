@@ -48,4 +48,30 @@ helm upgrade spacelift-prometheus-exporter spacelift/spacelift-promex --install 
 | `caCert.secretKey` | Key within the secret holding the PEM-encoded certificate | `"ca.crt"` |
 | `caCert.mountPath` | Directory to mount the certificate into | `"/certs"` |
 
+## Extra Environment Variables
+
+You can add extra environment variables to the container via `extraEnv` and `extraEnvFrom`:
+
+```yaml
+extraEnv:
+  - name: MY_ENV_VAR
+    value: "some-value"
+  - name: MY_SECRET_ENV_VAR
+    valueFrom:
+      secretKeyRef:
+        name: my-secret
+        key: my-key
+
+extraEnvFrom:
+  - configMapRef:
+      name: my-configmap
+  - secretRef:
+      name: my-secret
+```
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `extraEnv` | Extra environment variables to add to the container | `[]` |
+| `extraEnvFrom` | Extra envFrom sources (ConfigMaps/Secrets) to add to the container | `[]` |
+
 Follow the instructions on the [user-documentation](https://github.com/spacelift-io/prometheus-exporter) for more detailed instructions.
