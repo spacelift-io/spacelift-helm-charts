@@ -80,6 +80,13 @@ spec:
             - name: "SPACELIFT_PROMEX_CA_CERT_PATH"
               value: "{{ .Values.caCert.mountPath }}/{{ .Values.caCert.secretKey }}"
             {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- if .Values.caCert.enabled }}
           volumeMounts:
             - name: ca-cert
