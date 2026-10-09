@@ -1,0 +1,326 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: server ingress extra paths and rules
+templates:
+  - server-ingress.yaml
+  - server-ingress-v6.yaml
+tests:
+  - it: renders only the default server rule and path when extra rules and paths are empty
+    asserts:
+      - lengthEqual:
+          path: spec.rules
+          count: 1
+        template: server-ingress.yaml
+      - lengthEqual:
+          path: spec.rules
+          count: 1
+        template: server-ingress-v6.yaml
+      - equal:
+          path: spec.rules[0].http.paths
+          value:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: spacelift-server
+                  port:
+                    name: server
+        template: server-ingress.yaml
+      - equal:
+          path: spec.rules[0].http.paths
+          value:
+            - path: /*
+              pathType: ImplementationSpecific
+              backend:
+                service:
+                  name: spacelift-server
+                  port:
+                    name: server
+        template: server-ingress-v6.yaml
+
+  - it: appends IPv4 extra paths in order and renders Helm expressions
+    release:
+      name: example-release
+    set:
+      fullnameOverride: example-spacelift
+      ingress.extraPaths:
+        - path: /redirect
+          pathType: Prefix
+          backend:
+            service:
+              name: ssl-redirect
+              port:
+                name: use-annotation
+        - path: '/{{ .Release.Name }}'
+          pathType: Exact
+          backend:
+            service:
+              name: '{{ include "spacelift.fullname" . }}-custom'
+              port:
+                number: 8080
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths
+          value:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: example-spacelift-server
+                  port:
+                    name: server
+            - path: /redirect
+              pathType: Prefix
+              backend:
+                service:
+                  name: ssl-redirect
+                  port:
+                    name: use-annotation
+            - path: /example-release
+              pathType: Exact
+              backend:
+                service:
+                  name: example-spacelift-custom
+                  port:
+                    number: 8080
+        template: server-ingress.yaml
+      - lengthEqual:
+          path: spec.rules[0].http.paths
+          count: 1
+        template: server-ingress-v6.yaml
+
+  - it: appends IPv6 extra paths independently and renders Helm expressions
+    release:
+      name: example-release
+    set:
+      fullnameOverride: example-spacelift
+      ingressV6.extraPaths:
+        - path: '/{{ .Release.Name }}/*'
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: '{{ include "spacelift.fullname" . }}-custom-v6'
+              port:
+                number: 8080
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths
+          value:
+            - path: /*
+              pathType: ImplementationSpecific
+              backend:
+                service:
+                  name: example-spacelift-server
+                  port:
+                    name: server
+            - path: /example-release/*
+              pathType: ImplementationSpecific
+              backend:
+                service:
+                  name: example-spacelift-custom-v6
+                  port:
+                    number: 8080
+        template: server-ingress-v6.yaml
+      - lengthEqual:
+          path: spec.rules[0].http.paths
+          count: 1
+        template: server-ingress.yaml
+
+  - it: appends IPv4 extra rules in order alongside extra paths and renders Helm expressions
+    release:
+      name: example-release
+    set:
+      shared.serverHostname: spacelift.example.com
+      fullnameOverride: example-spacelift
+      ingress.extraPaths:
+        - path: /redirect
+          pathType: Prefix
+          backend:
+            service:
+              name: ssl-redirect
+              port:
+                name: use-annotation
+      ingress.extraRules:
+        - host: '{{ .Release.Name }}.example.com'
+          http:
+            paths:
+              - path: '/{{ .Release.Name }}'
+                pathType: Prefix
+                backend:
+                  service:
+                    name: '{{ include "spacelift.fullname" $ }}-custom'
+                    port:
+                      number: 8080
+        - host: static.example.com
+          http:
+            paths:
+              - path: /static
+                pathType: Exact
+                backend:
+                  service:
+                    name: static-service
+                    port:
+                      name: http
+    asserts:
+      - lengthEqual:
+          path: spec.rules
+          count: 3
+        template: server-ingress.yaml
+      - equal:
+          path: spec.rules[0].host
+          value: spacelift.example.com
+        template: server-ingress.yaml
+      - lengthEqual:
+          path: spec.rules[0].http.paths
+          count: 2
+        template: server-ingress.yaml
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /
+        template: server-ingress.yaml
+      - equal:
+          path: spec.rules[0].http.paths[1]
+          value:
+            path: /redirect
+            pathType: Prefix
+            backend:
+              service:
+                name: ssl-redirect
+                port:
+                  name: use-annotation
+        template: server-ingress.yaml
+      - equal:
+          path: spec.rules[1]
+          value:
+            host: example-release.example.com
+            http:
+              paths:
+                - path: /example-release
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: example-spacelift-custom
+                      port:
+                        number: 8080
+        template: server-ingress.yaml
+      - equal:
+          path: spec.rules[2]
+          value:
+            host: static.example.com
+            http:
+              paths:
+                - path: /static
+                  pathType: Exact
+                  backend:
+                    service:
+                      name: static-service
+                      port:
+                        name: http
+        template: server-ingress.yaml
+      - lengthEqual:
+          path: spec.rules
+          count: 1
+        template: server-ingress-v6.yaml
+      - lengthEqual:
+          path: spec.rules[0].http.paths
+          count: 1
+        template: server-ingress-v6.yaml
+
+  - it: appends IPv6 extra rules in order alongside extra paths and renders Helm expressions
+    release:
+      name: example-release
+    set:
+      shared.serverHostname: spacelift.example.com
+      fullnameOverride: example-spacelift
+      ingressV6.extraPaths:
+        - path: /redirect
+          pathType: Prefix
+          backend:
+            service:
+              name: ssl-redirect
+              port:
+                name: use-annotation
+      ingressV6.extraRules:
+        - host: '{{ .Release.Name }}.example.com'
+          http:
+            paths:
+              - path: '/{{ .Release.Name }}'
+                pathType: Prefix
+                backend:
+                  service:
+                    name: '{{ include "spacelift.fullname" $ }}-custom'
+                    port:
+                      number: 8080
+        - host: static.example.com
+          http:
+            paths:
+              - path: /static
+                pathType: Exact
+                backend:
+                  service:
+                    name: static-service
+                    port:
+                      name: http
+    asserts:
+      - lengthEqual:
+          path: spec.rules
+          count: 3
+        template: server-ingress-v6.yaml
+      - equal:
+          path: spec.rules[0].host
+          value: spacelift.example.com
+        template: server-ingress-v6.yaml
+      - lengthEqual:
+          path: spec.rules[0].http.paths
+          count: 2
+        template: server-ingress-v6.yaml
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /*
+        template: server-ingress-v6.yaml
+      - equal:
+          path: spec.rules[0].http.paths[1]
+          value:
+            path: /redirect
+            pathType: Prefix
+            backend:
+              service:
+                name: ssl-redirect
+                port:
+                  name: use-annotation
+        template: server-ingress-v6.yaml
+      - equal:
+          path: spec.rules[1]
+          value:
+            host: example-release.example.com
+            http:
+              paths:
+                - path: /example-release
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: example-spacelift-custom
+                      port:
+                        number: 8080
+        template: server-ingress-v6.yaml
+      - equal:
+          path: spec.rules[2]
+          value:
+            host: static.example.com
+            http:
+              paths:
+                - path: /static
+                  pathType: Exact
+                  backend:
+                    service:
+                      name: static-service
+                      port:
+                        name: http
+        template: server-ingress-v6.yaml
+      - lengthEqual:
+          path: spec.rules
+          count: 1
+        template: server-ingress.yaml
+      - lengthEqual:
+          path: spec.rules[0].http.paths
+          count: 1
+        template: server-ingress.yaml

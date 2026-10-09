@@ -521,6 +521,12 @@
         },
         "annotations": {
           "$ref": "#/$defs/annotations"
+        },
+        "extraPaths": {
+          "$ref": "#/$defs/extraPaths"
+        },
+        "extraRules": {
+          "$ref": "#/$defs/extraRules"
         }
       }
     },
@@ -536,6 +542,12 @@
         },
         "annotations": {
           "$ref": "#/$defs/annotations"
+        },
+        "extraPaths": {
+          "$ref": "#/$defs/extraPaths"
+        },
+        "extraRules": {
+          "$ref": "#/$defs/extraRules"
         }
       }
     },
@@ -558,6 +570,22 @@
     }
   },
   "$defs": {
+    "extraRules": {
+      "type": "array",
+      "description": "Additional ingress rules to render. Each item is rendered through the Helm template engine.",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
+    "extraPaths": {
+      "type": "array",
+      "description": "Additional ingress paths to render. Each item is rendered through the Helm template engine.",
+      "default": [],
+      "items": {
+        "type": "object"
+      }
+    },
     "port": {
       "type": "integer",
       "minimum": 1,

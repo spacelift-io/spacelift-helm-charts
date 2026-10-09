@@ -28,4 +28,10 @@ spec:
                 name: {{ include "spacelift.fullname" $ }}-server
                 port:
                   name: server
+        {{- with .Values.ingress.extraPaths }}
+          {{- tpl (toYaml .) $ | nindent 10 }}
+        {{- end }}
+    {{- with .Values.ingress.extraRules }}
+      {{- tpl (toYaml .) $ | nindent 4 }}
+    {{- end }}
 {{- end }}
