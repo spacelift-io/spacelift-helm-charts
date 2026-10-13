@@ -59,11 +59,11 @@ spec:
                   type: string
                 type: array
               commsProtocol:
-                default: mqtt
+                default: poll
                 description: |-
                   CommsProtocol selects the transport used to communicate with the Spacelift backend
-                  for this pool's workers: "mqtt" (default, server push over MQTT) or "poll"
-                  (worker-initiated HTTP long-poll). All workers in the pool use the selected transport.
+                  for this pool's workers: "poll" (default, worker-initiated HTTP long-poll) or "mqtt"
+                  (deprecated server push over MQTT). All workers in the pool use the selected transport.
                 enum:
                 - mqtt
                 - poll
@@ -129,8 +129,9 @@ spec:
                       StartTime before the system will actively try to mark it failed and kill associated containers.
                       Value must be a positive integer.
 
-                      That could be used to specify the maximum duration of a run.
-                      Default: 70 minutes
+                      Set it longer than the worker's run timeout (SPACELIFT_LAUNCHER_RUN_TIMEOUT) plus the pod's
+                      startup time and 80 seconds, so a timed-out run can still report its failure and run after-run hooks.
+                      Default: 81 minutes 20 seconds (the default 70-minute run timeout, 80 seconds, and 10 minutes for startup)
                     format: int64
                     type: integer
                   additionalSidecarContainers:
@@ -13349,10 +13350,12 @@ spec:
                     type: object
                 type: object
               pollCommsURL:
+                default: https://app.spacelift.io
                 description: |-
                   PollCommsURL is the base URL of the Spacelift worker communication server used when
-                  CommsProtocol is "poll" (for example https://app.spacelift.io). It is required
-                  when CommsProtocol is "poll" and ignored otherwise.
+                  CommsProtocol is "poll". It defaults to the EU SaaS server; US-region accounts must
+                  set https://app.us.spacelift.io and self-hosted installations their own server URL.
+                  It is ignored when CommsProtocol is "mqtt".
                 type: string
               poolSize:
                 description: PoolSize is the desired size of your worker pool.
