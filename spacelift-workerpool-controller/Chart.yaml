@@ -3,7 +3,7 @@ name: spacelift-workerpool-controller
 description: A Helm chart for deploying spacelift workerpool controller
 type: application
 version: v0.22.0  # VERSION
-appVersion: "v0.0.45"
+appVersion: "v0.0.46"
 
 dependencies:
   - name: crds
