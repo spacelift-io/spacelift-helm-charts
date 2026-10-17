@@ -8034,6 +8034,17 @@ spec:
                       More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
                     type: object
                     x-kubernetes-map-type: atomic
+                  priorityClassName:
+                    description: |-
+                      PriorityClassName is the name of a PriorityClass to assign to worker pods.
+                      The scheduler may preempt lower-priority pods to make room for
+                      higher-priority ones. Workers with a priority at least as high as the other
+                      workloads on their nodes cannot be preempted by them, but a high class also
+                      lets every worker pod preempt lower-priority workloads. A class with
+                      preemptionPolicy: Never keeps the scheduling priority without preempting
+                      anything. If unset, the cluster's default PriorityClass applies, or
+                      priority 0 when there is none.
+                    type: string
                   runtimeClassName:
                     description: |-
                       RuntimeClassName refers to a RuntimeClass object in the node.k8s.io group, which should be used
