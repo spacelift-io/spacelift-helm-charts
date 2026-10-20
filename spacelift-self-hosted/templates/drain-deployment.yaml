@@ -23,6 +23,10 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.shared.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ include "spacelift.drainServiceAccountName" . }}
       securityContext:
         {{- toYaml .Values.drain.podSecurityContext | nindent 8 }}

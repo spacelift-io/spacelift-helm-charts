@@ -24,6 +24,25 @@
           ],
           "description": "Container image for all Spacelift components"
         },
+        "imagePullSecrets": {
+          "type": "array",
+          "description": "Secrets with credentials to pull the image from a private registry. Set on the server, drain, scheduler and VCS Gateway pods.",
+          "default": [],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Name of a secret in the release namespace"
+              }
+            }
+          }
+        },
         "serverHostname": {
           "type": [
             "string",

@@ -111,3 +111,78 @@ tests:
             secretRef:
               name: null
         template: drain-deployment.yaml
+
+  - it: sets the shared image pull secrets on every workload
+    set:
+      scheduler.enabled: true
+      vcsGateway.enabled: true
+      vcsGateway.domain: vcs-gateway.example.com
+      shared.image: registry.spacelift.io/spacelift/backend:v6.5.0
+      shared.imagePullSecrets:
+        - name: spacelift-registry
+        - name: mirror-registry
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets
+          value:
+            - name: spacelift-registry
+            - name: mirror-registry
+        template: server-deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets
+          value:
+            - name: spacelift-registry
+            - name: mirror-registry
+        template: drain-deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets
+          value:
+            - name: spacelift-registry
+            - name: mirror-registry
+        template: scheduler-deployment.yaml
+      - equal:
+          path: spec.template.spec.imagePullSecrets
+          value:
+            - name: spacelift-registry
+            - name: mirror-registry
+        template: vcs-gateway-deployment.yaml
+
+  - it: omits image pull secrets by default
+    set:
+      scheduler.enabled: true
+      vcsGateway.enabled: true
+      vcsGateway.domain: vcs-gateway.example.com
+      shared.image: registry.example.com/spacelift/backend:v6.5.0
+    asserts:
+      - notExists:
+          path: spec.template.spec.imagePullSecrets
+        template: server-deployment.yaml
+      - notExists:
+          path: spec.template.spec.imagePullSecrets
+        template: drain-deployment.yaml
+      - notExists:
+          path: spec.template.spec.imagePullSecrets
+        template: scheduler-deployment.yaml
+      - notExists:
+          path: spec.template.spec.imagePullSecrets
+        template: vcs-gateway-deployment.yaml
+
+  - it: rejects image pull secrets given as plain strings
+    template: server-deployment.yaml
+    set:
+      shared.image: registry.example.com/spacelift/backend:v6.5.0
+      shared.imagePullSecrets:
+        - spacelift-registry
+    asserts:
+      - failedTemplate:
+          errorPattern: "/shared/imagePullSecrets/0': got string, want object"
+
+  - it: rejects image pull secrets without a name
+    template: server-deployment.yaml
+    set:
+      shared.image: registry.example.com/spacelift/backend:v6.5.0
+      shared.imagePullSecrets:
+        - namespace: default
+    asserts:
+      - failedTemplate:
+          errorPattern: "/shared/imagePullSecrets/0': missing property 'name'"

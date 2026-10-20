@@ -27,6 +27,10 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.shared.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ include "spacelift.vcsGatewayServiceAccountName" . }}
       securityContext:
         {{- toYaml .Values.vcsGateway.podSecurityContext | nindent 8 }}
