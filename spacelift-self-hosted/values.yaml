@@ -16,6 +16,17 @@ shared:
     digest: ""
     # Use the FIPS 140 build of the image, <repository>-fips.
     fips: false
+  # The launcher image that Kubernetes workers run. When enabled, the chart sets
+  # LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG on the server, drain and VCS Gateway.
+  # These win over the same keys in the secrets from secretRef.
+  launcherImage:
+    enabled: false
+    registry: registry.spacelift.io
+    repository: deploy/launcher
+    # Defaults to the chart appVersion.
+    tag: ""
+    # Use the FIPS 140 build of the image, <repository>-fips.
+    fips: false
   # Secrets with credentials to pull the backend image from a private registry, for
   # example registry.spacelift.io. The secrets must exist in the release namespace.
   # They are set on the server, drain, scheduler and VCS Gateway pods.

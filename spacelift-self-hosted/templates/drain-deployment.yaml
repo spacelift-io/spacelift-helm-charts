@@ -120,6 +120,9 @@ spec:
           env:
             - name: ENABLE_INSTRUMENTATION_ENDPOINTS
               value: "true"
+            {{- with include "spacelift.launcherImageEnv" . }}
+            {{- . | nindent 12 }}
+            {{- end }}
           {{- if or .Values.shared.secretRef .Values.drain.secretRef }}
           envFrom:
             {{- with .Values.shared.secretRef }}

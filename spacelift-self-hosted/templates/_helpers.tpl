@@ -148,18 +148,28 @@ Create the name of the service account to use for the scheduler.
 {{- end }}
 {{- end }}
 
+{{/*
+The <registry>/<repository>[-fips] part of an image, from a dict with the
+registry, repository and fips keys (.Values.shared.backendImage or
+.Values.shared.launcherImage).
+*/}}
+{{- define "spacelift.imageRepository" -}}
+	{{- $repository := .repository -}}
+	{{- if .fips -}}
+		{{- $repository = printf "%s-fips" $repository -}}
+	{{- end -}}
+	{{- with .registry -}}
+		{{- $repository = printf "%s/%s" (trimSuffix "/" .) $repository -}}
+	{{- end -}}
+	{{- $repository -}}
+{{- end -}}
+
 {{- define "spacelift.backendImage" -}}
 	{{- if .Values.shared.image -}}
 		{{- .Values.shared.image -}}
 	{{- else -}}
 		{{- $image := .Values.shared.backendImage -}}
-		{{- $repository := $image.repository -}}
-		{{- if $image.fips -}}
-			{{- $repository = printf "%s-fips" $repository -}}
-		{{- end -}}
-		{{- with $image.registry -}}
-			{{- $repository = printf "%s/%s" (trimSuffix "/" .) $repository -}}
-		{{- end -}}
+		{{- $repository := include "spacelift.imageRepository" $image -}}
 		{{- if $image.digest -}}
 			{{- printf "%s@%s" $repository $image.digest -}}
 		{{- else -}}
@@ -173,6 +183,23 @@ The tag of .Values.shared.backendImage, which defaults to the chart appVersion.
 */}}
 {{- define "spacelift.backendImageTag" -}}
 {{- .Values.shared.backendImage.tag | default .Chart.AppVersion -}}
+{{- end -}}
+
+{{/*
+The LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG env vars from .Values.shared.launcherImage,
+as container env entries. Renders nothing when launcherImage is disabled.
+
+The backend joins the two values as LAUNCHER_IMAGE:LAUNCHER_IMAGE_TAG, which is
+why launcherImage has no digest.
+*/}}
+{{- define "spacelift.launcherImageEnv" -}}
+	{{- $image := .Values.shared.launcherImage -}}
+	{{- if $image.enabled -}}
+- name: LAUNCHER_IMAGE
+  value: {{ include "spacelift.imageRepository" $image | quote }}
+- name: LAUNCHER_IMAGE_TAG
+  value: {{ $image.tag | default .Chart.AppVersion | quote }}
+	{{- end -}}
 {{- end -}}
 
 {{/*
