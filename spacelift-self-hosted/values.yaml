@@ -1,6 +1,13 @@
 shared:
   secretRef:
   image:
+  # Secrets with credentials to pull shared.image from a private registry, for
+  # example registry.spacelift.io. The secrets must exist in the release namespace.
+  # They are set on the server, drain, scheduler and VCS Gateway pods.
+  # For example:
+  #  imagePullSecrets:
+  #    - name: spacelift-registry
+  imagePullSecrets: []
   serverHostname:
 
 server:
