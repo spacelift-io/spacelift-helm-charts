@@ -7,9 +7,6 @@ templates:
   - vcs-gateway-deployment.yaml
 tests:
   - it: does not set the launcher env vars by default
-    set:
-      vcsGateway.enabled: true
-      vcsGateway.domain: vcs-gateway.example.com
     asserts:
       - notContains:
           path: spec.template.spec.containers[0].env
@@ -35,25 +32,11 @@ tests:
             name: LAUNCHER_IMAGE_TAG
           any: true
         template: drain-deployment.yaml
-      - notContains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: LAUNCHER_IMAGE
-          any: true
-        template: vcs-gateway-deployment.yaml
-      - notContains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: LAUNCHER_IMAGE_TAG
-          any: true
-        template: vcs-gateway-deployment.yaml
 
-  - it: sets the launcher env vars on the server, drain and VCS Gateway when enabled
+  - it: sets the launcher env vars on the server and drain when enabled
     chart:
       appVersion: v7.1.0
     set:
-      vcsGateway.enabled: true
-      vcsGateway.domain: vcs-gateway.example.com
       shared.launcherImage.enabled: true
     asserts:
       - contains:
@@ -80,23 +63,12 @@ tests:
             name: LAUNCHER_IMAGE_TAG
             value: v7.1.0
         template: drain-deployment.yaml
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: LAUNCHER_IMAGE
-            value: registry.spacelift.io/deploy/launcher
-        template: vcs-gateway-deployment.yaml
-      - contains:
-          path: spec.template.spec.containers[0].env
-          content:
-            name: LAUNCHER_IMAGE_TAG
-            value: v7.1.0
-        template: vcs-gateway-deployment.yaml
 
-  - it: does not set the launcher env vars on the scheduler, which does not read them
-    template: scheduler-deployment.yaml
+  - it: does not set the launcher env vars on the scheduler and VCS Gateway
     set:
       scheduler.enabled: true
+      vcsGateway.enabled: true
+      vcsGateway.domain: vcs-gateway.example.com
       shared.launcherImage.enabled: true
     asserts:
       - notContains:
@@ -104,6 +76,13 @@ tests:
           content:
             name: LAUNCHER_IMAGE
           any: true
+        template: scheduler-deployment.yaml
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE
+          any: true
+        template: vcs-gateway-deployment.yaml
 
   - it: builds LAUNCHER_IMAGE from the registry and repository, and uses the tag
     template: drain-deployment.yaml
