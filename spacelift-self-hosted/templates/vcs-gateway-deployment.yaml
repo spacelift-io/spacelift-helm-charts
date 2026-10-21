@@ -104,6 +104,9 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            {{- with include "spacelift.launcherImageEnv" . }}
+            {{- . | nindent 12 }}
+            {{- end }}
           {{- if or .Values.shared.secretRef .Values.vcsGateway.secretRef }}
           envFrom:
             {{- with .Values.shared.secretRef }}

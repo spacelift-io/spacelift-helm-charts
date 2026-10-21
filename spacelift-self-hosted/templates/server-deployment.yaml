@@ -133,6 +133,9 @@ spec:
               value: "true"
             - name: FEATURE_FLAG_SELF_HOSTED_V3_INSTALLATION_FLOW
               value: "true"
+            {{- with include "spacelift.launcherImageEnv" . }}
+            {{- . | nindent 12 }}
+            {{- end }}
           {{- if or .Values.shared.secretRef .Values.server.secretRef }}
           envFrom:
             {{- with .Values.shared.secretRef }}

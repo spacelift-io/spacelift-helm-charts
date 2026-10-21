@@ -21,6 +21,16 @@ Set `shared.backendImage` to change the registry, repository, tag or digest, and
 `shared.image` still works and takes a full image reference, but it is deprecated.
 While it is set, the chart ignores `shared.backendImage`.
 
+## Launcher image
+
+Kubernetes workers run the launcher image that the backend reads from
+`LAUNCHER_IMAGE` and `LAUNCHER_IMAGE_TAG`. Set `shared.launcherImage.enabled` to
+`true` to let the chart set both on the server, drain and VCS Gateway, by default
+to `registry.spacelift.io/deploy/launcher` and the chart's `appVersion`. These
+values win over the same keys in your secrets. `shared.launcherImage` takes the
+same `registry`, `repository`, `tag` and `fips` keys as `shared.backendImage`, but
+no digest: the backend joins the two values as `image:tag`.
+
 ## Quick Start
 
 Depending on your environment, you can check the [guides here](https://docs.spacelift.io/self-hosted/latest/installing-spacelift/reference-architecture/guides) 
