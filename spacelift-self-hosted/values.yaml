@@ -17,7 +17,7 @@ shared:
     # Use the FIPS 140 build of the image, <repository>-fips.
     fips: false
   # The launcher image that Kubernetes workers run. When enabled, the chart sets
-  # LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG on the server, drain and VCS Gateway.
+  # LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG on the server and drain.
   # These win over the same keys in the secrets from secretRef.
   launcherImage:
     enabled: false

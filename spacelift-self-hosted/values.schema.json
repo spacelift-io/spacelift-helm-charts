@@ -59,7 +59,7 @@
         },
         "launcherImage": {
           "type": "object",
-          "description": "The launcher image that Kubernetes workers run. When enabled, sets LAUNCHER_IMAGE to <registry>/<repository> and LAUNCHER_IMAGE_TAG to <tag> on the server, drain and VCS Gateway. These win over the same keys in the secrets from secretRef.",
+          "description": "The launcher image that Kubernetes workers run. When enabled, sets LAUNCHER_IMAGE to <registry>/<repository> and LAUNCHER_IMAGE_TAG to <tag> on the server and drain. These win over the same keys in the secrets from secretRef.",
           "additionalProperties": false,
           "properties": {
             "enabled": {
