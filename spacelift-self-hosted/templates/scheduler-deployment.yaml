@@ -110,7 +110,7 @@ spec:
         - name: scheduler
           securityContext:
             {{- toYaml .Values.scheduler.securityContext | nindent 12 }}
-          image: "{{ .Values.shared.image }}"
+          image: "{{ include "spacelift.backendImage" . }}"
           imagePullPolicy: {{ .Values.scheduler.pullPolicy }}
           command:
             - spacelift

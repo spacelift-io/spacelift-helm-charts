@@ -22,7 +22,40 @@
             "string",
             "null"
           ],
-          "description": "Container image for all Spacelift components"
+          "description": "Deprecated: use backendImage. A full container image reference for all Spacelift components. When set, backendImage is ignored."
+        },
+        "backendImage": {
+          "type": "object",
+          "description": "The Spacelift backend image, used by every workload. Rendered as <registry>/<repository>:<tag>, or as <registry>/<repository>@<digest> when digest is set.",
+          "additionalProperties": false,
+          "properties": {
+            "registry": {
+              "type": "string",
+              "default": "registry.spacelift.io",
+              "description": "Registry host, optionally with a path prefix. Leave empty to use the repository as it is."
+            },
+            "repository": {
+              "type": "string",
+              "minLength": 1,
+              "default": "deploy/backend",
+              "description": "Image repository within the registry"
+            },
+            "tag": {
+              "type": "string",
+              "default": "",
+              "description": "Image tag. Defaults to the chart appVersion when empty. Left out of the image when digest is set, but still used to read the Spacelift version, to decide whether scheduler should be rendered"
+            },
+            "digest": {
+              "type": "string",
+              "default": "",
+              "description": "Image digest without the leading @, for example sha256:0e07... When set, the image has no tag."
+            },
+            "fips": {
+              "type": "boolean",
+              "default": false,
+              "description": "Use the FIPS 140 build of the image, <repository>-fips"
+            }
+          }
         },
         "imagePullSecrets": {
           "type": "array",
@@ -212,7 +245,7 @@
             "null"
           ],
           "default": null,
-          "description": "Whether to deploy the standalone scheduler workload. Leave null to decide from the application version read out of shared.image; set true to always deploy it, false to never deploy it. Useful when the image tag does not carry a readable version."
+          "description": "Whether to deploy the standalone scheduler workload. Leave null to decide from the application version in the backend image tag; set true to always deploy it, false to never deploy it. Useful when the image tag does not carry a readable version."
         },
         "replicaCount": {
           "type": "integer",

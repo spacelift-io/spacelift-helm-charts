@@ -25,10 +25,11 @@ runs the cron scheduler itself and this chart stops deploying the workload, with
 no action needed on your side.
 {{- else }}
 
-WARNING: no Spacelift version could be read from shared.image
-({{ .Values.shared.image | default "not set" | quote }}), so this chart is keeping the
-standalone "scheduler" workload to be safe. Use an image tag of the form vX.Y.Z, or
-set scheduler.enabled explicitly, to decide this yourself.
+WARNING: no Spacelift version could be read from the backend image tag
+({{ include "spacelift.backendImage" . | quote }}), so this chart is keeping the
+standalone "scheduler" workload to be safe. Use an image tag of the form vX.Y.Z
+(with a digest, set it in shared.backendImage.tag), or set scheduler.enabled
+explicitly, to decide this yourself.
 {{- end }}
 {{- else if and $forced $core (semverCompare "<6.4.0" $core) }}
 
@@ -37,4 +38,11 @@ scheduler.enabled is set to false, but this installation runs Spacelift {{ $core
 which does not run the cron scheduler in the drain. Nothing will trigger recurring
 work - drift detection, scheduled runs, tasks and deletes - until you upgrade to
 v6.4.0 or set scheduler.enabled back to true.
+{{- end }}
+
+{{- if .Values.shared.image }}
+
+WARNING: shared.image is deprecated and will be removed in a future release. Move
+the image to shared.backendImage (registry, repository, tag, digest, fips). While
+shared.image is set, the chart ignores shared.backendImage.
 {{- end }}
