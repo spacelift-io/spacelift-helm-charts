@@ -32,6 +32,19 @@ controllerManager:
         cpu: 100m
         memory: 128Mi
     extraVolumeMounts: []
+    # extraEnv allows you to inject additional environment variables into the controller container.
+    # Use this to set an outbound proxy when the cluster cannot reach Spacelift directly:
+    # extraEnv:
+    #   - name: HTTP_PROXY
+    #     value: http://proxy.example.com:8080
+    #   - name: HTTPS_PROXY
+    #     value: http://proxy.example.com:8080
+    #   - name: NO_PROXY
+    #     value: localhost,127.0.0.1,.svc,.cluster.local
+    extraEnv: []
+    # envFrom allows you to inject all values from Secrets and ConfigMaps as environment variables
+    # into the controller container.
+    envFrom: []
     extraPodLabels: {}
   replicas: 1
   annotations: {}

@@ -20,6 +20,44 @@ helm upgrade spacelift-workerpool-controller spacelift/spacelift-workerpool-cont
 You are now ready to create a worker pool and start scheduling some runs.
 Follow the instructions on the [user-documentation](https://docs.spacelift.io/concepts/worker-pools.html#kubernetes) for more detailed instructions.
 
+## Extra environment variables
+
+`controllerManager.manager.extraEnv` and `controllerManager.manager.envFrom` inject additional
+environment variables into the controller container, the same way `launcher.extraEnv` and
+`launcher.envFrom` do for the worker pool chart.
+
+The controller is a Go process, so this is how you send its Spacelift API calls through an HTTP
+proxy. Set `HTTP_PROXY` and `HTTPS_PROXY` to the proxy URL, and set `NO_PROXY` so in-cluster
+traffic (the Kubernetes API, and anything under `.svc` / `.cluster.local`) stays direct. Without
+`NO_PROXY`, the controller will also try to reach the API server through the proxy.
+
+```yaml
+controllerManager:
+  manager:
+    extraEnv:
+      - name: HTTP_PROXY
+        value: http://proxy.example.com:8080
+      - name: HTTPS_PROXY
+        value: http://proxy.example.com:8080
+      - name: NO_PROXY
+        value: localhost,127.0.0.1,.svc,.cluster.local
+```
+
+To load every key from a Secret or ConfigMap instead:
+
+```yaml
+controllerManager:
+  manager:
+    envFrom:
+      - secretRef:
+          name: spacelift-controller-proxy
+```
+
+Entries in `extraEnv` are appended after the variables the chart sets itself
+(`CONTROLLER_NAMESPACE`, `KUBERNETES_CLUSTER_DOMAIN`, and `GODEBUG` when
+`controllerManager.enforceFips140` is true). An explicit `env` entry takes precedence over the
+same key coming from `envFrom`.
+
 ## Rolling Upgrades and Pod Disruption Budgets
 
 Two separate PDBs are available: `pdb` protects the **worker** pods that execute runs, and
