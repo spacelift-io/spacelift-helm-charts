@@ -74,6 +74,13 @@ spec:
         - name: GODEBUG
           value: fips140=only
         {{- end }}
+        {{- with .Values.controllerManager.manager.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.controllerManager.manager.envFrom }}
+        envFrom:
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
           | default .Chart.AppVersion }}
         ports:
