@@ -57,6 +57,39 @@
             }
           }
         },
+        "launcherImage": {
+          "type": "object",
+          "description": "The launcher image that Kubernetes workers run. When enabled, sets LAUNCHER_IMAGE to <registry>/<repository> and LAUNCHER_IMAGE_TAG to <tag> on the server and drain. These win over the same keys in the secrets from secretRef.",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Set LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG from these values. When false, the chart does not set them."
+            },
+            "registry": {
+              "type": "string",
+              "default": "registry.spacelift.io",
+              "description": "Registry host, optionally with a path prefix. Leave empty to use the repository as it is."
+            },
+            "repository": {
+              "type": "string",
+              "minLength": 1,
+              "default": "deploy/launcher",
+              "description": "Image repository within the registry"
+            },
+            "tag": {
+              "type": "string",
+              "default": "",
+              "description": "Image tag. Defaults to the chart appVersion when empty."
+            },
+            "fips": {
+              "type": "boolean",
+              "default": false,
+              "description": "Use the FIPS 140 build of the image, <repository>-fips"
+            }
+          }
+        },
         "imagePullSecrets": {
           "type": "array",
           "description": "Secrets with credentials to pull the image from a private registry. Set on the server, drain, scheduler and VCS Gateway pods.",
