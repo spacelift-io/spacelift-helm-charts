@@ -43,7 +43,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: LAUNCHER_IMAGE
-            value: registry.spacelift.io/deploy/launcher
+            value: oci.spacelift.io/deploy/launcher
         template: server-deployment.yaml
       - contains:
           path: spec.template.spec.containers[0].env
@@ -55,7 +55,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: LAUNCHER_IMAGE
-            value: registry.spacelift.io/deploy/launcher
+            value: oci.spacelift.io/deploy/launcher
         template: drain-deployment.yaml
       - contains:
           path: spec.template.spec.containers[0].env
@@ -113,7 +113,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: LAUNCHER_IMAGE
-            value: registry.spacelift.io/deploy/launcher-fips
+            value: oci.spacelift.io/deploy/launcher-fips
 
   - it: does not take the tag or digest of the backend image
     template: drain-deployment.yaml

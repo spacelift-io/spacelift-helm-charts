@@ -21,7 +21,7 @@ shared:
   # These win over the same keys in the secrets from secretRef.
   launcherImage:
     enabled: false
-    registry: registry.spacelift.io
+    registry: oci.spacelift.io
     repository: deploy/launcher
     # Defaults to the chart appVersion.
     tag: ""
