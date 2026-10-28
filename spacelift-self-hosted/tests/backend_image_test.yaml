@@ -6,7 +6,7 @@ templates:
   - scheduler-deployment.yaml
   - vcs-gateway-deployment.yaml
 tests:
-  - it: pulls from registry.spacelift.io with the chart appVersion by default
+  - it: pulls from oci.spacelift.io with the chart appVersion by default
     chart:
       appVersion: v7.1.0
     set:
@@ -16,19 +16,19 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: registry.spacelift.io/deploy/backend:v7.1.0
+          value: oci.spacelift.io/deploy/backend:v7.1.0
         template: server-deployment.yaml
       - equal:
           path: spec.template.spec.containers[0].image
-          value: registry.spacelift.io/deploy/backend:v7.1.0
+          value: oci.spacelift.io/deploy/backend:v7.1.0
         template: drain-deployment.yaml
       - equal:
           path: spec.template.spec.containers[0].image
-          value: registry.spacelift.io/deploy/backend:v7.1.0
+          value: oci.spacelift.io/deploy/backend:v7.1.0
         template: scheduler-deployment.yaml
       - equal:
           path: spec.template.spec.containers[0].image
-          value: registry.spacelift.io/deploy/backend:v7.1.0
+          value: oci.spacelift.io/deploy/backend:v7.1.0
         template: vcs-gateway-deployment.yaml
 
   - it: builds the image from registry, repository and tag
@@ -63,7 +63,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: registry.spacelift.io/deploy/backend@sha256:0e072dddd1f7f8fc8909a2ca6f65e76c5f0d2fcfb8be47935ae3457e8bbceb20
+          value: oci.spacelift.io/deploy/backend@sha256:0e072dddd1f7f8fc8909a2ca6f65e76c5f0d2fcfb8be47935ae3457e8bbceb20
 
   - it: uses the FIPS build when fips is set
     template: server-deployment.yaml
@@ -74,7 +74,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].image
-          value: registry.spacelift.io/deploy/backend-fips:v7.1.0
+          value: oci.spacelift.io/deploy/backend-fips:v7.1.0
 
   - it: drops a trailing slash from the registry
     template: server-deployment.yaml

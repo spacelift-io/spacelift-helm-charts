@@ -117,7 +117,7 @@ tests:
       scheduler.enabled: true
       vcsGateway.enabled: true
       vcsGateway.domain: vcs-gateway.example.com
-      shared.image: registry.spacelift.io/spacelift/backend:v6.5.0
+      shared.image: oci.spacelift.io/spacelift/backend:v6.5.0
       shared.imagePullSecrets:
         - name: spacelift-registry
         - name: mirror-registry

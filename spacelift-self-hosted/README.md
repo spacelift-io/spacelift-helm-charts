@@ -13,10 +13,10 @@ This chart allows to deploy an instance of Spacelift in a self-hosted environmen
 
 ## Backend image
 
-By default the chart pulls `registry.spacelift.io/deploy/backend:<appVersion>`.
+By default the chart pulls `oci.spacelift.io/deploy/backend:<appVersion>`.
 Set `shared.backendImage` to change the registry, repository, tag or digest, and
 `shared.backendImage.fips` to use the FIPS 140 build. Pulling from
-`registry.spacelift.io` needs credentials: set them with `shared.imagePullSecrets`.
+`oci.spacelift.io` needs credentials: set them with `shared.imagePullSecrets`.
 
 `shared.image` still works and takes a full image reference, but it is deprecated.
 While it is set, the chart ignores `shared.backendImage`.

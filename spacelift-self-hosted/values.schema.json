@@ -31,7 +31,7 @@
           "properties": {
             "registry": {
               "type": "string",
-              "default": "registry.spacelift.io",
+              "default": "oci.spacelift.io",
               "description": "Registry host, optionally with a path prefix. Leave empty to use the repository as it is."
             },
             "repository": {
