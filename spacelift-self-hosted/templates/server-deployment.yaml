@@ -122,7 +122,7 @@ spec:
         - name: server
           securityContext:
             {{- toYaml .Values.server.securityContext | nindent 12 }}
-          image: "{{ .Values.shared.image }}"
+          image: "{{ include "spacelift.backendImage" . }}"
           imagePullPolicy: {{ .Values.server.pullPolicy }}
           command:
             - spacelift

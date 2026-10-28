@@ -148,21 +148,59 @@ Create the name of the service account to use for the scheduler.
 {{- end }}
 {{- end }}
 
+{{- define "spacelift.backendImage" -}}
+	{{- if .Values.shared.image -}}
+		{{- .Values.shared.image -}}
+	{{- else -}}
+		{{- $image := .Values.shared.backendImage -}}
+		{{- $repository := $image.repository -}}
+		{{- if $image.fips -}}
+			{{- $repository = printf "%s-fips" $repository -}}
+		{{- end -}}
+		{{- with $image.registry -}}
+			{{- $repository = printf "%s/%s" (trimSuffix "/" .) $repository -}}
+		{{- end -}}
+		{{- if $image.digest -}}
+			{{- printf "%s@%s" $repository $image.digest -}}
+		{{- else -}}
+			{{- printf "%s:%s" $repository (include "spacelift.backendImageTag" .) -}}
+		{{- end -}}
+	{{- end -}}
+{{- end -}}
+
 {{/*
-The application version, taken from the tag of .Values.shared.image.
+The tag of .Values.shared.backendImage, which defaults to the chart appVersion.
+*/}}
+{{- define "spacelift.backendImageTag" -}}
+{{- .Values.shared.backendImage.tag | default .Chart.AppVersion -}}
+{{- end -}}
+
+{{/*
+The application version, taken from the backend image tag: the tag of the
+deprecated .Values.shared.image when it is set, and the tag of
+.Values.shared.backendImage otherwise.
+
+With a digest, the image carries no tag, so only a tag the user set explicitly
+counts. The chart appVersion does not: the digest may belong to another version.
 
 Returns the "X.Y.Z" core of the tag, or an empty string when there is no tag or
 the tag is not of the form vX.Y.Z. What an empty result means is up to the caller.
 */}}
 {{- define "spacelift.appVersionCore" -}}
-{{- $ref := .Values.shared.image | default "" -}}
-{{- $parts := $ref | splitList "/" | last | splitList ":" -}}
-{{- if eq (len $parts) 2 -}}
-{{- $tag := index $parts 1 -}}
-{{- if regexMatch "^v?[0-9]+\\.[0-9]+\\.[0-9]+([-+].*)?$" $tag -}}
-{{- regexFind "[0-9]+\\.[0-9]+\\.[0-9]+" $tag -}}
-{{- end -}}
-{{- end -}}
+	{{- $tag := "" -}}
+	{{- if .Values.shared.image -}}
+		{{- $parts := .Values.shared.image | splitList "/" | last | splitList ":" -}}
+		{{- if eq (len $parts) 2 -}}
+			{{- $tag = index $parts 1 -}}
+		{{- end -}}
+	{{- else if .Values.shared.backendImage.digest -}}
+		{{- $tag = .Values.shared.backendImage.tag -}}
+	{{- else -}}
+		{{- $tag = include "spacelift.backendImageTag" . -}}
+	{{- end -}}
+	{{- if regexMatch "^v?[0-9]+\\.[0-9]+\\.[0-9]+([-+].*)?$" $tag -}}
+		{{- regexFind "[0-9]+\\.[0-9]+\\.[0-9]+" $tag -}}
+	{{- end -}}
 {{- end -}}
 
 {{/*

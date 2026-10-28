@@ -1,0 +1,195 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: backend image
+templates:
+  - server-deployment.yaml
+  - drain-deployment.yaml
+  - scheduler-deployment.yaml
+  - vcs-gateway-deployment.yaml
+tests:
+  - it: pulls from oci.spacelift.io with the chart appVersion by default
+    chart:
+      appVersion: v7.1.0
+    set:
+      scheduler.enabled: true
+      vcsGateway.enabled: true
+      vcsGateway.domain: vcs-gateway.example.com
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: oci.spacelift.io/deploy/backend:v7.1.0
+        template: server-deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: oci.spacelift.io/deploy/backend:v7.1.0
+        template: drain-deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: oci.spacelift.io/deploy/backend:v7.1.0
+        template: scheduler-deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: oci.spacelift.io/deploy/backend:v7.1.0
+        template: vcs-gateway-deployment.yaml
+
+  - it: builds the image from registry, repository and tag
+    template: server-deployment.yaml
+    set:
+      shared.backendImage.registry: mirror.example.com/spacelift
+      shared.backendImage.repository: backend
+      shared.backendImage.tag: v7.2.0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: mirror.example.com/spacelift/backend:v7.2.0
+
+  - it: leaves the tag out when a digest is set
+    template: server-deployment.yaml
+    set:
+      shared.backendImage.registry: mirror.example.com/spacelift
+      shared.backendImage.repository: backend
+      shared.backendImage.tag: v7.2.0
+      shared.backendImage.digest: sha256:0e072dddd1f7f8fc8909a2ca6f65e76c5f0d2fcfb8be47935ae3457e8bbceb20
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: mirror.example.com/spacelift/backend@sha256:0e072dddd1f7f8fc8909a2ca6f65e76c5f0d2fcfb8be47935ae3457e8bbceb20
+
+  - it: leaves the tag out when only a digest is set
+    template: server-deployment.yaml
+    chart:
+      appVersion: v7.1.0
+    set:
+      shared.backendImage.digest: sha256:0e072dddd1f7f8fc8909a2ca6f65e76c5f0d2fcfb8be47935ae3457e8bbceb20
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: oci.spacelift.io/deploy/backend@sha256:0e072dddd1f7f8fc8909a2ca6f65e76c5f0d2fcfb8be47935ae3457e8bbceb20
+
+  - it: uses the FIPS build when fips is set
+    template: server-deployment.yaml
+    chart:
+      appVersion: v7.1.0
+    set:
+      shared.backendImage.fips: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: oci.spacelift.io/deploy/backend-fips:v7.1.0
+
+  - it: drops a trailing slash from the registry
+    template: server-deployment.yaml
+    chart:
+      appVersion: v7.1.0
+    set:
+      shared.backendImage.registry: mirror.example.com/
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: mirror.example.com/deploy/backend:v7.1.0
+
+  - it: uses the repository as it is when the registry is empty
+    template: server-deployment.yaml
+    chart:
+      appVersion: v7.1.0
+    set:
+      shared.backendImage.registry: ""
+      shared.backendImage.repository: spacelift/backend
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: spacelift/backend:v7.1.0
+
+  - it: uses the deprecated shared.image as it is and ignores backendImage
+    set:
+      scheduler.enabled: true
+      vcsGateway.enabled: true
+      vcsGateway.domain: vcs-gateway.example.com
+      shared.image: legacy.example.com/spacelift/backend:v6.5.0
+      shared.backendImage.registry: mirror.example.com
+      shared.backendImage.fips: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: legacy.example.com/spacelift/backend:v6.5.0
+        template: server-deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: legacy.example.com/spacelift/backend:v6.5.0
+        template: drain-deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: legacy.example.com/spacelift/backend:v6.5.0
+        template: scheduler-deployment.yaml
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: legacy.example.com/spacelift/backend:v6.5.0
+        template: vcs-gateway-deployment.yaml
+
+  - it: skips the standalone scheduler when the appVersion is v6.4.0 or newer
+    template: scheduler-deployment.yaml
+    chart:
+      appVersion: v7.1.0
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: deploys the standalone scheduler when the tag is older than v6.4.0
+    template: scheduler-deployment.yaml
+    chart:
+      appVersion: v7.1.0
+    set:
+      shared.backendImage.tag: v6.3.0
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: deploys the standalone scheduler when the tag has no version
+    template: scheduler-deployment.yaml
+    set:
+      shared.backendImage.tag: latest
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: does not read the version from the appVersion when only a digest is set
+    template: scheduler-deployment.yaml
+    chart:
+      appVersion: v7.1.0
+    set:
+      shared.backendImage.digest: sha256:0e072dddd1f7f8fc8909a2ca6f65e76c5f0d2fcfb8be47935ae3457e8bbceb20
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: reads the version from the tag when a digest is also set
+    template: scheduler-deployment.yaml
+    set:
+      shared.backendImage.tag: v7.1.0
+      shared.backendImage.digest: sha256:0e072dddd1f7f8fc8909a2ca6f65e76c5f0d2fcfb8be47935ae3457e8bbceb20
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: rejects an empty repository
+    template: server-deployment.yaml
+    set:
+      shared.backendImage.repository: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: "/shared/backendImage/repository': minLength: got 0, want 1"
+
+  - it: rejects a fips value that is not a boolean
+    template: server-deployment.yaml
+    set:
+      shared.backendImage.fips: "yes"
+    asserts:
+      - failedTemplate:
+          errorPattern: "/shared/backendImage/fips': got string, want boolean"
+
+  - it: rejects unknown backendImage fields
+    template: server-deployment.yaml
+    set:
+      shared.backendImage.name: backend
+    asserts:
+      - failedTemplate:
+          errorPattern: "/shared/backendImage': additional properties 'name' not allowed"

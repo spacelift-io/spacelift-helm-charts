@@ -89,7 +89,7 @@ spec:
         - name: vcs-gateway
           securityContext:
             {{- toYaml .Values.vcsGateway.securityContext | nindent 12 }}
-          image: "{{ .Values.shared.image }}"
+          image: "{{ include "spacelift.backendImage" . }}"
           imagePullPolicy: {{ .Values.vcsGateway.pullPolicy }}
           command:
             - spacelift
