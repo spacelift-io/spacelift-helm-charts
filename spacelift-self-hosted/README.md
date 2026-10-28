@@ -27,7 +27,9 @@ Kubernetes workers run the launcher image that the backend reads from
 `LAUNCHER_IMAGE` and `LAUNCHER_IMAGE_TAG`. Set `shared.launcherImage.enabled` to
 `true` to let the chart set both on the server and drain, by default
 to `oci.spacelift.io/deploy/launcher` and the chart's `appVersion`. These
-values win over the same keys in your secrets. `shared.launcherImage` takes the
+values win over the same keys in your secrets, because
+[`env` takes precedence over `envFrom`](https://kubernetes.io/docs/reference/kubernetes-api/core/pod-v1/#Container).
+`shared.launcherImage` takes the
 same `registry`, `repository`, `tag` and `fips` keys as `shared.backendImage`, but
 no digest: the backend joins the two values as `image:tag`.
 
