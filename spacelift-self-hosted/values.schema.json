@@ -65,7 +65,7 @@
             "enabled": {
               "type": "boolean",
               "default": false,
-              "description": "Set LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG from these values. When false, the chart does not set them."
+              "description": "Set LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG from these values. When false, the chart does not set them, and requires shared.image."
             },
             "registry": {
               "type": "string",

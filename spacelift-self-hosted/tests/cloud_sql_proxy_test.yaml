@@ -6,6 +6,7 @@ templates:
   - scheduler-deployment.yaml
   - vcs-gateway-deployment.yaml
 set:
+  shared.launcherImage.enabled: true
   scheduler.enabled: true
   vcsGateway.enabled: true
   vcsGateway.domain: vcs-gateway.example.com

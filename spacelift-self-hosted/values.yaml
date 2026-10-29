@@ -19,6 +19,8 @@ shared:
   # The launcher image that Kubernetes workers run. When enabled, the chart sets
   # LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG on the server and drain.
   # These win over the same keys in the secrets from secretRef.
+  # Leave it disabled only together with shared.image, when the secrets set both
+  # keys. Otherwise the chart fails to render.
   launcherImage:
     enabled: false
     registry: oci.spacelift.io

@@ -6,7 +6,9 @@ templates:
   - scheduler-deployment.yaml
   - vcs-gateway-deployment.yaml
 tests:
-  - it: does not set the launcher env vars by default
+  - it: leaves the launcher env vars to the secrets when shared.image is set
+    set:
+      shared.image: registry.example.com/spacelift/backend:v6.5.0
     asserts:
       - notContains:
           path: spec.template.spec.containers[0].env
@@ -31,6 +33,40 @@ tests:
           content:
             name: LAUNCHER_IMAGE_TAG
           any: true
+        template: drain-deployment.yaml
+
+  - it: fails when neither shared.image nor launcherImage is set
+    template: server-deployment.yaml
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            shared.image is not set and shared.launcherImage.enabled is false, so
+            nothing sets LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG. Without them, runs on
+            Kubernetes workers fail.
+
+            This usually means the infrastructure comes from a Spacelift self-hosted
+            Terraform module with create_container_registry = false. In that mode the module
+            creates no container registry, so its outputs have no shared.image, and its
+            kubernetes_secrets output has no LAUNCHER_IMAGE or LAUNCHER_IMAGE_TAG.
+
+            To fix it, let the chart set the launcher image. Add this to your values:
+
+              shared:
+                launcherImage:
+                  enabled: true
+
+            This pulls oci.spacelift.io/deploy/launcher, tagged with the chart appVersion.
+            Set shared.launcherImage.registry, repository, tag or fips to pull another
+            image. These values win over LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG in your
+            secrets.
+
+  - it: renders when launcherImage is enabled and shared.image is not set
+    set:
+      shared.launcherImage.enabled: true
+    asserts:
+      - notFailedTemplate: {}
+        template: server-deployment.yaml
+      - notFailedTemplate: {}
         template: drain-deployment.yaml
 
   - it: sets the launcher env vars on the server and drain when enabled

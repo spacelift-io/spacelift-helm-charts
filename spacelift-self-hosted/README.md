@@ -33,6 +33,12 @@ values win over the same keys in your secrets, because
 same `registry`, `repository`, `tag` and `fips` keys as `shared.backendImage`, but
 no digest: the backend joins the two values as `image:tag`.
 
+Leave `shared.launcherImage.enabled` set to `false` only if you also set the
+deprecated `shared.image` and your secrets set both keys. Without `shared.image`,
+the chart fails to render and asks you to set `shared.launcherImage.enabled: true`.
+Without the keys, the backend cannot build the launcher image, and runs on
+Kubernetes workers fail.
+
 ## Quick Start
 
 Depending on your environment, you can check the [guides here](https://docs.spacelift.io/self-hosted/latest/installing-spacelift/reference-architecture/guides) 
