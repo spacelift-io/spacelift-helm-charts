@@ -133,6 +133,15 @@ spec:
               value: "true"
             - name: FEATURE_FLAG_SELF_HOSTED_V3_INSTALLATION_FLOW
               value: "true"
+            {{- /*
+              The envs take precedence over envFrom, so if customers mount a secret with LAUNCHER_IMAGE/LAUNCHER_IMAGE_TAG,
+              then these manually set envs will win
+              source: https://kubernetes.io/docs/reference/kubernetes-api/core/pod-v1/#Container
+              "Values defined by an Env with a duplicate key will take precedence."
+            */}}
+            {{- with include "spacelift.launcherImageEnv" . }}
+            {{- . | nindent 12 }}
+            {{- end }}
           {{- if or .Values.shared.secretRef .Values.server.secretRef }}
           envFrom:
             {{- with .Values.shared.secretRef }}

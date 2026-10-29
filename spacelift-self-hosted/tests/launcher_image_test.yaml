@@ -1,0 +1,183 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: launcher image
+templates:
+  - server-deployment.yaml
+  - drain-deployment.yaml
+  - scheduler-deployment.yaml
+  - vcs-gateway-deployment.yaml
+tests:
+  - it: leaves the launcher env vars to the secrets when shared.image is set
+    set:
+      shared.image: registry.example.com/spacelift/backend:v6.5.0
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE
+          any: true
+        template: server-deployment.yaml
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE_TAG
+          any: true
+        template: server-deployment.yaml
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE
+          any: true
+        template: drain-deployment.yaml
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE_TAG
+          any: true
+        template: drain-deployment.yaml
+
+  - it: fails when neither shared.image nor launcherImage is set
+    template: server-deployment.yaml
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            shared.image is not set and shared.launcherImage.enabled is false, so
+            nothing sets LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG. Without them, runs on
+            Kubernetes workers fail.
+
+            This usually means the infrastructure comes from a Spacelift self-hosted
+            Terraform module with create_container_registry = false. In that mode the module
+            creates no container registry, so its outputs have no shared.image, and its
+            kubernetes_secrets output has no LAUNCHER_IMAGE or LAUNCHER_IMAGE_TAG.
+
+            To fix it, let the chart set the launcher image. Add this to your values:
+
+              shared:
+                launcherImage:
+                  enabled: true
+
+            This pulls oci.spacelift.io/deploy/launcher, tagged with the chart appVersion.
+            Set shared.launcherImage.registry, repository, tag or fips to pull another
+            image. These values win over LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG in your
+            secrets.
+
+  - it: renders when launcherImage is enabled and shared.image is not set
+    set:
+      shared.launcherImage.enabled: true
+    asserts:
+      - notFailedTemplate: {}
+        template: server-deployment.yaml
+      - notFailedTemplate: {}
+        template: drain-deployment.yaml
+
+  - it: sets the launcher env vars on the server and drain when enabled
+    chart:
+      appVersion: v7.1.0
+    set:
+      shared.launcherImage.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE
+            value: oci.spacelift.io/deploy/launcher
+        template: server-deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE_TAG
+            value: v7.1.0
+        template: server-deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE
+            value: oci.spacelift.io/deploy/launcher
+        template: drain-deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE_TAG
+            value: v7.1.0
+        template: drain-deployment.yaml
+
+  - it: does not set the launcher env vars on the scheduler and VCS Gateway
+    set:
+      scheduler.enabled: true
+      vcsGateway.enabled: true
+      vcsGateway.domain: vcs-gateway.example.com
+      shared.launcherImage.enabled: true
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE
+          any: true
+        template: scheduler-deployment.yaml
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE
+          any: true
+        template: vcs-gateway-deployment.yaml
+
+  - it: builds LAUNCHER_IMAGE from the registry and repository, and uses the tag
+    template: drain-deployment.yaml
+    set:
+      shared.launcherImage.enabled: true
+      shared.launcherImage.registry: mirror.example.com/spacelift/
+      shared.launcherImage.repository: launcher
+      shared.launcherImage.tag: v7.2.0
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE
+            value: mirror.example.com/spacelift/launcher
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE_TAG
+            value: v7.2.0
+
+  - it: uses the FIPS build when fips is set
+    template: drain-deployment.yaml
+    set:
+      shared.launcherImage.enabled: true
+      shared.launcherImage.fips: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE
+            value: oci.spacelift.io/deploy/launcher-fips
+
+  - it: does not take the tag or digest of the backend image
+    template: drain-deployment.yaml
+    chart:
+      appVersion: v7.1.0
+    set:
+      shared.launcherImage.enabled: true
+      shared.backendImage.tag: v7.2.0
+      shared.backendImage.digest: sha256:0e072dddd1f7f8fc8909a2ca6f65e76c5f0d2fcfb8be47935ae3457e8bbceb20
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LAUNCHER_IMAGE_TAG
+            value: v7.1.0
+
+  - it: rejects a digest, which the backend cannot take
+    template: drain-deployment.yaml
+    set:
+      shared.launcherImage.digest: sha256:0e072dddd1f7f8fc8909a2ca6f65e76c5f0d2fcfb8be47935ae3457e8bbceb20
+    asserts:
+      - failedTemplate:
+          errorPattern: "/shared/launcherImage': additional properties 'digest' not allowed"
+
+  - it: rejects an enabled value that is not a boolean
+    template: drain-deployment.yaml
+    set:
+      shared.launcherImage.enabled: "yes"
+    asserts:
+      - failedTemplate:
+          errorPattern: "/shared/launcherImage/enabled': got string, want boolean"
