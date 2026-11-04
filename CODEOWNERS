@@ -5,9 +5,6 @@
 # Ecosystem Team - External integrations and VCS connectivity
 /vcs-agent/ @spacelift-io/ecosystem-backend
 
-# EnterpriseReady Team - Self-hosted deployments and enterprise features
-/spacelift-self-hosted/ @spacelift-io/enterprise-ready-backend
-
 # Flows Team
 /spacelift-flows/ @spacelift-io/flows
 /spacelift-flows-agent/ @spacelift-io/flows
