@@ -5,6 +5,8 @@ templates:
   - drain-deployment.yaml
   - scheduler-deployment.yaml
   - vcs-gateway-deployment.yaml
+set:
+  shared.launcherImage.enabled: true
 tests:
   - it: pulls from oci.spacelift.io with the chart appVersion by default
     chart:

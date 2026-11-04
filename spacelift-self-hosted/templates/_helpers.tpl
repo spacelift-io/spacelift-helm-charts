@@ -148,18 +148,28 @@ Create the name of the service account to use for the scheduler.
 {{- end }}
 {{- end }}
 
+{{/*
+The <registry>/<repository>[-fips] part of an image, from a dict with the
+registry, repository and fips keys (.Values.shared.backendImage or
+.Values.shared.launcherImage).
+*/}}
+{{- define "spacelift.imageRepository" -}}
+	{{- $repository := .repository -}}
+	{{- if .fips -}}
+		{{- $repository = printf "%s-fips" $repository -}}
+	{{- end -}}
+	{{- with .registry -}}
+		{{- $repository = printf "%s/%s" (trimSuffix "/" .) $repository -}}
+	{{- end -}}
+	{{- $repository -}}
+{{- end -}}
+
 {{- define "spacelift.backendImage" -}}
 	{{- if .Values.shared.image -}}
 		{{- .Values.shared.image -}}
 	{{- else -}}
 		{{- $image := .Values.shared.backendImage -}}
-		{{- $repository := $image.repository -}}
-		{{- if $image.fips -}}
-			{{- $repository = printf "%s-fips" $repository -}}
-		{{- end -}}
-		{{- with $image.registry -}}
-			{{- $repository = printf "%s/%s" (trimSuffix "/" .) $repository -}}
-		{{- end -}}
+		{{- $repository := include "spacelift.imageRepository" $image -}}
 		{{- if $image.digest -}}
 			{{- printf "%s@%s" $repository $image.digest -}}
 		{{- else -}}
@@ -173,6 +183,51 @@ The tag of .Values.shared.backendImage, which defaults to the chart appVersion.
 */}}
 {{- define "spacelift.backendImageTag" -}}
 {{- .Values.shared.backendImage.tag | default .Chart.AppVersion -}}
+{{- end -}}
+
+{{/*
+The LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG env vars from .Values.shared.launcherImage,
+as container env entries. Renders nothing when launcherImage is disabled.
+
+The backend joins the two values as LAUNCHER_IMAGE:LAUNCHER_IMAGE_TAG, which is
+why launcherImage has no digest.
+
+Fails when launcherImage is disabled and the deprecated .Values.shared.image is not
+set. The secrets from secretRef carry LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG only
+when they also carry the backend image, which goes to shared.image. Without both
+env vars the backend builds an empty launcher image, and runs on Kubernetes
+workers fail.
+*/}}
+{{- define "spacelift.launcherImageEnv" -}}
+	{{- $image := .Values.shared.launcherImage -}}
+	{{- if $image.enabled -}}
+- name: LAUNCHER_IMAGE
+  value: {{ include "spacelift.imageRepository" $image | quote }}
+- name: LAUNCHER_IMAGE_TAG
+  value: {{ $image.tag | default .Chart.AppVersion | quote }}
+	{{- else if not .Values.shared.image -}}
+		{{- /* The leading newline puts the message below Helm's "execution error at" prefix. */ -}}
+		{{- fail `
+shared.image is not set and shared.launcherImage.enabled is false, so
+nothing sets LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG. Without them, runs on
+Kubernetes workers fail.
+
+This usually means the infrastructure comes from a Spacelift self-hosted
+Terraform module with create_container_registry = false. In that mode the module
+creates no container registry, so its outputs have no shared.image, and its
+kubernetes_secrets output has no LAUNCHER_IMAGE or LAUNCHER_IMAGE_TAG.
+
+To fix it, let the chart set the launcher image. Add this to your values:
+
+  shared:
+    launcherImage:
+      enabled: true
+
+This pulls oci.spacelift.io/deploy/launcher, tagged with the chart appVersion.
+Set shared.launcherImage.registry, repository, tag or fips to pull another
+image. These values win over LAUNCHER_IMAGE and LAUNCHER_IMAGE_TAG in your
+secrets.` -}}
+	{{- end -}}
 {{- end -}}
 
 {{/*
