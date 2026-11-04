@@ -13533,6 +13533,11 @@ spec:
             - selector
             type: object
         type: object
+        x-kubernetes-validations:
+        - message: token and privateKey cannot be added or removed after the WorkerPool
+            is created; create a new WorkerPool to change how it is registered
+          rule: (has(self.spec) && has(self.spec.token)) == (has(oldSelf.spec) &&
+            has(oldSelf.spec.token))
     served: true
     storage: true
     subresources:

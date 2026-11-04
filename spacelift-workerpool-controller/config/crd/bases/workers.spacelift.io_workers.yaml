@@ -86,6 +86,10 @@ spec:
                 type: string
             type: object
         type: object
+        x-kubernetes-validations:
+        - message: name must be the pool name followed by a dash and the worker's
+            lowercase ULID
+          rule: self.metadata.name.matches('^.+-[0-7][0-9a-hjkmnp-tv-z]{25}$')
     served: true
     storage: true
     subresources:
