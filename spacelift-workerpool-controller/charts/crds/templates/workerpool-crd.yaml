@@ -6284,7 +6284,7 @@ spec:
                     description: |-
                       DefaultRunnerImage overrides the default runner image for non-Ansible runs.
                       When set, this image will be used instead of the backend-provided runner image
-                      for Terraform and other non-Ansible stacks.
+                      for Terraform, OpenTofu and other non-Ansible stacks.
                       Default: public.ecr.aws/spacelift/runner-terraform:latest
                     type: string
                   dnsConfig:
