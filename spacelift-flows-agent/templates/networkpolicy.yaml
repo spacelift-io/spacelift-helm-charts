@@ -39,7 +39,20 @@ spec:
             except:
               # Link-local covers the cloud metadata endpoint
               - 169.254.0.0/16
-              {{- with .Values.networkPolicy.blockedCIDRs }}
-              {{- toYaml . | nindent 14 }}
+              {{- range .Values.networkPolicy.blockedCIDRs }}
+              {{- if not (contains ":" .) }}
+              - {{ . }}
+              {{- end }}
+              {{- end }}
+        - ipBlock:
+            cidr: ::/0
+            except:
+              - fe80::/10
+              # The AWS metadata endpoint over IPv6
+              - fd00:ec2::254/128
+              {{- range .Values.networkPolicy.blockedCIDRs }}
+              {{- if contains ":" . }}
+              - {{ . }}
+              {{- end }}
               {{- end }}
 {{- end }}

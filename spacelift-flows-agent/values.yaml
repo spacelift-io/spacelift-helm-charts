@@ -63,12 +63,8 @@ agent:
 # Network policy for runtime pods, which run app code and user expressions
 networkPolicy:
   enabled: true
-  # Egress is allowed to the internet except these ranges and link-local ones
-  blockedCIDRs:
-    - 10.0.0.0/8
-    - 100.64.0.0/10
-    - 172.16.0.0/12
-    - 192.168.0.0/16
+  # Egress is allowed everywhere except link-local and these ranges, such as the cluster and VPC
+  blockedCIDRs: []
 
 # OpenTelemetry configuration
 otel:
