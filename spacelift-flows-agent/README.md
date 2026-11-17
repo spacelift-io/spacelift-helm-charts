@@ -62,6 +62,8 @@ helm install spacelift-flows-agent spacelift/spacelift-flows-agent -f your-value
 | `resources.limits.cpu`       | CPU limit                                | `500m`                                                   |
 | `serviceAccount.create`      | Create service account                   | `true`                                                   |
 | `rbac.create`                | Create RBAC resources                    | `true`                                                   |
+| `networkPolicy.enabled`      | Create a NetworkPolicy for runtime pods  | `true`                                                   |
+| `networkPolicy.blockedCIDRs` | Egress ranges blocked for runtime pods   | private and CGNAT ranges                                 |
 | `otel.enabled`               | Enable OpenTelemetry                     | `false`                                                  |
 | `otel.collectorEndpoint`     | OTEL collector endpoint                  | `http://otel-collector:4317`                             |
 
