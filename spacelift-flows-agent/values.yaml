@@ -55,7 +55,8 @@ agent:
   
   # Kubernetes configuration
   kubernetes:
-    namespace: "default"
+    # Namespace for runtime pods, defaults to the release namespace
+    namespace: ""
 
   extraEnv: []
 

@@ -53,7 +53,7 @@ helm install spacelift-flows-agent spacelift/spacelift-flows-agent -f your-value
 | `agent.poolSize`             | The size of the agent pool               | `3`                                                      |
 | `agent.endpoint`             | Spaceflows API endpoint                  | `https://your-spaceflows-instance.com`                   |
 | `agent.executor`             | Executor type                            | `kubernetes`                                             |
-| `agent.kubernetes.namespace` | Kubernetes namespace for executor pods   | `default`                                                |
+| `agent.kubernetes.namespace` | Kubernetes namespace for executor pods   | release namespace                                        |
 | `jsExecutorImage.repository` | JS executor image repository             | `471112651138.dkr.ecr.eu-central-1.amazonaws.com/flows`  |
 | `jsExecutorImage.tag`        | JS executor image tag                    | `k8s-js-executor-3`                                      |
 | `resources.requests.memory`  | Memory request                           | `256Mi`                                                  |

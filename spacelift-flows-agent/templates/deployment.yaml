@@ -50,7 +50,7 @@ spec:
             - name: FLOWS_POOL_SIZE
               value: {{ .Values.agent.poolSize | quote }}
             - name: KUBERNETES_NAMESPACE
-              value: {{ .Values.agent.kubernetes.namespace | quote }}
+              value: {{ .Values.agent.kubernetes.namespace | default .Release.Namespace | quote }}
             - name: FLOWS_KUBERNETES_IMAGE
               value: "{{ .Values.jsExecutorImage.repository }}:{{ .Values.jsExecutorImage.tag }}"
             # Downward API for owner references
