@@ -1,0 +1,58 @@
+{{- if .Values.networkPolicy.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "spacelift-flows-agent.fullname" . }}-runtime
+  namespace: {{ include "spacelift-flows-agent.runtimeNamespace" . }}
+  labels:
+    {{- include "spacelift-flows-agent.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: spaceflows-js-executor
+      component: runtime
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Only the agent connects to runtimes, over SSH
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Release.Namespace }}
+          podSelector:
+            matchLabels:
+              {{- include "spacelift-flows-agent.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 22
+  egress:
+    # Any destination since DNS may be served from the node, as on EKS Auto Mode
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              # Link-local covers the cloud metadata endpoint
+              - 169.254.0.0/16
+              {{- range .Values.networkPolicy.blockedCIDRs }}
+              {{- if not (contains ":" .) }}
+              - {{ . }}
+              {{- end }}
+              {{- end }}
+        - ipBlock:
+            cidr: ::/0
+            except:
+              - fe80::/10
+              # The AWS metadata endpoint over IPv6
+              - fd00:ec2::254/128
+              {{- range .Values.networkPolicy.blockedCIDRs }}
+              {{- if contains ":" . }}
+              - {{ . }}
+              {{- end }}
+              {{- end }}
+{{- end }}

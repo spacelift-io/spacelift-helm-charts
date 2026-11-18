@@ -60,3 +60,9 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+{{/*
+Namespace the agent creates runtime pods in
+*/}}
+{{- define "spacelift-flows-agent.runtimeNamespace" -}}
+{{- default .Release.Namespace .Values.agent.kubernetes.namespace }}
+{{- end }}

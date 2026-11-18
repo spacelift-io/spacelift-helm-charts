@@ -55,9 +55,16 @@ agent:
   
   # Kubernetes configuration
   kubernetes:
-    namespace: "default"
+    # Namespace for runtime pods, defaults to the release namespace
+    namespace: ""
 
   extraEnv: []
+
+# Network policy for runtime pods, which run app code and user expressions
+networkPolicy:
+  enabled: true
+  # Egress is allowed everywhere except link-local and these ranges, such as the cluster and VPC
+  blockedCIDRs: []
 
 # OpenTelemetry configuration
 otel:
