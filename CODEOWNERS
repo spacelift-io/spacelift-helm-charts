@@ -6,7 +6,6 @@
 /vcs-agent/ @spacelift-io/ecosystem-backend
 
 # Flows Team
-/spacelift-flows/ @spacelift-io/flows
 /spacelift-flows-agent/ @spacelift-io/flows
 
 # Foundations Team - Core IaC execution and workflow automation
