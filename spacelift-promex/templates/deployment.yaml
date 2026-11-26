@@ -28,6 +28,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      {{- if .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName | quote }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -69,11 +72,16 @@ spec:
               value: "{{ .Values.apiEndpoint | required "must include apiEndpoint in values" }}"
             - name: "SPACELIFT_PROMEX_API_KEY_ID"
               value: "{{ .Values.apiKeyId | required "must include apiKeyId in values" }}"
+            {{- if .Values.oidc.enabled }}
+            - name: "SPACELIFT_PROMEX_API_KEY_SECRET_FILE"
+              value: "{{ .Values.oidc.mountPath }}/{{ .Values.oidc.tokenFileName }}"
+            {{- else }}
             - name: "SPACELIFT_PROMEX_API_KEY_SECRET"
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.apiKeySecretName | required "must include apiKeySecretName in values" }}
+                  name: {{ .Values.apiKeySecretName | required "must include apiKeySecretName in values (or enable oidc)" }}
                   key: "SPACELIFT_PROMEX_API_KEY_SECRET"
+            {{- end }}
             - name: "SPACELIFT_PROMEX_LISTEN_ADDRESS"
               value: "{{ .Values.listenAddress}}"
             {{- if .Values.caCert.enabled }}
@@ -87,15 +95,33 @@ spec:
           envFrom:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.caCert.enabled }}
+          {{- if or .Values.caCert.enabled .Values.oidc.enabled }}
           volumeMounts:
+            {{- if .Values.caCert.enabled }}
             - name: ca-cert
               mountPath: {{ .Values.caCert.mountPath }}
               readOnly: true
+            {{- end }}
+            {{- if .Values.oidc.enabled }}
+            - name: oidc-token
+              mountPath: {{ .Values.oidc.mountPath }}
+              readOnly: true
+            {{- end }}
           {{- end }}
-      {{- if .Values.caCert.enabled }}
+      {{- if or .Values.caCert.enabled .Values.oidc.enabled }}
       volumes:
+        {{- if .Values.caCert.enabled }}
         - name: ca-cert
           secret:
             secretName: {{ .Values.caCert.secretName | required "caCert.secretName is required when caCert.enabled is true" }}
+        {{- end }}
+        {{- if .Values.oidc.enabled }}
+        - name: oidc-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: {{ .Values.oidc.tokenFileName }}
+                  audience: {{ .Values.oidc.audience | required "oidc.audience is required when oidc.enabled is true" | quote }}
+                  expirationSeconds: {{ .Values.oidc.expirationSeconds }}
+        {{- end }}
       {{- end }}

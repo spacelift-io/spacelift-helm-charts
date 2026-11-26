@@ -24,6 +24,30 @@ helm upgrade spacelift-prometheus-exporter spacelift/spacelift-promex --install 
     --set apiKeySecretName="spacelift-api-key"
 ```
 
+## OIDC API keys
+
+If your Spacelift API key is an OIDC key (key ID of the form `oidc::<issuer>::<key-id>`), the chart can mount a rotating projected service-account token instead of using a static secret. The exporter reads it through `SPACELIFT_PROMEX_API_KEY_SECRET_FILE` and picks up rotations without restarts. This requires exporter image `v0.11.0` or newer.
+
+```shell
+helm upgrade spacelift-prometheus-exporter spacelift/spacelift-promex --install \
+    --set image.tag="v0.13.0" \
+    --set apiEndpoint="https://{yourAccount}.app.spacelift.io" \
+    --set apiKeyId="oidc::{issuer}::{keyId}" \
+    --set oidc.enabled=true \
+    --set oidc.audience="{yourAudience}"
+```
+
+`apiKeySecretName` is not needed when `oidc.enabled=true`.
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `oidc.enabled` | Use a projected service-account token as the API key secret | `false` |
+| `oidc.audience` | Audience of the projected token (required when enabled) | `""` |
+| `oidc.expirationSeconds` | Requested token lifetime | `3600` |
+| `oidc.mountPath` | Directory the token is mounted into | `"/var/run/secrets/spacelift"` |
+| `oidc.tokenFileName` | Token file name within the mount path | `"token"` |
+| `serviceAccountName` | Service account for the pod (the token's identity) | `""` |
+
 ## Custom CA Certificate
 
 If your Spacelift endpoint uses a certificate chain not covered by system CAs, you can inject a custom CA certificate from a Kubernetes secret:
