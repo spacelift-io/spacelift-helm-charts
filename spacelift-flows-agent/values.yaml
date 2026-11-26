@@ -14,8 +14,7 @@ jsExecutorImage:
 
 # Secrets with registry credentials for the agent image, for example for
 # oci.spacelift.io. They must exist in the release namespace. The runtime pods
-# run as the default service account, so add the secrets to it for the JS
-# executor image. For example:
+# take theirs from a service account instead, see the README. For example:
 #  imagePullSecrets:
 #    - name: spacelift-registry
 imagePullSecrets: []

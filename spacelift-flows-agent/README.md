@@ -130,6 +130,16 @@ kubectl create secret docker-registry spacelift-registry \
   --docker-password=your-password
 ```
 
+The agent pod gets the secret from `imagePullSecrets`. The agent creates the
+runtime pods itself and sets only their ServiceAccount, so they need a
+ServiceAccount with the secret. Create it in the namespace of the runtime pods:
+
+```bash
+kubectl create serviceaccount flows-runtime
+kubectl patch serviceaccount flows-runtime \
+  -p '{"imagePullSecrets":[{"name":"spacelift-registry"}]}'
+```
+
 Then use this values file:
 ```yaml
 image:
@@ -142,14 +152,12 @@ jsExecutorImage:
 
 imagePullSecrets:
   - name: spacelift-registry
-```
 
-The agent pod gets the secrets from `imagePullSecrets`. The runtime pods run as
-the `default` ServiceAccount of their namespace, so add the secret to it there:
-
-```bash
-kubectl patch serviceaccount default \
-  -p '{"imagePullSecrets":[{"name":"spacelift-registry"}]}'
+agent:
+  extraEnv:
+    # The ServiceAccount of the runtime pods, default otherwise
+    - name: FLOWS_KUBERNETES_SERVICE_ACCOUNT
+      value: flows-runtime
 ```
 
 ### With custom secret name:
