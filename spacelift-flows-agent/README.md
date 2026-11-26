@@ -54,6 +54,8 @@ helm install spacelift-flows-agent spacelift/spacelift-flows-agent -f your-value
 | `agent.endpoint`             | Spaceflows API endpoint                  | `https://your-spaceflows-instance.com`                   |
 | `agent.executor`             | Executor type                            | `kubernetes`                                             |
 | `agent.kubernetes.namespace` | Kubernetes namespace for executor pods   | release namespace                                        |
+| `agent.kubernetes.serviceAccount.create` | Create a ServiceAccount for executor pods | `false` |
+| `agent.kubernetes.serviceAccount.name` | ServiceAccount for executor pods | `<fullname>-runtime` with `create`, else `default` |
 | `jsExecutorImage.repository` | JS executor image repository             | `471112651138.dkr.ecr.eu-central-1.amazonaws.com/flows`  |
 | `jsExecutorImage.tag`        | JS executor image tag                    | `k8s-js-executor-3`                                      |
 | `imagePullSecrets`           | Secrets with registry credentials        | `[]`                                                     |
@@ -73,6 +75,8 @@ helm install spacelift-flows-agent spacelift/spacelift-flows-agent -f your-value
 The chart creates the following RBAC resources by default:
 
 - ServiceAccount for the agent
+- ServiceAccount for the runtime pods, with no API token and no Role, if
+  `agent.kubernetes.serviceAccount.create` is `true`
 - Role with permissions to manage pods (create, get, list, delete, watch)
 - RoleBinding to associate the ServiceAccount with the Role
 
@@ -130,16 +134,6 @@ kubectl create secret docker-registry spacelift-registry \
   --docker-password=your-password
 ```
 
-The agent pod gets the secret from `imagePullSecrets`. The agent creates the
-runtime pods itself and sets only their ServiceAccount, so they need a
-ServiceAccount with the secret. Create it in the namespace of the runtime pods:
-
-```bash
-kubectl create serviceaccount flows-runtime
-kubectl patch serviceaccount flows-runtime \
-  -p '{"imagePullSecrets":[{"name":"spacelift-registry"}]}'
-```
-
 Then use this values file:
 ```yaml
 image:
@@ -154,11 +148,15 @@ imagePullSecrets:
   - name: spacelift-registry
 
 agent:
-  extraEnv:
-    # The ServiceAccount of the runtime pods, default otherwise
-    - name: FLOWS_KUBERNETES_SERVICE_ACCOUNT
-      value: flows-runtime
+  kubernetes:
+    serviceAccount:
+      create: true
 ```
+
+The agent pod gets the secret from `imagePullSecrets`. The agent creates the
+runtime pods itself and sets only their ServiceAccount, so the chart creates one
+for them with the same secret. To use your own ServiceAccount instead, leave
+`create` off and set `agent.kubernetes.serviceAccount.name`.
 
 ### With custom secret name:
 

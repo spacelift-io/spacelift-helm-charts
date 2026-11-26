@@ -12,9 +12,10 @@ jsExecutorImage:
   repository: public.ecr.aws/w5z2f6e8/spacelift-flows-agent
   tag: "k8s-js-executor-latest"
 
-# Secrets with registry credentials for the agent image, for example for
-# oci.spacelift.io. They must exist in the release namespace. The runtime pods
-# take theirs from a service account instead, see the README. For example:
+# Secrets with registry credentials, for example for oci.spacelift.io. They go
+# on the agent pod and, with agent.kubernetes.serviceAccount.create, on the
+# service account of the runtime pods. They must exist in the release namespace
+# and in the runtime namespace. For example:
 #  imagePullSecrets:
 #    - name: spacelift-registry
 imagePullSecrets: []
@@ -64,6 +65,13 @@ agent:
   kubernetes:
     # Namespace for runtime pods, defaults to the release namespace
     namespace: ""
+    # Service account for runtime pods. With create, the chart creates it in the
+    # runtime namespace, with the imagePullSecrets and no API token. The name
+    # defaults to <fullname>-runtime then. Without create, name is an existing
+    # service account, and the runtime pods run as default when it's empty.
+    serviceAccount:
+      create: false
+      name: ""
 
   extraEnv: []
 
