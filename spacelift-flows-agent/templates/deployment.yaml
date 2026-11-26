@@ -19,6 +19,10 @@ spec:
         {{- include "spacelift-flows-agent.selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "spacelift-flows-agent.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:

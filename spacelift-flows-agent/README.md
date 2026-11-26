@@ -56,6 +56,7 @@ helm install spacelift-flows-agent spacelift/spacelift-flows-agent -f your-value
 | `agent.kubernetes.namespace` | Kubernetes namespace for executor pods   | release namespace                                        |
 | `jsExecutorImage.repository` | JS executor image repository             | `471112651138.dkr.ecr.eu-central-1.amazonaws.com/flows`  |
 | `jsExecutorImage.tag`        | JS executor image tag                    | `k8s-js-executor-3`                                      |
+| `imagePullSecrets`           | Secrets with registry credentials        | `[]`                                                     |
 | `resources.requests.memory`  | Memory request                           | `256Mi`                                                  |
 | `resources.requests.cpu`     | CPU request                              | `100m`                                                   |
 | `resources.limits.memory`    | Memory limit                             | `512Mi`                                                  |
@@ -115,6 +116,40 @@ replicaCount: 3
 
 agent:
   endpoint: "https://mycompany.spacelift.sh"
+```
+
+### With images from oci.spacelift.io:
+
+Create a `docker-registry` Secret with your registry credentials in the release
+namespace, and in `agent.kubernetes.namespace` if you set it:
+
+```bash
+kubectl create secret docker-registry spacelift-registry \
+  --docker-server=oci.spacelift.io \
+  --docker-username=your-username \
+  --docker-password=your-password
+```
+
+Then use this values file:
+```yaml
+image:
+  repository: oci.spacelift.io/flows/agent
+  tag: "your-spacelift-version"
+
+jsExecutorImage:
+  repository: oci.spacelift.io/flows/k8s-js-executor
+  tag: "your-spacelift-version"
+
+imagePullSecrets:
+  - name: spacelift-registry
+```
+
+The agent pod gets the secrets from `imagePullSecrets`. The runtime pods run as
+the `default` ServiceAccount of their namespace, so add the secret to it there:
+
+```bash
+kubectl patch serviceaccount default \
+  -p '{"imagePullSecrets":[{"name":"spacelift-registry"}]}'
 ```
 
 ### With custom secret name:

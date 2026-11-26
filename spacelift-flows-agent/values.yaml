@@ -12,6 +12,14 @@ jsExecutorImage:
   repository: public.ecr.aws/w5z2f6e8/spacelift-flows-agent
   tag: "k8s-js-executor-latest"
 
+# Secrets with registry credentials for the agent image, for example for
+# oci.spacelift.io. They must exist in the release namespace. The runtime pods
+# run as the default service account, so add the secrets to it for the JS
+# executor image. For example:
+#  imagePullSecrets:
+#    - name: spacelift-registry
+imagePullSecrets: []
+
 # Deployment configuration
 replicaCount: 1
 
