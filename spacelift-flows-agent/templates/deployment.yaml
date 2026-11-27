@@ -19,6 +19,10 @@ spec:
         {{- include "spacelift-flows-agent.selectorLabels" . | nindent 8 }}
     spec:
       serviceAccountName: {{ include "spacelift-flows-agent.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -53,6 +57,10 @@ spec:
               value: {{ include "spacelift-flows-agent.runtimeNamespace" . | quote }}
             - name: FLOWS_KUBERNETES_IMAGE
               value: "{{ .Values.jsExecutorImage.repository }}:{{ .Values.jsExecutorImage.tag }}"
+            {{- with include "spacelift-flows-agent.runtimeServiceAccountName" . }}
+            - name: FLOWS_KUBERNETES_SERVICE_ACCOUNT
+              value: {{ . | quote }}
+            {{- end }}
             # Downward API for owner references
             - name: POD_NAME
               valueFrom:

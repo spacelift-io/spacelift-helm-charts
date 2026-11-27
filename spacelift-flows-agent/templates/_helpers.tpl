@@ -66,3 +66,15 @@ Namespace the agent creates runtime pods in
 {{- define "spacelift-flows-agent.runtimeNamespace" -}}
 {{- default .Release.Namespace .Values.agent.kubernetes.namespace }}
 {{- end }}
+
+{{/*
+Service account of the runtime pods, empty for default
+*/}}
+{{- define "spacelift-flows-agent.runtimeServiceAccountName" -}}
+{{- $sa := .Values.agent.kubernetes.serviceAccount }}
+{{- if $sa.create }}
+{{- default (printf "%s-runtime" (include "spacelift-flows-agent.fullname" .)) $sa.name }}
+{{- else }}
+{{- $sa.name }}
+{{- end }}
+{{- end }}
