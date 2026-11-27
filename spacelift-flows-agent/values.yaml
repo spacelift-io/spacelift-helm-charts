@@ -72,6 +72,8 @@ agent:
     serviceAccount:
       create: false
       name: ""
+      # Annotations for the chart-created runtime ServiceAccount.
+      annotations: {}
 
   extraEnv: []
 

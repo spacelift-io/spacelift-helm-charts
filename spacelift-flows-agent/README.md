@@ -56,6 +56,7 @@ helm install spacelift-flows-agent spacelift/spacelift-flows-agent -f your-value
 | `agent.kubernetes.namespace` | Kubernetes namespace for executor pods   | release namespace                                        |
 | `agent.kubernetes.serviceAccount.create` | Create a ServiceAccount for executor pods | `false` |
 | `agent.kubernetes.serviceAccount.name` | ServiceAccount for executor pods | `<fullname>-runtime` with `create`, else `default` |
+| `agent.kubernetes.serviceAccount.annotations` | Annotations for the chart-created runtime ServiceAccount | `{}` |
 | `jsExecutorImage.repository` | JS executor image repository             | `471112651138.dkr.ecr.eu-central-1.amazonaws.com/flows`  |
 | `jsExecutorImage.tag`        | JS executor image tag                    | `k8s-js-executor-3`                                      |
 | `imagePullSecrets`           | Secrets with registry credentials        | `[]`                                                     |
