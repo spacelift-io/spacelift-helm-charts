@@ -35,6 +35,7 @@ priorityClassName: ""
 #apiKeyId: ""
 #
 ## your api key secret, the secret should contain the key "SPACELIFT_PROMEX_API_KEY_SECRET"
+## Required unless oidc.enabled is true.
 #apiKeySecretName: ""
 #
 # nodeSelector allows you to schedule pods on specific nodes.
@@ -53,6 +54,27 @@ caCert:
   secretKey: "ca.crt"
   # Directory to mount the CA certificate into
   mountPath: "/certs"
+
+## OIDC API keys (key ID of the form "oidc::<issuer>::<key-id>").
+## Instead of a static secret, a projected Kubernetes service-account token is mounted
+## and passed to the exporter via SPACELIFT_PROMEX_API_KEY_SECRET_FILE. The kubelet rotates
+## the token on disk and the exporter re-reads it on every refresh.
+## Requires exporter image >= v0.11.0 (set image.tag accordingly).
+## When enabled, apiKeySecretName is not used.
+oidc:
+  enabled: false
+  # Audience of the projected token; must match what your Spacelift OIDC API key expects
+  audience: ""
+  # Requested token lifetime in seconds (kubelet minimum is 600)
+  expirationSeconds: 3600
+  # Directory the token is mounted into
+  mountPath: "/var/run/secrets/spacelift"
+  # File name of the token within mountPath
+  tokenFileName: "token"
+
+# Service account the pod runs as (the one whose token is projected when oidc.enabled).
+# Defaults to the namespace's "default" service account when empty.
+serviceAccountName: ""
 
 nodeSelector: {}
 
